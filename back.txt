@@ -1,0 +1,687 @@
+{
+  "name": "漫跃",
+  "version": "1.0.0",
+  "description": "A Vue.js project",
+  "author": "2372781727@qq.com",
+  "private": true,
+  "scripts": {
+    "dev": "webpack-dev-server --host 0.0.0.0 --inline --progress --config build/webpack.dev.conf.js",
+    "dev:test": "cross-env NODE_ENV=testing webpack-dev-server --host 0.0.0.0 --inline --progress --config build/webpack.dev.conf.js",
+    "dev:prod": "cross-env NODE_ENV=production webpack-dev-server --host 0.0.0.0 --inline --progress --config build/webpack.dev.conf.js",
+    "start": "npm run dev",
+    "unit": "jest --config test/unit/jest.conf.js --coverage",
+    "e2e": "node test/e2e/runner.js",
+    "test": "npm run unit && npm run e2e",
+    "lint": "eslint --ext .js,.vue src test/unit test/e2e/specs",
+    "build": "node build/build.js",
+    "build:test": "cross-env NODE_ENV=testing node build/build.js"
+  },
+  "dependencies": {
+    "ant-design-vue": "^1.7.8",
+    "axios": "^0.21.1",
+    "crypto-js": "^4.1.1",
+    "dplayer": "^1.27.1",
+    "echarts": "^5.6.0",
+    "element-ui": "^2.15.13",
+    "har-validator": "^5.1.5",
+    "hls.js": "^1.6.2",
+    "html2canvas": "^1.4.1",
+    "jsencrypt": "^3.3.2",
+    "jspdf": "^3.0.1",
+    "marked": "^0.8.2",
+    "vue": "^2.6.14",
+    "vue-dplayer": "^0.0.10",
+    "vue-echarts": "^4.1.0",
+    "vue-hot-reload-api": "^2.3.4",
+    "vue-quill-editor": "^3.0.6",
+    "vue-router": "^3.0.6",
+    "vuedraggable": "^2.24.3",
+    "vuex": "^3.6.2",
+    "wangeditor": "^4.7.15"
+  },
+  "devDependencies": {
+    "autoprefixer": "^7.1.2",
+    "babel-core": "^6.22.1",
+    "babel-eslint": "^8.2.1",
+    "babel-helper-vue-jsx-merge-props": "^2.0.3",
+    "babel-jest": "^21.0.2",
+    "babel-loader": "^7.1.1",
+    "babel-plugin-dynamic-import-node": "^1.2.0",
+    "babel-plugin-syntax-jsx": "^6.18.0",
+    "babel-plugin-transform-es2015-modules-commonjs": "^6.26.0",
+    "babel-plugin-transform-runtime": "^6.22.0",
+    "babel-plugin-transform-vue-jsx": "^3.5.0",
+    "babel-preset-env": "^1.3.2",
+    "babel-preset-stage-2": "^6.22.0",
+    "babel-register": "^6.22.0",
+    "chalk": "^2.0.1",
+    "chromedriver": "^2.27.2",
+    "copy-webpack-plugin": "^4.0.1",
+    "cross-env": "^7.0.3",
+    "cross-spawn": "^5.0.1",
+    "css-loader": "^0.28.11",
+    "eslint": "^4.15.0",
+    "eslint-config-standard": "^10.2.1",
+    "eslint-friendly-formatter": "^3.0.0",
+    "eslint-loader": "^1.7.1",
+    "eslint-plugin-import": "^2.7.0",
+    "eslint-plugin-node": "^5.2.0",
+    "eslint-plugin-promise": "^3.4.0",
+    "eslint-plugin-standard": "^3.0.1",
+    "eslint-plugin-vue": "^4.0.0",
+    "extract-text-webpack-plugin": "^3.0.0",
+    "file-loader": "^1.1.4",
+    "friendly-errors-webpack-plugin": "^1.6.1",
+    "html-webpack-plugin": "^2.30.1",
+    "jest": "^22.0.4",
+    "jest-serializer-vue": "^0.3.0",
+    "nightwatch": "^0.9.12",
+    "node-notifier": "^5.1.2",
+    "optimize-css-assets-webpack-plugin": "^3.2.0",
+    "ora": "^1.2.0",
+    "portfinder": "^1.0.13",
+    "postcss-import": "^11.0.0",
+    "postcss-loader": "^2.0.8",
+    "postcss-url": "^7.2.1",
+    "rimraf": "^2.6.0",
+    "selenium-server": "^3.0.1",
+    "semver": "^5.3.0",
+    "shelljs": "^0.7.6",
+    "uglifyjs-webpack-plugin": "^1.1.1",
+    "url-loader": "^0.5.8",
+    "vue-jest": "^1.0.2",
+    "vue-loader": "^13.3.0",
+    "vue-style-loader": "^3.0.1",
+    "vue-template-compiler": "^2.6.14",
+    "webpack": "^3.6.0",
+    "webpack-bundle-analyzer": "^2.9.0",
+    "webpack-dev-server": "^2.11.5",
+    "webpack-merge": "^4.1.0"
+  },
+  "engines": {
+    "node": ">= 6.0.0",
+    "npm": ">= 3.0.0"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not ie <= 8"
+  ]
+}
+
+@Tag(name = "音乐管理")
+@RestController
+@RequestMapping("/music")
+@RequiredArgsConstructor
+public class MusicController {
+
+    private final IMusicService musicService;
+
+    @Operation(summary = "上传歌曲")
+    @PostMapping("/upload")
+    public R uploadMusic(@RequestParam("file") MultipartFile file) throws Exception {
+        return R.success(musicService.uploadMusic(file));
+    }
+
+    @Operation(summary = "搜索歌曲")
+    @GetMapping("/search")
+    public R searchMusic(PageParam pageParam, @RequestParam(required = false) String keyword) {
+        return R.success(musicService.searchMusic(pageParam, keyword));
+    }
+
+    @Operation(summary = "收藏歌曲")
+    @PostMapping("/collect/{musicId}")
+    public R collectMusic(@PathVariable Long musicId) {
+        musicService.collectMusic(musicId);
+        return R.success();
+    }
+
+    @Operation(summary = "取消收藏")
+    @DeleteMapping("/uncollect/{musicId}")
+    public R uncollectMusic(@PathVariable Long musicId) {
+        musicService.uncollectMusic(musicId);
+        return R.success();
+    }
+
+    @Operation(summary = "获取我的收藏")
+    @GetMapping("/collections")
+    public R getMyCollections(PageParam pageParam) {
+        return R.success(musicService.getMyCollections(pageParam));
+    }
+    
+    @Operation(summary = "获取播放列表")
+    @GetMapping("/playback-list")
+    public R getPlaybackList() {
+        return R.success(musicService.getPlaybackList());
+    }
+
+    @Operation(summary = "添加到播放列表")
+    @PostMapping("/playback-list/add/{musicId}")
+    public R addToPlaybackList(@PathVariable Long musicId) {
+        musicService.addToPlaybackList(musicId);
+        return R.success();
+    }
+
+    @Operation(summary = "从播放列表移除")
+    @DeleteMapping("/playback-list/remove/{musicId}")
+    public R removeFromPlaybackList(@PathVariable Long musicId) {
+        musicService.removeFromPlaybackList(musicId);
+        return R.success();
+    }
+}
+package com.hsx.manyue.modules.music.controller;
+
+import com.hsx.manyue.common.dto.R;
+import com.hsx.manyue.modules.music.model.entity.PlaylistEntity;
+import com.hsx.manyue.modules.music.model.param.PlaylistCreateParam;
+import com.hsx.manyue.modules.music.model.vo.PlaylistDetailVO;
+import com.hsx.manyue.modules.music.service.IPlaylistService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+
+@Tag(name = "歌单管理")
+@RestController
+@RequestMapping("/playlist")
+@RequiredArgsConstructor
+public class PlaylistController {
+
+    private final IPlaylistService playlistService;
+
+    @Operation(summary = "创建歌单")
+    @PostMapping("/create")
+    public R createPlaylist(@RequestBody @Validated PlaylistCreateParam param) {
+        return R.success(playlistService.createPlaylist(param));
+    }
+
+    @Operation(summary = "获取歌单详情")
+    @GetMapping("/{playlistId}")
+    public R getPlaylistDetail(@PathVariable Long playlistId) {
+        return R.success(playlistService.getPlaylistDetail(playlistId));
+    }
+
+    @Operation(summary = "添加歌曲到歌单")
+    @PostMapping("/{playlistId}/add/{musicId}")
+    public R addMusicToPlaylist(@PathVariable Long playlistId, @PathVariable Long musicId) {
+        playlistService.addMusicToPlaylist(playlistId, musicId);
+        return R.success();
+    }
+
+    @Operation(summary = "从歌单移除歌曲")
+    @DeleteMapping("/{playlistId}/remove/{musicId}")
+    public R removeMusicFromPlaylist(@PathVariable Long playlistId, @PathVariable Long musicId) {
+        playlistService.removeMusicFromPlaylist(playlistId, musicId);
+        return R.success();
+    }
+}
+@Data
+@EqualsAndHashCode(callSuper = true)
+@Accessors(chain = true)
+@TableName("t_music")
+public class MusicEntity extends BaseEntity<MusicEntity> {
+    private static final long serialVersionUID = 1L;
+
+    private String name;
+    private String artistName;
+    private String albumName;
+    private Integer duration;
+    private String musicUrl;
+    private String coverUrl;
+    private Long uploaderId;
+    private Long playCount;
+}@Data
+@EqualsAndHashCode(callSuper = true)
+@Accessors(chain = true)
+@TableName("t_playlist")
+public class PlaylistEntity extends BaseEntity<PlaylistEntity> {
+    private static final long serialVersionUID = 1L;
+
+    private String name;
+    private String description;
+    private String coverUrl;
+    private Long creatorId;
+    private Integer songCount;
+}
+@Data
+@EqualsAndHashCode(callSuper = true)
+@Accessors(chain = true)
+@TableName("t_playlist_music")
+public class PlaylistMusicEntity extends BaseEntity<PlaylistMusicEntity> {
+    private static final long serialVersionUID = 1L;
+
+    private Long playlistId;
+    private Long musicId;
+}
+@Data
+@EqualsAndHashCode(callSuper = true)
+@Accessors(chain = true)
+@TableName("t_user_collection")
+public class UserCollectionEntity extends BaseEntity<UserCollectionEntity> {
+    private static final long serialVersionUID = 1L;
+
+    private Long userId;
+    private Long musicId;
+}
+@Data
+public class PageParam {
+    private long current = 1;
+    private long size = 10;
+}
+@Data
+public class PlaylistCreateParam {
+    @NotBlank(message = "歌单名称不能为空")
+    private String name;
+    private String description;
+}@Data
+public class MusicVO {
+    private Long id;
+    private String name;
+    private String artistName;
+    private String albumName;
+    private Integer duration;
+    private String musicUrl;
+    private String coverUrl;
+    private Long playCount;
+    private LocalDateTime createTime;
+}
+@Data
+public class PlaylistDetailVO {
+    private Long id;
+    private String name;
+    private String description;
+    private String coverUrl;
+    private Long creatorId;
+    private Integer songCount;
+    private List<MusicVO> songs;
+}package com.hsx.manyue.modules.music.service.impl;
+
+import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.StrUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.hsx.manyue.common.constant.RedisKeys;
+import com.hsx.manyue.common.dto.R;
+import com.hsx.manyue.common.utils.JwtUtil;
+import com.hsx.manyue.common.utils.PageUtils;
+import com.hsx.manyue.common.utils.RedisUtil;
+import com.hsx.manyue.modules.music.mapper.MusicMapper;
+import com.hsx.manyue.modules.music.mapper.UserCollectionMapper;
+import com.hsx.manyue.modules.music.model.entity.MusicEntity;
+import com.hsx.manyue.modules.music.model.entity.UserCollectionEntity;
+import com.hsx.manyue.modules.music.model.param.PageParam;
+import com.hsx.manyue.modules.music.model.vo.MusicVO;
+import com.hsx.manyue.modules.music.service.FileUploadService;
+import com.hsx.manyue.modules.music.service.IMusicService;
+import lombok.RequiredArgsConstructor;
+import org.jaudiotagger.audio.AudioFile;
+import org.jaudiotagger.audio.AudioFileIO;
+import org.jaudiotagger.tag.FieldKey;
+import org.jaudiotagger.tag.Tag;
+import org.jaudiotagger.tag.datatype.Artwork;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.File;
+import java.nio.file.Files;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
+@Service
+@RequiredArgsConstructor
+public class MusicServiceImpl extends ServiceImpl<MusicMapper, MusicEntity> implements IMusicService {
+
+    private final FileUploadService fileUploadService;
+    private final UserCollectionMapper userCollectionMapper;
+    private final RedisUtil redisUtil;
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public MusicVO uploadMusic(MultipartFile file) throws Exception {
+        Long userId = JwtUtil.LOGIN_USER_HANDLER.get();
+        // 1. 上传音频文件到OSS
+        String musicUrl = fileUploadService.uploadFile(file);
+
+        // 2. 提取音频元数据
+        File tempFile = Files.createTempFile("music-", file.getOriginalFilename()).toFile();
+        file.transferTo(tempFile);
+
+        AudioFile audioFile = AudioFileIO.read(tempFile);
+        Tag tag = audioFile.getTag();
+        int duration = audioFile.getAudioHeader().getTrackLength();
+
+        String coverUrl = null;
+        Artwork artwork = tag.getFirstArtwork();
+        if (artwork != null) {
+            byte[] imageData = artwork.getBinaryData();
+            // 上传封面到OSS
+            coverUrl = fileUploadService.uploadBytes(imageData, "cover-" + file.getOriginalFilename());
+        }
+
+        // 3. 构造MusicEntity并保存
+        MusicEntity musicEntity = new MusicEntity()
+                .setName(tag.getFirst(FieldKey.TITLE))
+                .setArtistName(tag.getFirst(FieldKey.ARTIST))
+                .setAlbumName(tag.getFirst(FieldKey.ALBUM))
+                .setDuration(duration)
+                .setMusicUrl(musicUrl)
+                .setCoverUrl(coverUrl)
+                .setUploaderId(userId)
+                .setPlayCount(0L);
+        this.save(musicEntity);
+
+        // 清理临时文件
+        tempFile.delete();
+
+        return BeanUtil.copyProperties(musicEntity, MusicVO.class);
+    }
+
+    @Override
+    public IPage<MusicVO> searchMusic(PageParam pageParam, String keyword) {
+        Page<MusicEntity> page = new Page<>(pageParam.getCurrent(), pageParam.getSize());
+        LambdaQueryWrapper<MusicEntity> wrapper = new LambdaQueryWrapper<>();
+        if (StrUtil.isNotBlank(keyword)) {
+            wrapper.like(MusicEntity::getName, keyword)
+                    .or().like(MusicEntity::getArtistName, keyword)
+                    .or().like(MusicEntity::getAlbumName, keyword);
+        }
+        wrapper.orderByDesc(MusicEntity::getCreateTime);
+        IPage<MusicEntity> musicPage = this.page(page, wrapper);
+        return PageUtils.convert(musicPage, MusicVO.class);
+    }
+
+    @Override
+    public R collectMusic(Long musicId) {
+        Long userId = JwtUtil.LOGIN_USER_HANDLER.get();
+        // 检查是否已收藏
+        long count = userCollectionMapper.selectCount(new LambdaQueryWrapper<UserCollectionEntity>()
+                .eq(UserCollectionEntity::getUserId, userId)
+                .eq(UserCollectionEntity::getMusicId, musicId));
+
+        if (count > 0) {
+            return R.failure("您已收藏该歌曲");
+        }
+
+        UserCollectionEntity collection = new UserCollectionEntity()
+                .setUserId(userId)
+                .setMusicId(musicId);
+        userCollectionMapper.insert(collection);
+
+        return R.success();
+    }
+
+    @Override
+    public void uncollectMusic(Long musicId) {
+        Long userId = JwtUtil.LOGIN_USER_HANDLER.get();
+        userCollectionMapper.delete(new LambdaQueryWrapper<UserCollectionEntity>()
+                .eq(UserCollectionEntity::getUserId, userId)
+                .eq(UserCollectionEntity::getMusicId, musicId));
+    }
+
+    @Override
+    public IPage<MusicVO> getMyCollections(PageParam pageParam) {
+        Long userId = JwtUtil.LOGIN_USER_HANDLER.get();
+        Page<UserCollectionEntity> page = new Page<>(pageParam.getCurrent(), pageParam.getSize());
+
+        // 分页查询收藏关系
+        IPage<UserCollectionEntity> collectionPage = userCollectionMapper.selectPage(page, new LambdaQueryWrapper<UserCollectionEntity>()
+                .eq(UserCollectionEntity::getUserId, userId)
+                .orderByDesc(UserCollectionEntity::getCreateTime));
+
+        List<Long> musicIds = collectionPage.getRecords().stream()
+                .map(UserCollectionEntity::getMusicId)
+                .collect(Collectors.toList());
+
+        if (CollUtil.isEmpty(musicIds)) {
+            return new Page<>(pageParam.getCurrent(), pageParam.getSize(), 0);
+        }
+
+        // 查询歌曲详情
+        List<MusicEntity> musicList = this.listByIds(musicIds);
+        List<MusicVO> musicVOList = BeanUtil.copyToList(musicList, MusicVO.class);
+        
+        IPage<MusicVO> resultPage = new Page<>(collectionPage.getCurrent(), collectionPage.getSize(), collectionPage.getTotal());
+        resultPage.setRecords(musicVOList);
+        return resultPage;
+    }
+
+    private String getPlaybackQueueKey() {
+        Long userId = JwtUtil.LOGIN_USER_HANDLER.get();
+        return RedisKeys.PLAYBACK_QUEUE_KEY_PREFIX + userId;
+    }
+    
+    @Override
+    public List<MusicVO> getPlaybackList() {
+        String key = getPlaybackQueueKey();
+        List<Object> musicIdsObj = redisUtil.lGet(key, 0, -1);
+        if (CollUtil.isEmpty(musicIdsObj)) {
+            return Collections.emptyList();
+        }
+        List<Long> musicIds = musicIdsObj.stream()
+            .map(id -> Long.valueOf(id.toString()))
+            .collect(Collectors.toList());
+
+        List<MusicEntity> musicList = this.listByIds(musicIds);
+        return BeanUtil.copyToList(musicList, MusicVO.class);
+    }
+
+    @Override
+    public void addToPlaybackList(Long musicId) {
+        String key = getPlaybackQueueKey();
+        redisUtil.lSet(key, musicId);
+        redisUtil.expire(key, RedisKeys.PLAYBACK_QUEUE_TTL_DAYS, TimeUnit.DAYS);
+    }
+
+    @Override
+    public void removeFromPlaybackList(Long musicId) {
+        String key = getPlaybackQueueKey();
+        // 移除所有等于musicId的项
+        redisUtil.lRemove(key, 0, musicId);
+    }
+}
+package com.hsx.manyue.modules.music.service.impl;
+
+import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.hsx.manyue.common.dto.R;
+import com.hsx.manyue.common.utils.JwtUtil;
+import com.hsx.manyue.modules.music.mapper.PlaylistMapper;
+import com.hsx.manyue.modules.music.mapper.PlaylistMusicMapper;
+import com.hsx.manyue.modules.music.model.entity.MusicEntity;
+import com.hsx.manyue.modules.music.model.entity.PlaylistEntity;
+import com.hsx.manyue.modules.music.model.entity.PlaylistMusicEntity;
+import com.hsx.manyue.modules.music.model.param.PlaylistCreateParam;
+import com.hsx.manyue.modules.music.model.vo.MusicVO;
+import com.hsx.manyue.modules.music.model.vo.PlaylistDetailVO;
+import com.hsx.manyue.modules.music.service.IMusicService;
+import com.hsx.manyue.modules.music.service.IPlaylistService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
+@Service
+@RequiredArgsConstructor
+public class PlaylistServiceImpl extends ServiceImpl<PlaylistMapper, PlaylistEntity> implements IPlaylistService {
+
+    private final PlaylistMusicMapper playlistMusicMapper;
+    private final IMusicService musicService;
+
+    @Override
+    public PlaylistEntity createPlaylist(PlaylistCreateParam param) {
+        Long userId = JwtUtil.LOGIN_USER_HANDLER.get();
+        PlaylistEntity playlist = new PlaylistEntity()
+                .setName(param.getName())
+                .setDescription(param.getDescription())
+                .setCreatorId(userId)
+                .setSongCount(0);
+        this.save(playlist);
+        return playlist;
+    }
+
+    @Override
+    @Transactional
+    public R addMusicToPlaylist(Long playlistId, Long musicId) {
+        Long userId = JwtUtil.LOGIN_USER_HANDLER.get();
+        PlaylistEntity playlist = this.getById(playlistId);
+
+        // 1. 检查歌单和权限
+        if (playlist == null || !Objects.equals(playlist.getCreatorId(), userId)) {
+            // 不抛异常，直接返回包含错误信息的 R 对象
+            // 假设返回 403（无权限）或一个自定义业务错误码
+            return R.failure("歌单不存在或您无权操作");
+        }
+
+        // 2. 检查歌曲是否已在歌单中
+        long count = playlistMusicMapper.selectCount(new LambdaQueryWrapper<PlaylistMusicEntity>()
+                .eq(PlaylistMusicEntity::getPlaylistId, playlistId)
+                .eq(PlaylistMusicEntity::getMusicId, musicId));
+
+        if (count > 0) {
+            // 不抛异常，直接返回包含错误信息的 R 对象
+            return R.failure("歌曲已在歌单中");
+        }
+
+        // 3. 执行成功操作
+        playlistMusicMapper.insert(new PlaylistMusicEntity().setPlaylistId(playlistId).setMusicId(musicId));
+        // 更新歌单歌曲数量
+        this.update().setSql("song_count = song_count + 1").eq("id", playlistId).update();
+
+        // 4. 返回成功的结果对象
+        return R.success();
+    }
+    @Override
+    @Transactional
+    public void removeMusicFromPlaylist(Long playlistId, Long musicId) {
+        Long userId = JwtUtil.LOGIN_USER_HANDLER.get();
+        PlaylistEntity playlist = this.getById(playlistId);
+
+        // 权限和歌单存在性检查
+        if (playlist == null || !Objects.equals(playlist.getCreatorId(), userId)) {
+            // 替换为 IllegalStateException
+            throw new IllegalStateException("歌单不存在或您无权操作");
+        }
+
+        // 删除歌曲关联记录
+        int deletedRows = playlistMusicMapper.delete(new LambdaQueryWrapper<PlaylistMusicEntity>()
+                .eq(PlaylistMusicEntity::getPlaylistId, playlistId)
+                .eq(PlaylistMusicEntity::getMusicId, musicId));
+
+        // 如果成功删除了行数 (deletedRows > 0)，则更新歌单歌曲数量
+        if (deletedRows > 0) {
+            this.update().setSql("song_count = song_count - 1").eq("id", playlistId).update();
+        }
+    }
+
+    @Override
+    public PlaylistDetailVO getPlaylistDetail(Long playlistId) {
+        PlaylistEntity playlist = this.getById(playlistId);
+        if (playlist == null) {
+            return null;
+        }
+
+        PlaylistDetailVO detailVO = BeanUtil.copyProperties(playlist, PlaylistDetailVO.class);
+
+        // 查询歌单中的所有歌曲ID
+        List<PlaylistMusicEntity> relations = playlistMusicMapper.selectList(new LambdaQueryWrapper<PlaylistMusicEntity>()
+                .eq(PlaylistMusicEntity::getPlaylistId, playlistId)
+                .orderByDesc(PlaylistMusicEntity::getCreateTime));
+        
+        if (CollUtil.isEmpty(relations)) {
+            detailVO.setSongs(Collections.emptyList());
+            return detailVO;
+        }
+
+        List<Long> musicIds = relations.stream().map(PlaylistMusicEntity::getMusicId).collect(Collectors.toList());
+        List<MusicEntity> musicList = musicService.listByIds(musicIds);
+        detailVO.setSongs(BeanUtil.copyToList(musicList, MusicVO.class));
+        
+        return detailVO;
+    }
+}
+@Data
+@Accessors(chain = true)
+public class BaseEntity<T extends Model<?>> extends Model<T> {
+
+    @TableId(value = "id", type = IdType.ASSIGN_ID)
+    private Long id;
+
+    @TableField(fill = FieldFill.INSERT)
+    private LocalDateTime createTime;
+
+    /**
+     * 更新时间
+     */
+    @TableField(fill = FieldFill.INSERT_UPDATE)
+    private LocalDateTime updateTime;
+
+    /**
+     * 是否删除
+     */
+    private Boolean isDelete;
+
+}/**
+ * 统一返回结果
+ */
+@Data
+@Accessors(chain = true)
+public class R {
+    /**
+     * 响应码
+     */
+    private Integer code;
+    /**
+     * 响应消息
+     */
+    private String msg;
+
+    /**
+     * 响应数据
+     */
+    private Object data;
+
+    private R () {
+        data = new HashMap<>();
+    }
+
+    public static R success() {
+        return result(ReturnCodeEnums.SUCCESS);
+    }
+
+    public static R success(Object data) {
+        return success().setData(data);
+    }
+
+    public static R failure() {
+        return result(ReturnCodeEnums.FAIL);
+    }
+
+    public static R failure(ReturnCodeEnums returnCode) {
+        return result(returnCode);
+    }
+
+    public static R failure(String msg) {
+        return new R().setCode(400000)
+                .setMsg(msg);
+    }
+
+    private static R result(ReturnCodeEnums returnCode) {
+        return new R().setCode(returnCode.getCode())
+                .setMsg(returnCode.getMsg());
+    }
+
+}

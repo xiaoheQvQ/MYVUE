@@ -100,7 +100,7 @@
                             :command="{ type: 'live', index }" :key="msg.id">
                             <div class="notification-item">
                               <div class="notification-content"><span class="uploader-name">{{ msg.currentUserName
-                                  }}</span><span class="notification-text">开始了直播</span></div>
+                              }}</span><span class="notification-text">开始了直播</span></div>
                               <div class="video-title">直播间ID: {{ msg.roomId }}</div>
                             </div>
                           </el-dropdown-item>
@@ -155,7 +155,7 @@
                             :key="msg.id">
                             <div class="notification-item">
                               <div class="notification-content"><span class="sender-name">{{ msg.fromUserNick
-                                  }}</span><span class="notification-text">发来私信:</span></div>
+                              }}</span><span class="notification-text">发来私信:</span></div>
                               <div class="message-content">{{ msg.content }}</div>
                             </div>
                           </el-dropdown-item>
@@ -173,7 +173,7 @@
                               <div class="notification-content">
                                 <span class="sender-name">{{ msg.data.fromUserNick || msg.data.nick }}</span>
                                 <span class="notification-text">{{ msg.type === 'POST_COMMENT' ? '回复了你的动态:' : '回复了你的评论:'
-                                  }}</span>
+                                }}</span>
                               </div>
                               <div class="message-content">{{ msg.data.content || msg.data.commentContent }}</div>
                             </div>
@@ -235,8 +235,8 @@
                 <el-dropdown-item icon="el-icon-film" @click.native="animeListEntry()">查看番剧</el-dropdown-item>
                 <el-dropdown-item icon="el-icon-plus" @click.native="animeUploadEntry()">上传番剧</el-dropdown-item>
                 <el-dropdown-item icon="el-icon-present" @click.native="vipEntry()">会员充值</el-dropdown-item>
-                <el-dropdown-item icon="el-icon-notebook-2" @click.native="resume()">发布feed流</el-dropdown-item>
-                <el-dropdown-item icon="el-icon-film" @click.native="feedPage()">feedPage</el-dropdown-item>
+                <el-dropdown-item icon="el-icon-notebook-2" @click.native="resume()">发布图文</el-dropdown-item>
+                <el-dropdown-item icon="el-icon-film" @click.native="feedPage()">图文社区</el-dropdown-item>
                 <el-dropdown-item icon="el-icon-data-analysis" @click.native="analyze()">视频管理</el-dropdown-item>
                 <el-dropdown-item icon="el-icon-user" @click.native="music()">音乐中心</el-dropdown-item>
                 <el-dropdown-item divided>

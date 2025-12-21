@@ -40,7 +40,7 @@
 
       <div class="chat-messages" ref="chatMessages">
         <div v-for="(message, index) in messages" :key="index" class="message"
-             :class="{'message-self': message.userId === currentUserId}">
+          :class="{ 'message-self': message.userId === currentUserId }">
           <span class="message-user">
             {{ message.userName }}:
           </span>
@@ -72,13 +72,8 @@
         </el-table>
 
         <div style="margin-top: 20px; text-align: center">
-          <el-button
-            @click="payGift"
-            type="primary"
-            size="medium"
-            :disabled="balance < currentGift.price"
-            v-loading="payLoading"
-          >
+          <el-button @click="payGift" type="primary" size="medium" :disabled="balance < currentGift.price"
+            v-loading="payLoading">
             确认支付
           </el-button>
           <el-button @click="payDialogVisible = false" type="info" size="medium">
@@ -104,19 +99,10 @@
         </el-radio-group>
 
         <div style="margin-top: 30px; text-align: center">
-          <el-button
-            @click="handleRecharge"
-            type="primary"
-            size="medium"
-            v-loading="rechargeLoading"
-          >
+          <el-button @click="handleRecharge" type="primary" size="medium" v-loading="rechargeLoading">
             立即充值
           </el-button>
-          <el-button
-            @click="rechargeDialogVisible = false"
-            type="info"
-            size="medium"
-          >
+          <el-button @click="rechargeDialogVisible = false" type="info" size="medium">
             取消
           </el-button>
         </div>
@@ -124,11 +110,7 @@
     </el-dialog>
 
     <!-- 支付结果弹窗 -->
-    <el-dialog
-      title="支付结果"
-      :visible.sync="payResultDialogVisible"
-      width="30%"
-      center>
+    <el-dialog title="支付结果" :visible.sync="payResultDialogVisible" width="30%" center>
       <div style="text-align: center">
         <i :class="paySuccess ? 'el-icon-success success-icon' : 'el-icon-error error-icon'"></i>
         <p style="font-size: 18px; margin-top: 15px">{{ payResultMessage }}</p>
@@ -139,11 +121,7 @@
     </el-dialog>
 
     <!-- 结束直播确认对话框 -->
-    <el-dialog
-      title="提示"
-      :visible.sync="endLiveDialogVisible"
-      width="30%"
-      center>
+    <el-dialog title="提示" :visible.sync="endLiveDialogVisible" width="30%" center>
       <span>确定要结束当前直播吗？</span>
       <span slot="footer" class="dialog-footer">
         <el-button @click="endLiveDialogVisible = false">取消</el-button>
@@ -162,7 +140,7 @@ import liveApi from '@/api/live/live'
 const baseUrl = 'http://localhost:8088'
 
 export default {
-  data () {
+  data() {
     return {
       currentUserId: Global.user ? String(Global.user.id) : null,
       currentUserName: Global.user ? Global.user.nick : '匿名用户',
@@ -200,23 +178,23 @@ export default {
     }
   },
   props: {
-    roomId: {type: String, required: true},
-    nick: {type: String, required: true},
-    live_from: {type: String, required: true},
-    visit_id: {type: String, required: true}
+    roomId: { type: String, required: true },
+    nick: { type: String, required: true },
+    live_from: { type: String, required: true },
+    visit_id: { type: String, required: true }
   },
   computed: {
-    isHost () {
+    isHost() {
       return this.roomId === this.currentUserId
     }
   },
-  async mounted () {
+  async mounted() {
     await this.checkBalance()
     this.initPlayer()
     this.initWebSocket()
     this.checkPayCallback()
   },
-  beforeDestroy () {
+  beforeDestroy() {
     this.cleanupWebSocket()
     this.destroyPlayer()
     if (this.pollingInterval) {
@@ -224,7 +202,7 @@ export default {
     }
   },
   methods: {
-    async checkBalance () {
+    async checkBalance() {
       try {
         const response = await liveApi.getBalance()
         this.balance = response.data.coinBalance || 0
@@ -234,7 +212,7 @@ export default {
       }
     },
 
-    async sendGift (gift) {
+    async sendGift(gift) {
       this.currentGift = gift
 
       // 检查余额
@@ -252,7 +230,7 @@ export default {
       this.payDialogVisible = true
     },
 
-    async payGift () {
+    async payGift() {
       if (!this.currentGift) return
 
       this.payLoading = true
@@ -299,7 +277,7 @@ export default {
       }
     },
 
-    async handleRecharge () {
+    async handleRecharge() {
       this.rechargeLoading = true
       try {
         // 创建充值订单
@@ -333,7 +311,7 @@ export default {
       }
     },
 
-    startPollingPaymentStatus (orderId, amount) {
+    startPollingPaymentStatus(orderId, amount) {
       // 先清除之前的轮询
       if (this.pollingInterval) {
         clearInterval(this.pollingInterval)
@@ -361,7 +339,7 @@ export default {
     },
 
     // ... 其他现有方法保持不变
-    handleManagementCommand (command) {
+    handleManagementCommand(command) {
       if (command === 'notify') {
         this.notifyFans()
       } else if (command === 'endLive') {
@@ -369,7 +347,7 @@ export default {
       }
     },
 
-    notifyFans () {
+    notifyFans() {
       if (!this.nick) {
         console.error('用户昵称未定义')
         return
@@ -383,7 +361,7 @@ export default {
         })
     },
 
-    async confirmEndLive () {
+    async confirmEndLive() {
       this.endingLive = true
       try {
         await liveApi.unpublish()
@@ -417,7 +395,7 @@ export default {
       }
     },
 
-    destroyPlayer () {
+    destroyPlayer() {
       if (this.dp) {
         this.dp.destroy()
         this.dp = null
@@ -428,7 +406,7 @@ export default {
       }
     },
 
-    checkPayCallback () {
+    checkPayCallback() {
       const urlParams = new URLSearchParams(window.location.search)
       const paySuccess = urlParams.get('pay_success')
       const orderId = urlParams.get('order_id')
@@ -447,7 +425,7 @@ export default {
       }
     },
 
-    initPlayer () {
+    initPlayer() {
       const videoUrl = 'http://8.140.29.27:8080/live/livestream.m3u8'
 
       if (Hls.isSupported()) {
@@ -503,7 +481,7 @@ export default {
       }
     },
 
-    initWebSocket () {
+    initWebSocket() {
       if (!Global.socket) {
         console.error('WebSocket连接未初始化')
         return
@@ -517,14 +495,14 @@ export default {
       this.loadHistoryMessages()
     },
 
-    cleanupWebSocket () {
+    cleanupWebSocket() {
       if (Global.socket && this.chatChannel) {
         this.leaveLiveRoom()
         Global.socket.removeEventListener('message', this.handleSocketMessage)
       }
     },
 
-    joinLiveRoom () {
+    joinLiveRoom() {
       if (Global.socket && Global.socket.readyState === WebSocket.OPEN) {
         Global.socket.send(JSON.stringify({
           type: 'JOIN_LIVE_ROOM',
@@ -535,7 +513,7 @@ export default {
       }
     },
 
-    leaveLiveRoom () {
+    leaveLiveRoom() {
       if (Global.socket && Global.socket.readyState === WebSocket.OPEN) {
         Global.socket.send(JSON.stringify({
           type: 'LEAVE_LIVE_ROOM',
@@ -546,7 +524,7 @@ export default {
       }
     },
 
-    sendMessage () {
+    sendMessage() {
       if (!this.newMessage.trim()) return
 
       if (Global.socket && Global.socket.readyState === WebSocket.OPEN) {
@@ -567,7 +545,7 @@ export default {
       }
     },
 
-    handleSocketMessage (event) {
+    handleSocketMessage(event) {
       try {
         const message = JSON.parse(event.data)
 
@@ -587,7 +565,7 @@ export default {
       }
     },
 
-    handleChatMessage (message) {
+    handleChatMessage(message) {
       if (message.roomId === this.roomId) {
         this.messages.push({
           userId: String(message.userId),
@@ -599,7 +577,7 @@ export default {
       }
     },
 
-    handleGiftMessage (message) {
+    handleGiftMessage(message) {
       if (message.roomId === this.roomId) {
         this.messages.push({
           userId: String(message.userId),
@@ -612,7 +590,7 @@ export default {
       }
     },
 
-    handleLiveEnded (message) {
+    handleLiveEnded(message) {
       if (message.roomId === this.roomId) {
         this.messages.push({
           userId: 'system',
@@ -626,7 +604,7 @@ export default {
       }
     },
 
-    handleUserJoin (message) {
+    handleUserJoin(message) {
       if (message.roomId === this.roomId) {
         this.messages.push({
           userId: 'system',
@@ -638,7 +616,7 @@ export default {
       }
     },
 
-    handleUserLeave (message) {
+    handleUserLeave(message) {
       if (message.roomId === this.roomId) {
         this.messages.push({
           userId: 'system',
@@ -650,7 +628,7 @@ export default {
       }
     },
 
-    async loadHistoryMessages () {
+    async loadHistoryMessages() {
       try {
         // 这里可以调用API获取历史消息
       } catch (error) {
@@ -658,7 +636,7 @@ export default {
       }
     },
 
-    scrollToBottom () {
+    scrollToBottom() {
       this.$nextTick(() => {
         const container = this.$refs.chatMessages
         if (container) {
@@ -667,7 +645,7 @@ export default {
       })
     },
 
-    formatTime (timestamp) {
+    formatTime(timestamp) {
       const date = new Date(timestamp)
       const hours = date.getHours().toString().padStart(2, '0')
       const minutes = date.getMinutes().toString().padStart(2, '0')
@@ -727,16 +705,21 @@ export default {
 .video-dplayer {
   width: 100%;
   height: 350px;
-  background-color: #6a9e25;
+  background-color: #000;
   border-radius: 8px;
   overflow: hidden;
+}
+
+#dplayer {
+  width: 100%;
+  height: 100%;
 }
 
 .gift-section {
   flex: 1;
   padding: 15px;
   border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   margin-top: 20px;
   background: #fff;
   display: flex;
@@ -761,7 +744,7 @@ export default {
   flex-direction: column;
   height: 100%;
   width: 35%;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   background: #fff;
 }
 
@@ -798,7 +781,7 @@ export default {
   border-radius: 15px;
   background: #ffffff;
   word-break: break-word;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .message-self {
@@ -837,7 +820,7 @@ export default {
   background: white;
   border-radius: 10px;
   width: 95%;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .chat-input input {
@@ -896,7 +879,7 @@ export default {
 
 .gift-item:hover {
   transform: translateY(-3px);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   background: #fff;
 }
 

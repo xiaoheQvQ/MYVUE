@@ -37,21 +37,6 @@
 
         <!-- Main Content -->
         <main class="main-container">
-            <!-- Top Header -->
-            <header class="top-header">
-                <div class="header-left">
-                    <!-- Left side is now empty as controls moved to right -->
-                </div>
-                <div class="header-right">
-                    <api-switch />
-                    <div class="window-controls">
-                        <div class="dot red"></div>
-                        <div class="dot yellow"></div>
-                        <div class="dot green"></div>
-                    </div>
-                </div>
-            </header>
-
             <!-- Content Area -->
             <div class="content-scroll">
                 <!-- Favorites View (as per Screenshot 2) -->
@@ -157,30 +142,40 @@
                 <div v-if="activeMenu === 'search' || activeMenu === 'results'" class="search-view">
                     <div class="search-bar-inner">
                         <el-input v-model="keyword" placeholder="搜索音乐、歌手、专辑" prefix-icon="el-icon-search"
-                            @keyup.enter.native="handleSearch" clearable></el-input>
-                        <el-button type="primary" @click="handleSearch" :loading="loading">搜索</el-button>
+                            @keyup.enter.native="handleSearch" clearable class="premium-search-input"></el-input>
+                        <el-button type="primary" class="premium-search-btn" @click="handleSearch" :loading="loading">
+                            <i class="el-icon-search"></i> 搜索
+                        </el-button>
                     </div>
 
                     <el-table v-if="results.length > 0" :data="results" v-loading="loading" class="music-table"
-                        @row-dblclick="playSong">
+                        @row-dblclick="playSong" :row-class-name="tableRowClassName">
                         <el-table-column label="#" width="60">
-                            <template slot-scope="scope">{{ scope.$index + 1 }}</template>
+                            <template slot-scope="scope">
+                                <span class="index-num">{{ scope.$index + 1 }}</span>
+                            </template>
                         </el-table-column>
                         <el-table-column prop="name" label="歌名" min-width="200"></el-table-column>
                         <el-table-column prop="artist" label="歌手" width="150"></el-table-column>
                         <el-table-column prop="album" label="专辑" width="180"></el-table-column>
-                        <el-table-column label="时长" width="80">
-                            <template slot-scope="scope">{{ scope.row.duration || '--:--' }}</template>
-                        </el-table-column>
                         <el-table-column label="平台" width="100">
                             <template slot-scope="scope">
                                 <span :class="['tag', scope.row.platform]">{{ getPlatformName(scope.row.platform)
                                     }}</span>
                             </template>
                         </el-table-column>
-                        <el-table-column width="80" align="center">
+                        <el-table-column width="100" align="right">
                             <template slot-scope="scope">
-                                <i class="el-icon-star-off favorite-row-btn" @click="toggleFavorite(scope.row)"></i>
+                                <div class="row-actions">
+                                    <div class="index-cell">
+                                        <i v-if="isCurrent(scope.row)" class="el-icon-headset playing-icon"></i>
+                                        <div class="row-play-btn" @click.stop="playSong(scope.row)">
+                                            <i class="el-icon-video-play"></i>
+                                        </div>
+                                    </div>
+                                    <i :class="isFavorite(scope.row) ? 'el-icon-star-on active' : 'el-icon-star-off'"
+                                        class="favorite-row-btn" @click.stop="toggleFavorite(scope.row)"></i>
+                                </div>
                             </template>
                         </el-table-column>
                     </el-table>
@@ -211,7 +206,20 @@
                         <span class="platform-tag" :class="currentSong.platform">{{
                             getPlatformName(currentSong.platform)
                             }}</span>
-                        <span class="quality-tag">320K</span>
+                        <el-dropdown trigger="click" @command="handleQualityChange">
+                            <span class="quality-tag clickable">{{ currentQuality.toUpperCase() }}</span>
+                            <el-dropdown-menu slot="dropdown" class="quality-dropdown">
+                                <el-dropdown-item command="128k" :class="{ active: currentQuality === '128k' }">128K
+                                    标准</el-dropdown-item>
+                                <el-dropdown-item command="320k" :class="{ active: currentQuality === '320k' }">320K
+                                    高品质</el-dropdown-item>
+                                <el-dropdown-item command="flac" :class="{ active: currentQuality === 'flac' }">FLAC
+                                    无损</el-dropdown-item>
+                                <el-dropdown-item command="flac24bit"
+                                    :class="{ active: currentQuality === 'flac24bit' }">HI-RES
+                                    音质</el-dropdown-item>
+                            </el-dropdown-menu>
+                        </el-dropdown>
                     </div>
                 </div>
             </div>
@@ -241,7 +249,7 @@
                     <i :class="volume === 0 ? 'el-icon-message-solid mute' : 'el-icon-bell'" @click="toggleMute"></i>
                     <el-slider v-model="volume" :max="100" class="volume-slider"></el-slider>
                 </div>
-                <i class="el-icon-rank" title="全屏" @click="toggleFullscreen"></i>
+                <i class="el-icon-full-screen" title="全屏" @click="toggleFullscreen"></i>
             </div>
 
             <audio ref="audioPlayer" :src="currentSong.url" @timeupdate="onTimeUpdate"
@@ -254,17 +262,39 @@
                 <div class="glass-bg" :style="{ backgroundImage: `url(${currentSong.pic})` }"></div>
                 <div class="fs-overlay"></div>
 
+                <!-- Fullscreen mode should respect the global header if it's there, 
+                     but typically fullscreen apps hide it. The user wants the header shown.
+                     We keep the internal one for controls but adjust z-index to not conflict. -->
                 <header class="fs-header">
-                    <i class="el-icon-arrow-down" @click="toggleFullscreen"></i>
+                    <div class="header-left">
+                        <!-- Left side can keep its own logo or be empty to avoid duplication -->
+                    </div>
+                    <div class="header-right">
+                        <!-- Lyric Sync Controls -->
+                        <div class="lyric-sync-ctrls">
+                            <span class="ctrl-label">歌词同步:</span>
+                            <el-button type="text" icon="el-icon-minus" @click="adjustLyricOffset(-0.5)"
+                                title="提前0.5秒"></el-button>
+                            <span class="offset-val">{{ lyricOffset > 0 ? '+' : '' }}{{ lyricOffset.toFixed(1)
+                                }}s</span>
+                            <el-button type="text" icon="el-icon-plus" @click="adjustLyricOffset(0.5)"
+                                title="延后0.5秒"></el-button>
+                            <el-button type="text" @click="lyricOffset = 0" title="重置">重置</el-button>
+                        </div>
+                        <api-switch />
+                        <div class="window-controls">
+                            <i class="el-icon-arrow-down" @click="toggleFullscreen" title="收起全屏"></i>
+                        </div>
+                    </div>
                 </header>
 
                 <div class="fs-body">
                     <div class="fs-left">
                         <div class="fs-album-card">
-                            <img :src="currentSong.pic" alt="cover">
+                            <img :src="currentSong.pic" alt="cover" @error="handleImgError">
                         </div>
                         <div class="fs-info">
-                            <h1 class="fs-title">{{ currentSong.name }}</h1>
+                            <h1 class="fs-title" style="color: white;">{{ currentSong.name }}</h1>
                             <div class="fs-artist-line">
                                 <span>{{ currentSong.artist }}</span>
                                 <span class="source-badge">{{ getPlatformName(currentSong.platform) }}</span>
@@ -279,31 +309,46 @@
                                 <span class="time">{{ formatTime(duration) }}</span>
                             </div>
                             <div class="fs-btns">
-                                <i class="el-icon-refresh"></i>
+                                <i class="el-icon-refresh shuffle" title="随机播放"></i>
                                 <i class="el-icon-caret-left" @click="playPrev"></i>
                                 <div class="fs-play-btn" @click="togglePlay">
                                     <i :class="isPlaying ? 'el-icon-video-pause' : 'el-icon-video-play'"></i>
                                 </div>
                                 <i class="el-icon-caret-right" @click="playNext"></i>
-                                <i class="el-icon-bell"></i>
+                                <div class="fs-volume-wrap">
+                                    <i :class="volume === 0 ? 'el-icon-message-solid mute' : 'el-icon-bell'"
+                                        @click="toggleMute"></i>
+                                    <el-slider v-model="volume" :max="100" class="fs-volume-slider"></el-slider>
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="fs-right" ref="lyricContainer">
-                        <div class="lyric-scroll" v-if="lyrics.length > 0">
-                            <div v-for="(line, index) in lyrics" :key="index" class="lrc-line" :class="{
-                                active: currentLyricIndex === index,
-                                'next-line': currentLyricIndex + 1 === index,
-                                'prev-line': currentLyricIndex - 1 === index
-                            }">
-                                <div class="lrc-text">{{ line.text }}</div>
-                                <!-- <div v-if="line.translation" class="lrc-sub">{{ line.translation }}</div> -->
+                    <div class="fs-right-container">
+                        <div class="fs-right" ref="lyricContainer" @mousedown="handleLyricMouseDown"
+                            @mousemove="handleLyricMouseMove" @mouseup="handleLyricMouseUp"
+                            @mouseleave="handleLyricMouseUp" :class="{ 'dragging': isDraggingLyric }">
+                            <div class="lyric-scroll" v-if="lyrics.length > 0">
+                                <div v-for="(line, index) in lyrics" :key="index" class="lrc-line" :class="{
+                                    active: currentLyricIndex === index,
+                                    'next-line': currentLyricIndex + 1 === index,
+                                    'prev-line': currentLyricIndex - 1 === index,
+                                    'drag-target': isDraggingLyric && hoveredLyricIndex === index
+                                }">
+                                    <div class="lrc-text" :style="getKaraokeStyle(index)">{{ line.text }}</div>
+                                </div>
                             </div>
-                        </div>
-                        <div v-else class="fs-no-lyric">
-                            <i class="el-icon-loading" v-if="loadingLrc"></i>
-                            <span v-else>纯音乐，请欣赏</span>
+                            <div v-else class="fs-no-lyric">
+                                <i class="el-icon-loading" v-if="loadingLrc"></i>
+                                <span v-else>纯音乐，请欣赏</span>
+                            </div>
+
+                            <!-- Drag Indicator Line -->
+                            <div class="drag-indicator" v-if="isDraggingLyric && hoveredTime !== null">
+                                <span class="drag-time">{{ formatTime(hoveredTime) }}</span>
+                                <div class="line"></div>
+                                <i class="el-icon-caret-right"></i>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -391,6 +436,7 @@ export default {
             progress: 0,
             volume: parseInt(localStorage.getItem('player_volume') || '80'),
             prevVolume: 80,
+            currentQuality: localStorage.getItem('player_quality') || '320k',
 
             // Discover
             discoverPlatform: 'netease',
@@ -401,10 +447,24 @@ export default {
             fetchingPlaylist: false,
             importedInfo: null,
             importForm: {
-                url: '',
                 source: 'auto',
                 method: 'new'
-            }
+            },
+
+            // Lyric drag seek state
+            isDraggingLyric: false,
+            dragStartY: 0,
+            dragStartScrollTop: 0,
+            hasMoved: false,
+            hoveredLyricIndex: -1,
+            hoveredTime: null,
+
+            // Smooth progress for lyrics
+            smoothProgressTime: 0,
+            animationId: null,
+
+            // Sync adjustment
+            lyricOffset: parseFloat(localStorage.getItem('lyric_offset') || '0')
         }
     },
     watch: {
@@ -418,6 +478,13 @@ export default {
             deep: true,
             handler(val) {
                 localStorage.setItem('my_favorites', JSON.stringify(val))
+            }
+        },
+        isPlaying(val) {
+            if (val) {
+                this.startSmoothProgress()
+            } else {
+                this.stopSmoothProgress()
             }
         }
     },
@@ -433,6 +500,7 @@ export default {
     },
     beforeDestroy() {
         document.body.classList.remove('music-page-body')
+        this.stopSmoothProgress()
     },
     methods: {
         getPlatformName(p) {
@@ -500,7 +568,7 @@ export default {
                         ...songInfo,
                         id: row.id,
                         platform: row.platform,
-                        url: musicApi.getSongUrl(row.platform, row.id),
+                        url: musicApi.getSongUrl(row.platform, row.id, this.currentQuality),
                         pic: musicApi.getAlbumPic(row.platform, row.id)
                     }
 
@@ -604,11 +672,12 @@ export default {
             this.progress = (this.currentTime / this.duration) * 100
 
             if (this.lyrics.length > 0) {
-                let index = this.lyrics.findIndex(l => l.time > this.currentTime)
+                const effectiveTime = this.currentTime + this.lyricOffset
+                let index = this.lyrics.findIndex(l => l.time > effectiveTime)
                 if (index === -1) index = this.lyrics.length
                 this.currentLyricIndex = index - 1
 
-                if (this.isFullscreen && this.currentLyricIndex >= 0) {
+                if (this.isFullscreen && this.currentLyricIndex >= 0 && !this.isDraggingLyric) {
                     const container = this.$refs.lyricContainer
                     const activeLine = container.querySelectorAll('.lrc-line')[this.currentLyricIndex]
                     if (activeLine) {
@@ -617,6 +686,54 @@ export default {
                     }
                 }
             }
+        },
+        getKaraokeStyle(index) {
+            if (index !== this.currentLyricIndex || !this.isPlaying || this.isDraggingLyric) {
+                return {}
+            }
+            const line = this.lyrics[index]
+            const nextLine = this.lyrics[index + 1]
+            const duration = nextLine ? nextLine.time - line.time : 5 // fallback to 5s
+
+            // Use smoothProgressTime for much smoother transitions
+            const time = (this.smoothProgressTime || this.currentTime) + this.lyricOffset
+            const progress = Math.min(Math.max((time - line.time) / duration, 0), 1) * 100
+
+            return {
+                backgroundImage: `linear-gradient(to right, var(--primary-color) ${progress}%, white ${progress}%)`,
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+                color: 'transparent'
+            }
+        },
+        startSmoothProgress() {
+            if (this.animationId) return
+            const update = () => {
+                if (this.$refs.audioPlayer) {
+                    this.smoothProgressTime = this.$refs.audioPlayer.currentTime
+                }
+                this.animationId = requestAnimationFrame(update)
+            }
+            this.animationId = requestAnimationFrame(update)
+        },
+        stopSmoothProgress() {
+            if (this.animationId) {
+                cancelAnimationFrame(this.animationId)
+                this.animationId = null
+            }
+        },
+        handleImgError(e) {
+            e.target.src = 'https://picsum.photos/400'
+        },
+        adjustLyricOffset(delta) {
+            this.lyricOffset += delta
+            localStorage.setItem('lyric_offset', this.lyricOffset)
+            this.$message({
+                message: `歌词已${delta > 0 ? '延后' : '提前'}0.5秒`,
+                type: 'info',
+                duration: 1000
+            })
         },
         onLoadedMetadata() {
             this.duration = this.$refs.audioPlayer.duration
@@ -710,6 +827,90 @@ export default {
             this.importModalVisible = false
             this.importedInfo = null
             this.importForm.url = ''
+        },
+        isCurrent(song) {
+            return this.currentSong && this.currentSong.id === song.id && this.currentSong.platform === song.platform
+        },
+        isFavorite(song) {
+            return this.favoritesSongs.some(s => s.id === song.id && s.platform === song.platform)
+        },
+        tableRowClassName({ row }) {
+            if (this.isCurrent(row)) {
+                return 'current-row'
+            }
+            return ''
+        },
+        handleQualityChange(q) {
+            this.currentQuality = q
+            localStorage.setItem('player_quality', q)
+            this.$message.success(`已切换音质: ${q.toUpperCase()}`)
+            if (this.currentSong) {
+                const currentTime = this.currentTime
+                this.playSong(this.currentSong).then(() => {
+                    this.$nextTick(() => {
+                        if (this.$refs.audioPlayer) {
+                            this.$refs.audioPlayer.currentTime = currentTime
+                        }
+                    })
+                })
+            }
+        },
+        seekTo(time) {
+            if (this.$refs.audioPlayer) {
+                this.$refs.audioPlayer.currentTime = time
+            }
+        },
+        handleLyricMouseDown(e) {
+            if (!this.isFullscreen || this.lyrics.length === 0) return
+            e.preventDefault()
+            this.isDraggingLyric = true
+            this.dragStartY = e.clientY
+            this.dragStartScrollTop = this.$refs.lyricContainer.scrollTop
+            this.hasMoved = false
+        },
+        handleLyricMouseMove(e) {
+            if (!this.isDraggingLyric) return
+            const deltaY = e.clientY - this.dragStartY
+            if (Math.abs(deltaY) > 5) {
+                this.hasMoved = true
+                // Scroll container manually
+                this.$refs.lyricContainer.scrollTop = this.dragStartScrollTop - deltaY
+
+                // Find the lyric closest to the center of the container
+                const container = this.$refs.lyricContainer
+                const lines = container.querySelectorAll('.lrc-line')
+                const containerRect = container.getBoundingClientRect()
+                const containerCenter = containerRect.top + containerRect.height / 2
+
+                let minDiff = Infinity
+                let closestIdx = -1
+
+                lines.forEach((line, index) => {
+                    const rect = line.getBoundingClientRect()
+                    const lineCenter = rect.top + rect.height / 2
+                    const diff = Math.abs(lineCenter - containerCenter)
+                    if (diff < minDiff) {
+                        minDiff = diff
+                        closestIdx = index
+                    }
+                })
+
+                if (closestIdx !== -1) {
+                    this.hoveredLyricIndex = closestIdx
+                    this.hoveredTime = this.lyrics[closestIdx].time
+                }
+            }
+        },
+        handleLyricMouseUp() {
+            if (this.isDraggingLyric) {
+                if (this.hasMoved && this.hoveredTime !== null) {
+                    this.seekTo(this.hoveredTime)
+                }
+                this.isDraggingLyric = false
+                this.hasMoved = false
+                this.hoveredLyricIndex = -1
+                this.hoveredTime = null
+            }
         }
     }
 }
@@ -868,7 +1069,7 @@ export default {
 
 .content-scroll {
     flex: 1;
-    padding: 0 32px 100px;
+    padding: 0 5% 100px;
     overflow-y: auto;
     scrollbar-width: thin;
     scrollbar-color: var(--glass) transparent;
@@ -975,18 +1176,85 @@ export default {
     cursor: pointer;
 }
 
-.music-table /deep/ tr:hover {
-    background: var(--glass) !important;
+.music-table /deep/ tr:hover td,
+.music-table /deep/ tr.el-table__row--hover td,
+.music-table /deep/ tr.hover-row td {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    color: var(--text-main) !important;
+}
+
+/* Fix for the bright white row issue */
+.music-table /deep/ .el-table__body tr.current-row>td,
+.music-table /deep/ .el-table__body tr.current-row:hover>td {
+    background-color: rgba(30, 215, 96, 0.2) !important;
+    color: var(--primary-color) !important;
+}
+
+.music-table /deep/ .el-table__body tr.current-row td .name,
+.music-table /deep/ .el-table__body tr.current-row td .artist,
+.music-table /deep/ .el-table__body tr.current-row td .index {
+    color: var(--primary-color) !important;
 }
 
 .music-table /deep/ td {
     border: none !important;
     color: var(--text-main);
+    transition: 0.2s;
 }
 
 .index {
     color: var(--text-dim);
     font-size: 14px;
+}
+
+.index-cell {
+    position: relative;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.row-play-btn {
+    display: none;
+    cursor: pointer;
+    font-size: 20px;
+    color: var(--primary-color);
+}
+
+.music-table /deep/ tr:hover .index-num,
+.music-table /deep/ tr:hover .playing-icon {
+    display: none;
+}
+
+.music-table /deep/ tr:hover .row-play-btn {
+    display: block;
+}
+
+.playing-icon {
+    color: var(--primary-color);
+    font-size: 16px;
+    animation: bounce 1s infinite alternate;
+}
+
+.row-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 16px;
+}
+
+@keyframes bounce {
+    from {
+        transform: scale(1);
+        opacity: 0.8;
+    }
+
+    to {
+        transform: scale(1.2);
+        opacity: 1;
+    }
 }
 
 .table-cover {
@@ -1055,15 +1323,104 @@ export default {
 .search-bar-inner {
     display: flex;
     gap: 16px;
-    margin-bottom: 32px;
-    max-width: 600px;
+    margin: 40px auto;
+    padding: 0 20px;
+    max-width: 700px;
+    justify-content: center;
 }
 
 .search-bar-inner /deep/ .el-input__inner {
-    background: var(--bg-light);
-    border: none;
-    border-radius: 500px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
     color: white;
+    height: 48px;
+    line-height: normal;
+    /* Use normal and flex for centering */
+    display: flex;
+    align-items: center;
+    transition: 0.3s;
+    font-size: 15px;
+    padding: 0 15px 0 40px;
+    /* Adjust padding for icon */
+}
+
+.search-bar-inner /deep/ .el-input__prefix {
+    left: 12px;
+    display: flex;
+    align-items: center;
+    color: var(--text-dim);
+}
+
+.search-bar-inner /deep/ .el-input__icon {
+    line-height: 48px;
+    font-size: 18px;
+}
+
+.search-bar-inner /deep/ .el-input__inner:focus {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--primary-color);
+}
+
+.premium-search-btn.el-button--primary {
+    height: 48px;
+    border-radius: 12px;
+    padding: 0 28px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    background: var(--primary-color) !important;
+    border: none !important;
+    color: black !important;
+    box-shadow: 0 4px 15px rgba(30, 215, 96, 0.3);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.premium-search-btn.el-button--primary:hover {
+    background: #1fef6c !important;
+    transform: translateY(-1px);
+    opacity: 1;
+}
+
+.premium-search-btn.el-button--primary i {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+/* Table Header Styling */
+.music-table /deep/ .el-table__header-wrapper th {
+    background: transparent !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+    color: var(--text-dim) !important;
+    font-weight: 500;
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: 1px;
+}
+
+.music-table /deep/ .current-row {
+    background: rgba(30, 215, 96, 0.1) !important;
+}
+
+.music-table /deep/ .current-row td {
+    color: var(--primary-color) !important;
+}
+
+.favorite-row-btn {
+    cursor: pointer;
+    font-size: 18px;
+    color: var(--text-dim);
+    transition: 0.2s;
+}
+
+.favorite-row-btn:hover {
+    color: #ff4d4f;
+    transform: scale(1.2);
+}
+
+.favorite-row-btn.active {
+    color: #ff4d4f;
 }
 
 /* Discover Page */
@@ -1229,10 +1586,39 @@ export default {
 
 .quality-tag {
     font-size: 9px;
-    border: 1px solid #ffbd2e;
-    color: #ffbd2e;
+    border: 1px solid var(--primary-color);
+    color: var(--primary-color);
     padding: 1px 4px;
     border-radius: 2px;
+}
+
+.quality-tag.clickable {
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.quality-tag.clickable:hover {
+    background: var(--primary-color);
+    color: black;
+}
+
+.quality-dropdown {
+    background: #282828 !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.quality-dropdown /deep/ .el-dropdown-menu__item {
+    color: var(--text-dim) !important;
+}
+
+.quality-dropdown /deep/ .el-dropdown-menu__item:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: white !important;
+}
+
+.quality-dropdown /deep/ .el-dropdown-menu__item.active {
+    color: var(--primary-color) !important;
+    font-weight: bold;
 }
 
 .player-center {
@@ -1263,7 +1649,6 @@ export default {
 .play-pause {
     width: 36px;
     height: 36px;
-    background: white;
     color: black !important;
     border-radius: 50%;
     display: flex;
@@ -1271,6 +1656,10 @@ export default {
     justify-content: center;
     font-size: 24px !important;
     transition: 0.2s;
+}
+
+.play-pause i {
+    color: white;
 }
 
 .play-pause:hover {
@@ -1327,7 +1716,8 @@ export default {
 /* Fullscreen View */
 .fullscreen-view {
     position: fixed;
-    top: 0;
+    top: 64px;
+    /* Start below the global header as requested */
     left: 0;
     right: 0;
     bottom: 0;
@@ -1359,23 +1749,39 @@ export default {
 }
 
 .fs-header {
-    height: 60px;
-    padding: 0 40px;
+    height: 80px;
+    padding: 0 60px;
     display: flex;
     align-items: center;
-    justify-content: flex-end;
+    justify-content: space-between;
     position: relative;
-    z-index: 10;
+    z-index: 100;
 }
 
-.fs-header i {
+.fs-header .header-left,
+.fs-header .header-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.fs-header .logo-inner {
+    color: white;
+}
+
+.fs-header .logo-inner span {
+    font-weight: 700;
+    font-size: 20px;
+}
+
+.fs-header .window-controls i {
     cursor: pointer;
-    font-size: 32px;
+    font-size: 28px;
     color: var(--text-dim);
     transition: 0.3s;
 }
 
-.fs-header i:hover {
+.fs-header .window-controls i:hover {
     color: white;
     transform: translateY(4px);
 }
@@ -1383,38 +1789,59 @@ export default {
 .fs-body {
     flex: 1;
     display: flex;
-    padding: 40px 100px;
+    justify-content: center;
+    align-items: center;
+    padding: 0 10%;
     position: relative;
     z-index: 10;
     overflow: hidden;
+    gap: 80px;
+    height: calc(100% - 80px);
 }
 
 .fs-left {
-    flex: 1;
+    flex: 0 0 400px;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: flex-start;
+    height: 100%;
+    padding-top: 0;
 }
 
 .fs-album-card {
-    width: 380px;
-    height: 380px;
-    border-radius: 20px;
-    overflow: hidden;
-    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+    width: 350px;
+    height: 350px;
+    border-radius: 12px;
     margin-bottom: 40px;
+    margin-top: 0;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    /* Soft dark shadow */
+    transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.fs-album-card:hover {
+    transform: translateY(-5px);
 }
 
 .fs-album-card img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    border-radius: 12px;
+}
+
+.fs-info {
+    width: 100%;
+    margin-bottom: 20px;
+    text-align: left;
 }
 
 .fs-info h1 {
-    font-size: 42px;
-    margin: 0 0 12px;
+    font-size: 28px;
+    margin: 0 0 8px;
+    font-weight: 700;
+    line-height: 1.2;
 }
 
 .fs-artist-line {
@@ -1434,15 +1861,15 @@ export default {
 
 .fs-controls {
     width: 100%;
-    max-width: 380px;
-    margin-top: 40px;
 }
 
 .fs-progress {
     display: flex;
     align-items: center;
-    gap: 16px;
-    margin-bottom: 24px;
+    gap: 12px;
+    margin-bottom: 20px;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.4);
 }
 
 .fs-slider-el {
@@ -1452,34 +1879,62 @@ export default {
 .fs-btns {
     display: flex;
     align-items: center;
-    gap: 32px;
-    color: var(--text-dim);
+    justify-content: space-between;
+    width: 100%;
+    color: rgba(255, 255, 255, 0.8);
 }
 
 .fs-btns i {
-    font-size: 28px;
+    font-size: 22px;
     cursor: pointer;
+    transition: color 0.2s;
+}
+
+.fs-btns i:hover {
+    color: white;
 }
 
 .fs-play-btn {
-    width: 64px;
-    height: 64px;
-    background: white;
-    color: black;
+    width: 30px;
+    height: 30px;
+    color: black !important;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 32px;
+    font-size: 24px;
+    transition: transform 0.5s;
+}
+
+.fs-play-btn:hover {
+    transform: scale(1.05);
+}
+
+.fs-play-btn i {
+    color: white;
+}
+
+.fs-right-container {
+    flex: 1;
+    height: 100%;
+    /* Increased from 60% to align with left content */
+    position: relative;
+    display: flex;
+    align-items: center;
 }
 
 .fs-right {
-    flex: 1.5;
-    display: flex;
-    flex-direction: column;
-    padding-left: 80px;
+    width: 100%;
+    height: 100%;
     overflow-y: auto;
     scrollbar-width: none;
+    -webkit-mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
+    mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
+    cursor: grab;
+}
+
+.fs-right.dragging {
+    cursor: grabbing;
 }
 
 .fs-right::-webkit-scrollbar {
@@ -1487,23 +1942,97 @@ export default {
 }
 
 .lyric-scroll {
-    padding: 50vh 0;
+    padding: 30vh 0;
 }
 
 .lrc-line {
     padding: 20px 0;
     font-size: 28px;
-    color: rgba(255, 255, 255, 0.3);
-    font-weight: 600;
+    color: rgba(255, 255, 255, 0.2);
+    font-weight: 700;
     transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     transform-origin: left;
 }
 
 .lrc-line.active {
     color: white;
-    font-size: 40px;
+    font-size: 38px;
     text-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
     transform: scale(1.05);
+}
+
+.lrc-line.active~.lrc-line {
+    color: white;
+}
+
+.lrc-line.prev-line,
+.lrc-line.next-line {
+    opacity: 0.8;
+}
+
+.lrc-text {
+    display: inline-block;
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+}
+
+.lrc-line.drag-target {
+    color: var(--primary-color) !important;
+    opacity: 1 !important;
+    transform: scale(1.1) translateX(10px);
+}
+
+.lrc-text {
+    transition: 0.2s;
+}
+
+/* Volume in FS */
+.fs-volume-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 150px;
+}
+
+.fs-volume-slider {
+    flex: 1;
+}
+
+/* Drag Indicator */
+.drag-indicator {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    transform: translateY(-50%);
+    pointer-events: none;
+    z-index: 100;
+    padding: 0 10px;
+}
+
+.drag-time {
+    background: var(--primary-color);
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-size: 14px;
+    color: black;
+    font-weight: bold;
+    margin-right: 12px;
+    box-shadow: 0 4px 12px rgba(30, 215, 96, 0.4);
+}
+
+.drag-indicator .line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--primary-color), transparent);
+    margin-right: 12px;
+}
+
+.drag-indicator i {
+    color: var(--primary-color);
+    font-size: 20px;
 }
 
 /* Animations */
@@ -1529,7 +2058,7 @@ export default {
 
 /* Dialog Styling */
 .premium-dialog /deep/ .el-dialog {
-    background: #1e1e1e;
+    background: #E3E9EE;
     border-radius: 24px;
     border: 1px solid rgba(255, 255, 255, 0.1);
 }
@@ -1640,6 +2169,39 @@ export default {
 </style>
 
 <style>
+/* Sync controls symbols */
+.lyric-sync-ctrls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-right: 20px;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 4px 12px;
+    border-radius: 20px;
+    color: var(--text-dim);
+}
+
+.lyric-sync-ctrls .ctrl-label {
+    font-size: 12px;
+}
+
+.lyric-sync-ctrls .offset-val {
+    font-size: 13px;
+    font-family: monospace;
+    color: var(--primary-color);
+    min-width: 40px;
+    text-align: center;
+}
+
+.lyric-sync-ctrls .el-button {
+    color: var(--text-dim);
+    padding: 0;
+}
+
+.lyric-sync-ctrls .el-button:hover {
+    color: white;
+}
+
 /* Global overrides for Music Page */
 .music-page-body {
     background-color: #0b0b0b !important;
@@ -1651,6 +2213,7 @@ export default {
     backdrop-filter: blur(10px);
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     color: white !important;
+    z-index: 3000;
 }
 
 .music-page-body #header .logo {
@@ -1660,5 +2223,11 @@ export default {
 .music-page-body #header .search-input .el-input__inner {
     background: rgba(255, 255, 255, 0.1) !important;
     color: white !important;
+}
+
+.music-page-body #component {
+    margin-top: 64px !important;
+    height: calc(100vh - 64px) !important;
+    overflow: hidden;
 }
 </style>

@@ -3,8 +3,8 @@ import axios from 'axios'
 const localBaseUrl = 'http://localhost:8088'
 const externalBaseUrl = 'https://music-dl.sayqz.com'
 
-// 默认使用本地接口，或者从缓存读取
-let useLocal = localStorage.getItem('music_api_local') !== 'false'
+// 默认使用开放平台接口，或者从缓存读取
+let useLocal = localStorage.getItem('music_api_local') === 'true'
 
 export const setUseLocal = (val) => {
     useLocal = val

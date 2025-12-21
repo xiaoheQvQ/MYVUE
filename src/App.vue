@@ -30,27 +30,16 @@
 
           <!-- Header Center: Search -->
           <div class="header-center">
-            <div class="search-outer-wrapper"
-                 @mouseleave="handleWrapperMouseLeave"
-                 @mouseenter="handleWrapperMouseEnter">
+            <div class="search-outer-wrapper" @mouseleave="handleWrapperMouseLeave"
+              @mouseenter="handleWrapperMouseEnter">
               <div class="search-wrapper">
-                <el-input
-                  ref="searchInput"
-                  class="search-input"
-                  placeholder="请输入搜索内容，支持标签搜索"
-                  @keyup.enter.native="handleSearchKeyup"
-                  @input="getSuggestions"
-                  @focus="handleInputFocus"
+                <el-input ref="searchInput" class="search-input" placeholder="请输入搜索内容，支持标签搜索"
+                  @keyup.enter.native="handleSearchKeyup" @input="getSuggestions" @focus="handleInputFocus"
                   v-model="searchKeyword">
                   <el-button slot="append" icon="el-icon-search" @click="triggerSearch"></el-button>
                 </el-input>
-                <div
-                  v-if="suggestions.length > 0 && showSuggestions"
-                  class="custom-suggestions">
-                  <div
-                    v-for="(suggestion, index) in suggestions"
-                    :key="index"
-                    class="suggestion-item"
+                <div v-if="suggestions.length > 0 && showSuggestions" class="custom-suggestions">
+                  <div v-for="(suggestion, index) in suggestions" :key="index" class="suggestion-item"
                     @click="selectSuggestion(suggestion)">
                     <i class="el-icon-search suggestion-icon"></i>
                     <span class="suggestion-text" v-html="suggestion"></span>
@@ -64,8 +53,9 @@
           <div class="header-right">
             <el-tooltip content="动态" placement="bottom" effect="dark">
               <el-dropdown trigger="click" @command="handleNotificationCommand" class="header-action-item">
-                <el-badge :value="totalUnreadNotifications" :hidden="totalUnreadNotifications === 0" class="action-badge">
-                  <img src="@/assets/iconfont/风车.svg" class="action-icon" alt="动态"/>
+                <el-badge :value="totalUnreadNotifications" :hidden="totalUnreadNotifications === 0"
+                  class="action-badge">
+                  <img src="@/assets/iconfont/风车.svg" class="action-icon" alt="动态" />
                 </el-badge>
                 <el-dropdown-menu slot="dropdown" class="notification-menu">
                   <div class="notification-header">
@@ -74,39 +64,50 @@
                   </div>
                   <div class="notification-content-wrapper">
                     <div class="notification-nav">
-                      <div class="nav-item" :class="{ active: activeNotificationTab === 'video' }" @click="switchNotificationTab('video')">
+                      <div class="nav-item" :class="{ active: activeNotificationTab === 'video' }"
+                        @click="switchNotificationTab('video')">
                         <i class="el-icon-video-camera"></i>
                         <span>视频动态</span>
-                        <el-badge :value="msgList.length" :hidden="msgList.length === 0" class="nav-badge"/>
+                        <el-badge :value="msgList.length" :hidden="msgList.length === 0" class="nav-badge" />
                       </div>
-                      <div class="nav-item" :class="{ active: activeNotificationTab === 'live' }" @click="switchNotificationTab('live')">
+                      <div class="nav-item" :class="{ active: activeNotificationTab === 'live' }"
+                        @click="switchNotificationTab('live')">
                         <i class="el-icon-video-play"></i>
                         <span>直播动态</span>
-                        <el-badge :value="liveNotificationList.length" :hidden="liveNotificationList.length === 0" class="nav-badge"/>
+                        <el-badge :value="liveNotificationList.length" :hidden="liveNotificationList.length === 0"
+                          class="nav-badge" />
                       </div>
                     </div>
                     <div class="notification-main">
                       <div v-show="activeNotificationTab === 'video'" class="notification-list">
                         <div v-if="msgList.length > 0">
-                          <el-dropdown-item v-for="(msg, index) in msgList" :command="{type: 'video', index}" :key="msg.id">
+                          <el-dropdown-item v-for="(msg, index) in msgList" :command="{ type: 'video', index }"
+                            :key="msg.id">
                             <div class="notification-item">
-                              <div class="notification-content"><span class="uploader-name">{{ msg.nick }}</span><span class="notification-text">发布了新视频</span></div>
+                              <div class="notification-content"><span class="uploader-name">{{ msg.nick }}</span><span
+                                  class="notification-text">发布了新视频</span></div>
                               <div class="video-title">《{{ msg.title }}》</div>
                             </div>
                           </el-dropdown-item>
                         </div>
-                        <el-dropdown-item v-if="msgList.length === 0" disabled><div class="empty-notification"><i class="el-icon-video-camera"></i><span>暂无视频动态</span></div></el-dropdown-item>
+                        <el-dropdown-item v-if="msgList.length === 0" disabled>
+                          <div class="empty-notification"><i class="el-icon-video-camera"></i><span>暂无视频动态</span></div>
+                        </el-dropdown-item>
                       </div>
                       <div v-show="activeNotificationTab === 'live'" class="notification-list">
                         <div v-if="liveNotificationList.length > 0">
-                          <el-dropdown-item v-for="(msg, index) in liveNotificationList" :command="{type: 'live', index}" :key="msg.id">
+                          <el-dropdown-item v-for="(msg, index) in liveNotificationList"
+                            :command="{ type: 'live', index }" :key="msg.id">
                             <div class="notification-item">
-                              <div class="notification-content"><span class="uploader-name">{{ msg.currentUserName }}</span><span class="notification-text">开始了直播</span></div>
+                              <div class="notification-content"><span class="uploader-name">{{ msg.currentUserName
+                                  }}</span><span class="notification-text">开始了直播</span></div>
                               <div class="video-title">直播间ID: {{ msg.roomId }}</div>
                             </div>
                           </el-dropdown-item>
                         </div>
-                        <el-dropdown-item v-if="liveNotificationList.length === 0" disabled><div class="empty-notification"><i class="el-icon-video-play"></i><span>暂无直播动态</span></div></el-dropdown-item>
+                        <el-dropdown-item v-if="liveNotificationList.length === 0" disabled>
+                          <div class="empty-notification"><i class="el-icon-video-play"></i><span>暂无直播动态</span></div>
+                        </el-dropdown-item>
                       </div>
                     </div>
                   </div>
@@ -115,8 +116,9 @@
             </el-tooltip>
 
             <el-tooltip content="消息" placement="bottom" effect="dark">
-             <el-dropdown trigger="click" @command="handlePrivateMessageCommand" class="header-action-item">
-               <el-badge :value="totalUnreadPrivateMessages" :hidden="totalUnreadPrivateMessages === 0" class="action-badge">
+              <el-dropdown trigger="click" @command="handlePrivateMessageCommand" class="header-action-item">
+                <el-badge :value="totalUnreadPrivateMessages" :hidden="totalUnreadPrivateMessages === 0"
+                  class="action-badge">
                   <i class="el-icon-message-solid action-icon" />
                 </el-badge>
                 <el-dropdown-menu slot="dropdown" class="notification-menu">
@@ -126,52 +128,65 @@
                   </div>
                   <div class="notification-content-wrapper">
                     <div class="notification-nav">
-                      <div class="nav-item" :class="{ active: activePrivateMessageTab === 'private' }" @click="switchPrivateMessageTab('private')">
+                      <div class="nav-item" :class="{ active: activePrivateMessageTab === 'private' }"
+                        @click="switchPrivateMessageTab('private')">
                         <i class="el-icon-message"></i>
                         <span>私信</span>
-                        <el-badge :value="privateMsgList.length" :hidden="privateMsgList.length === 0" class="nav-badge"/>
+                        <el-badge :value="privateMsgList.length" :hidden="privateMsgList.length === 0"
+                          class="nav-badge" />
                       </div>
-                      <div class="nav-item" :class="{ active: activePrivateMessageTab === 'reply' }" @click="switchPrivateMessageTab('reply')">
+                      <div class="nav-item" :class="{ active: activePrivateMessageTab === 'reply' }"
+                        @click="switchPrivateMessageTab('reply')">
                         <i class="el-icon-chat-dot-round"></i>
                         <span>回复</span>
-                        <el-badge :value="replyMsgList.length" :hidden="replyMsgList.length === 0" class="nav-badge"/>
+                        <el-badge :value="replyMsgList.length" :hidden="replyMsgList.length === 0" class="nav-badge" />
                       </div>
-                      <div class="nav-item" :class="{ active: activePrivateMessageTab === 'like' }" @click="switchPrivateMessageTab('like')">
+                      <div class="nav-item" :class="{ active: activePrivateMessageTab === 'like' }"
+                        @click="switchPrivateMessageTab('like')">
                         <i class="el-icon-thumb"></i>
                         <span>赞</span>
-                        <el-badge :value="likeMsgList.length" :hidden="likeMsgList.length === 0" class="nav-badge"/>
+                        <el-badge :value="likeMsgList.length" :hidden="likeMsgList.length === 0" class="nav-badge" />
                       </div>
                     </div>
                     <div class="notification-main">
                       <div v-show="activePrivateMessageTab === 'private'" class="notification-list">
                         <div v-if="privateMsgList.length > 0">
-                          <el-dropdown-item v-for="(msg, index) in privateMsgList" :command="{type: 'private', index}" :key="msg.id">
+                          <el-dropdown-item v-for="(msg, index) in privateMsgList" :command="{ type: 'private', index }"
+                            :key="msg.id">
                             <div class="notification-item">
-                              <div class="notification-content"><span class="sender-name">{{ msg.fromUserNick }}</span><span class="notification-text">发来私信:</span></div>
+                              <div class="notification-content"><span class="sender-name">{{ msg.fromUserNick
+                                  }}</span><span class="notification-text">发来私信:</span></div>
                               <div class="message-content">{{ msg.content }}</div>
                             </div>
                           </el-dropdown-item>
                         </div>
-                        <el-dropdown-item v-if="privateMsgList.length === 0" disabled><div class="empty-notification"><i class="el-icon-message"></i><span>暂无新私信</span></div></el-dropdown-item>
+                        <el-dropdown-item v-if="privateMsgList.length === 0" disabled>
+                          <div class="empty-notification"><i class="el-icon-message"></i><span>暂无新私信</span></div>
+                        </el-dropdown-item>
                       </div>
                       <div v-show="activePrivateMessageTab === 'reply'" class="notification-list">
                         <div v-if="replyMsgList.length > 0">
-                            <!-- replyMsgList 现在包含视频评论和动态回复 -->
-                            <el-dropdown-item v-for="(msg, index) in replyMsgList" :command="{type: 'reply', index}" :key="msg.data.id">
-                                <div class="notification-item">
-                                    <div class="notification-content">
-                                        <span class="sender-name">{{ msg.data.fromUserNick || msg.data.nick }}</span>
-                                        <span class="notification-text">{{ msg.type === 'POST_COMMENT' ? '回复了你的动态:' : '回复了你的评论:' }}</span>
-                                    </div>
-                                    <div class="message-content">{{ msg.data.content || msg.data.commentContent }}</div>
-                                </div>
-                            </el-dropdown-item>
+                          <!-- replyMsgList 现在包含视频评论和动态回复 -->
+                          <el-dropdown-item v-for="(msg, index) in replyMsgList" :command="{ type: 'reply', index }"
+                            :key="msg.data.id">
+                            <div class="notification-item">
+                              <div class="notification-content">
+                                <span class="sender-name">{{ msg.data.fromUserNick || msg.data.nick }}</span>
+                                <span class="notification-text">{{ msg.type === 'POST_COMMENT' ? '回复了你的动态:' : '回复了你的评论:'
+                                  }}</span>
+                              </div>
+                              <div class="message-content">{{ msg.data.content || msg.data.commentContent }}</div>
+                            </div>
+                          </el-dropdown-item>
                         </div>
-                        <el-dropdown-item v-if="replyMsgList.length === 0" disabled><div class="empty-notification"><i class="el-icon-chat-dot-round"></i><span>暂无新回复</span></div></el-dropdown-item>
+                        <el-dropdown-item v-if="replyMsgList.length === 0" disabled>
+                          <div class="empty-notification"><i class="el-icon-chat-dot-round"></i><span>暂无新回复</span></div>
+                        </el-dropdown-item>
                       </div>
                       <div v-show="activePrivateMessageTab === 'like'" class="notification-list">
                         <div v-if="likeMsgList.length > 0">
-                          <el-dropdown-item v-for="(msg, index) in likeMsgList" :command="{type: 'like', index}" :key="msg.data.id">
+                          <el-dropdown-item v-for="(msg, index) in likeMsgList" :command="{ type: 'like', index }"
+                            :key="msg.data.id">
                             <div class="notification-item">
                               <div class="notification-content">
                                 <span class="sender-name">{{ msg.data.fromUserNick }}</span>
@@ -204,7 +219,7 @@
 
             <el-dropdown class="user-dropdown" trigger="click">
               <span class="el-dropdown-link">
-                <el-avatar size="medium" :src="user.avatar"/>
+                <el-avatar size="medium" :src="user.avatar" />
               </span>
               <el-dropdown-menu slot="dropdown">
                 <el-dropdown-item class="user-dropdown-info">
@@ -217,7 +232,7 @@
                 <el-dropdown-item icon="el-icon-star-off" @click.native="collection()">我的收藏</el-dropdown-item>
                 <el-dropdown-item icon="el-icon-video-camera-solid" @click.native="liveEntry()">我的直播间</el-dropdown-item>
                 <el-dropdown-item icon="el-icon-monitor" @click.native="liveSpmEntry()">查看直播间</el-dropdown-item>
-                 <el-dropdown-item icon="el-icon-film" @click.native="animeListEntry()">查看番剧</el-dropdown-item>
+                <el-dropdown-item icon="el-icon-film" @click.native="animeListEntry()">查看番剧</el-dropdown-item>
                 <el-dropdown-item icon="el-icon-plus" @click.native="animeUploadEntry()">上传番剧</el-dropdown-item>
                 <el-dropdown-item icon="el-icon-present" @click.native="vipEntry()">会员充值</el-dropdown-item>
                 <el-dropdown-item icon="el-icon-notebook-2" @click.native="resume()">发布feed流</el-dropdown-item>
@@ -233,11 +248,12 @@
         </div>
       </el-header>
       <!-- ==================== HEADER REFACTORED & FIXED END ==================== -->
-      <el-main id="component">
+      <el-main id="component" :class="{ 'no-padding': $route.path === '/music' }">
         <div v-if="showSearchResults" class="search-results-container">
           <div class="search-header">
             <h2>搜索：{{ currentSearchKeyword }}</h2>
-            <el-select v-if="searchType === 'videos'" v-model="videoSortType" placeholder="排序方式" style="width: 140px;" @change="sortVideos">
+            <el-select v-if="searchType === 'videos'" v-model="videoSortType" placeholder="排序方式" style="width: 140px;"
+              @change="sortVideos">
               <el-option label="综合排序" value="play"></el-option>
               <el-option label="最新发布" value="new"></el-option>
               <el-option label="最多点赞" value="like"></el-option>
@@ -248,7 +264,8 @@
             <el-tab-pane label="视频" name="videos">
               <el-empty v-if="records.length === 0" description="换个关键词试试吧~"></el-empty>
               <div v-else class="video-result-grid">
-                <div v-for="video in sortedRecords" :key="video.id" class="video-result-card" @click="goToVideoPlayer(video.id)">
+                <div v-for="video in sortedRecords" :key="video.id" class="video-result-card"
+                  @click="goToVideoPlayer(video.id)">
                   <div class="video-result-cover">
                     <el-image :src="video.cover" fit="cover" lazy></el-image>
                     <div class="cover-overlay"></div>
@@ -266,26 +283,30 @@
                   </div>
                 </div>
               </div>
-              <el-pagination v-if="records.length > 0" @current-change="handleVideoPageChange" :current-page="param.current" :page-size="param.size" :total="Number(param.pages * param.size)" layout="prev, pager, next" class="pagination"></el-pagination>
+              <el-pagination v-if="records.length > 0" @current-change="handleVideoPageChange"
+                :current-page="param.current" :page-size="param.size" :total="Number(param.pages * param.size)"
+                layout="prev, pager, next" class="pagination"></el-pagination>
             </el-tab-pane>
 
             <el-tab-pane label="用户" name="users">
               <el-empty v-if="userList.length === 0" description="没有找到相关用户"></el-empty>
               <div v-else class="user-result-grid">
                 <div v-for="user in userList" :key="user.id" class="user-result-card" @click="goToUserPage(user.id)">
-                    <div class="user-result-avatar"><el-avatar :size="60" :src="user.avatar"></el-avatar></div>
-                    <div class="user-result-info-main">
-                      <div class="user-result-name" v-html="user.nick"></div>
-                      <div class="user-result-desc" v-html="user.sign || '这个人很懒，什么都没有留下'"></div>
-                    </div>
+                  <div class="user-result-avatar"><el-avatar :size="60" :src="user.avatar"></el-avatar></div>
+                  <div class="user-result-info-main">
+                    <div class="user-result-name" v-html="user.nick"></div>
+                    <div class="user-result-desc" v-html="user.sign || '这个人很懒，什么都没有留下'"></div>
+                  </div>
                 </div>
               </div>
-              <el-pagination v-if="userList.length > 0" @current-change="handleUserPageChange" :current-page="userCurrentPage" :page-size="userPageSize" :total="userTotal" layout="prev, pager, next" class="pagination"></el-pagination>
+              <el-pagination v-if="userList.length > 0" @current-change="handleUserPageChange"
+                :current-page="userCurrentPage" :page-size="userPageSize" :total="userTotal" layout="prev, pager, next"
+                class="pagination"></el-pagination>
             </el-tab-pane>
           </el-tabs>
         </div>
 
-        <router-view v-if="!showSearchResults" @perform-search="handlePerformSearch"/>
+        <router-view v-if="!showSearchResults" @perform-search="handlePerformSearch" />
       </el-main>
     </el-container>
 
@@ -311,7 +332,7 @@ export default {
     NavHeader,
     ChatBar
   },
-  data () {
+  data() {
     return {
       activePrivateMessageTab: 'private',
       replyMsgList: [], // Will hold both video comments and post replies
@@ -357,18 +378,18 @@ export default {
   },
   computed: {
     ...mapState(['notifications', 'notificationCount']),
-    isAdminRoute () {
+    isAdminRoute() {
       const isAdminPath = this.$route.path.startsWith('/admin')
       const isFromAdmin = this.$route.query.source === 'admin'
       return isAdminPath || isFromAdmin
     },
-    totalUnreadNotifications () {
+    totalUnreadNotifications() {
       return this.msgList.length + this.liveNotificationList.length
     },
-    totalUnreadPrivateMessages () {
+    totalUnreadPrivateMessages() {
       return this.privateMsgList.length + this.replyMsgList.length + this.likeMsgList.length
     },
-    sortedRecords () {
+    sortedRecords() {
       if (this.searchType !== 'videos') return this.records
       let arr = [...this.records]
       if (this.videoSortType === 'play') {
@@ -380,15 +401,15 @@ export default {
       }
       return arr
     },
-    currentBackground () {
+    currentBackground() {
       return this.backgroundImages[this.currentBackgroundIndex - 1]
     }
   },
-  mounted () {
+  mounted() {
     this.getInfo()
     this.startBackgroundAnimation()
   },
-  created () {
+  created() {
     console.log('当前环境:', process.env.NODE_ENV)
     console.log('API地址:', process.env.API_URL)
     if (!this.isAdminRoute) {
@@ -398,32 +419,32 @@ export default {
       this.handledMessageIds.add(messageId)
     })
   },
-  beforeDestroy () {
+  beforeDestroy() {
     EventBus.$off('message-handled')
     this.stopBackgroundAnimation()
   },
   methods: {
-    startBackgroundAnimation () {
+    startBackgroundAnimation() {
       this.backgroundInterval = setInterval(() => {
         this.currentBackgroundIndex = this.currentBackgroundIndex % 5 + 1
       }, 5000)
     },
-    stopBackgroundAnimation () {
+    stopBackgroundAnimation() {
       if (this.backgroundInterval) {
         clearInterval(this.backgroundInterval)
         this.backgroundInterval = null
       }
     },
-    sortVideos () {
+    sortVideos() {
       // computed will auto-update
     },
-    handleCommentNotification (message) {
+    handleCommentNotification(message) {
       this.replyMsgList.unshift(message) // Add to the unified reply list
     },
-    switchPrivateMessageTab (tab) {
+    switchPrivateMessageTab(tab) {
       this.activePrivateMessageTab = tab
     },
-    handlePrivateMessageCommand (command) {
+    handlePrivateMessageCommand(command) {
       if (command.type === 'private') {
         this.playPrivateMessage(command.index)
       } else if (command.type === 'reply') {
@@ -432,7 +453,7 @@ export default {
         this.handleLikeMessageClick(command.index)
       }
     },
-    handleLikeMessageClick (index) {
+    handleLikeMessageClick(index) {
       this.likeMsgList.splice(index, 1)
       this.$router.push('/feedPage').catch(err => {
         if (err.name !== 'NavigationDuplicated') {
@@ -441,7 +462,7 @@ export default {
       })
       this.$message.info('已跳转到动态页面')
     },
-    handleReplyMessageClick (index) {
+    handleReplyMessageClick(index) {
       const message = this.replyMsgList[index]
       this.replyMsgList.splice(index, 1)
       if (message.type === 'NEW_COMMENT' && message.data.videoId) {
@@ -452,7 +473,7 @@ export default {
         this.$message.info('已将通知标记为已读')
       }
     },
-    selectSuggestion (suggestion) {
+    selectSuggestion(suggestion) {
       this.showSuggestions = false
       const tempDiv = document.createElement('div')
       tempDiv.innerHTML = suggestion
@@ -460,10 +481,10 @@ export default {
       this.searchKeyword = textContent
       this.triggerSearch()
     },
-    handleInputFocus () {
+    handleInputFocus() {
       this.getSuggestions()
     },
-    getSuggestions () {
+    getSuggestions() {
       if (!this.searchKeyword || this.searchKeyword.trim() === '') {
         this.suggestions = []
         this.showSuggestions = false
@@ -485,7 +506,7 @@ export default {
           this.showSuggestions = false
         })
     },
-    initWebSocket () {
+    initWebSocket() {
       if (this.ws) {
         this.ws.close()
       }
@@ -535,7 +556,7 @@ export default {
         console.error('WebSocket连接错误:', error)
       }
     },
-    handleLiveNotification (message) {
+    handleLiveNotification(message) {
       console.log('处理直播通知:', message.data.roomId)
       this.liveNotificationList.unshift({
         roomId: String(message.data.roomId),
@@ -543,17 +564,17 @@ export default {
         createTime: new Date().getTime()
       })
     },
-    switchNotificationTab (tab) {
+    switchNotificationTab(tab) {
       this.activeNotificationTab = tab
     },
-    handleNotificationCommand (command) {
+    handleNotificationCommand(command) {
       if (command.type === 'video') {
         this.play(command.index)
       } else if (command.type === 'live') {
         this.goToLiveRoom(command.index)
       }
     },
-    goToLiveRoom (index) {
+    goToLiveRoom(index) {
       const data = this.liveNotificationList[index]
       this.liveNotificationList.splice(index, 1)
       this.$router.push({
@@ -564,7 +585,7 @@ export default {
         }
       })
     },
-    queryVideosByParam (keyword) {
+    queryVideosByParam(keyword) {
       console.log('queryVideosByParam called with keyword:', keyword)
       if (!keyword || keyword.trim() === '') {
         this.$message.warning('请输入搜索关键词')
@@ -589,7 +610,7 @@ export default {
       })
       this.searchUsers(keyword)
     },
-    getInfo () {
+    getInfo() {
       if (localStorage.getItem('loginType') === 'admin' && this.isAdminRoute) {
         this.isGetInfo = true
         Global.user = null
@@ -618,7 +639,7 @@ export default {
         this.user = null
       })
     },
-    getOfflineNotifications () {
+    getOfflineNotifications() {
       // Get like notifications
       feedApi.getLikeNotifications().then(res => {
         if (res.data && res.data.length > 0) {
@@ -639,10 +660,10 @@ export default {
         console.error('获取离线评论通知失败:', err)
       })
     },
-    handlePostLikeNotification (message) {
+    handlePostLikeNotification(message) {
       this.likeMsgList.unshift(message)
     },
-    logout () {
+    logout() {
       this.$confirm('确认退出登录吗？', '退出登录', {
         confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning'
       }).then(() => {
@@ -661,15 +682,15 @@ export default {
           console.error('退出失败:', error)
           this.$message.error('退出失败')
         })
-      }).catch(() => {})
+      }).catch(() => { })
     },
-    getMsg () {
+    getMsg() {
       console.log('getMsg')
       userApi.getMsg().then(res => {
         this.msgList = res.data
       })
     },
-    playPrivateMessage (index) {
+    playPrivateMessage(index) {
       const data = this.privateMsgList[index]
       userApi.consumePrivateMsg(index).then(() => {
         this.privateMsgList.splice(index, 1)
@@ -684,7 +705,7 @@ export default {
         this.$message.error('删除通知失败')
       })
     },
-    play (index) {
+    play(index) {
       const videoId = this.msgList[index].videoId
       userApi.consumeMsg(index).then(() => {
         this.msgList.splice(index, 1)
@@ -696,29 +717,29 @@ export default {
         this.$message.error('删除通知失败')
       })
     },
-    index () {
+    index() {
       this.showSearchResults = false
       this.currentSearchKeyword = ''
       this.$router.push('/').catch(err => { if (err.name !== 'NavigationDuplicated') { throw err } })
     },
-    detail (userId) {
+    detail(userId) {
       this.$router.push({
         path: '/user/profile', query: { id: userId || this.user.id, isModify: false }
       })
     },
-    modify () {
+    modify() {
       this.$router.push({
         path: '/user/detail', query: { isModify: true }
       })
     },
-    history () { this.$router.push('/user/history') },
-    collection () { this.$router.push('/user/collection') },
-    works () { this.$router.push({ path: '/user/works', query: { id: this.user.id } }) },
-    vipEntry () { this.$router.push({ path: '/vip' }) },
-    liveSpmEntry () { this.$router.push({ path: '/liveSpm' }) },
-    animeUploadEntry () { this.$router.push({ path: '/animeUpload' }) },
-    animeListEntry () { this.$router.push({ path: '/animeList' }) },
-    liveEntry () {
+    history() { this.$router.push('/user/history') },
+    collection() { this.$router.push('/user/collection') },
+    works() { this.$router.push({ path: '/user/works', query: { id: this.user.id } }) },
+    vipEntry() { this.$router.push({ path: '/vip' }) },
+    liveSpmEntry() { this.$router.push({ path: '/liveSpm' }) },
+    animeUploadEntry() { this.$router.push({ path: '/animeUpload' }) },
+    animeListEntry() { this.$router.push({ path: '/animeList' }) },
+    liveEntry() {
       this.$confirm('是否选择开播？', '提示', {
         confirmButtonText: '是', cancelButtonText: '否', type: 'warning'
       }).then(() => {
@@ -739,7 +760,7 @@ export default {
                 params: { roomId },
                 query: { nick: this.user.nick, live_from: '71005', visit_id: '33llw6rlnmm0' }
               })
-            }).catch(() => {})
+            }).catch(() => { })
           } else { this.$message.error('获取直播流地址失败') }
         }).catch(err => {
           console.error('获取直播流地址失败:', err)
@@ -747,30 +768,30 @@ export default {
         })
       }).catch(() => { this.$message.info('您选择了取消') })
     },
-    resume () {
+    resume() {
       this.$router.push({
         path: '/feed'
       })
     },
-    postList () {
+    postList() {
       this.$router.push({
         path: '/feedList'
       })
     },
-    postCard () {
+    postCard() {
       this.$router.push({
         path: '/feedCard'
       })
     },
-    feedPage () {
+    feedPage() {
       this.$router.push({
         path: '/feedPage'
       })
     },
-    analyze () { this.$router.push('/analyze') },
-    music () { this.$router.push('/music') },
-    getRandomInt (min, max) { return Math.floor(Math.random() * (max - min + 1)) + min },
-    searchUsers (keyword) {
+    analyze() { this.$router.push('/analyze') },
+    music() { this.$router.push('/music') },
+    getRandomInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min },
+    searchUsers(keyword) {
       if (!keyword || keyword.trim() === '') return
       videoApi.queryVideosByParam({
         keyword: keyword, current: this.userCurrentPage, size: this.userPageSize, type: 'user'
@@ -784,7 +805,7 @@ export default {
         this.userTotal = 0
       })
     },
-    handleTabChange (tab) {
+    handleTabChange(tab) {
       this.searchType = tab.name
       if (tab.name === 'users' && this.userList.length === 0) {
         this.searchUsers(this.currentSearchKeyword)
@@ -792,48 +813,48 @@ export default {
         this.queryVideosByParam(this.currentSearchKeyword)
       }
     },
-    handleVideoPageChange (page) {
+    handleVideoPageChange(page) {
       this.param.current = page
       this.queryVideosByParam(this.currentSearchKeyword)
     },
-    handleUserPageChange (page) {
+    handleUserPageChange(page) {
       this.userCurrentPage = page
       this.searchUsers(this.currentSearchKeyword)
     },
-    goToVideoPlayer (videoId) {
+    goToVideoPlayer(videoId) {
       this.showSearchResults = false
       this.$router.push({
         path: '/video-player', query: { videoId: videoId }
       }).catch(err => { if (err.name !== 'NavigationDuplicated') { throw err } })
     },
-    goToUserPage (userId) {
+    goToUserPage(userId) {
       this.showSearchResults = false
       this.$router.push({
         path: '/user/profile', query: { id: userId }
       }).catch(err => { if (err.name !== 'NavigationDuplicated') { throw err } })
     },
-    formatDuration (seconds) {
+    formatDuration(seconds) {
       if (!seconds) return '00:00'
       const minutes = Math.floor(seconds / 60)
       const remainingSeconds = Math.floor(seconds % 60)
       return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`
     },
-    formatDate (timestamp) {
+    formatDate(timestamp) {
       if (!timestamp) return ''
       const date = new Date(timestamp)
       return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
     },
-    handlePerformSearch (keyword) {
+    handlePerformSearch(keyword) {
       console.log('Search event received in App.vue with keyword:', keyword)
       this.searchKeyword = keyword
       this.queryVideosByParam(keyword)
     },
-    handleNewVideoNotification (data) {
+    handleNewVideoNotification(data) {
       this.msgList.unshift({
         videoId: data.videoId, nick: data.nick, title: data.title, description: data.description
       })
     },
-    handleUploadClick () {
+    handleUploadClick() {
       if (!this.user) {
         this.$message.error('请先登录')
         this.$router.push('/login')
@@ -843,7 +864,7 @@ export default {
         path: '/upload-video', query: { timestamp: new Date().getTime() }
       }).catch(err => { if (err.name !== 'NavigationDuplicated') { throw err } })
     },
-    clearAllPrivateMessages () {
+    clearAllPrivateMessages() {
       this.$confirm('确认清除所有消息吗？', '提示', { confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning' }).then(() => {
         this.privateMsgList = []
         this.replyMsgList = []
@@ -856,9 +877,9 @@ export default {
           console.error('清除消息失败:', error)
           this.$message.error('清除消息失败')
         })
-      }).catch(() => {})
+      }).catch(() => { })
     },
-    clearAllNotifications () {
+    clearAllNotifications() {
       this.$confirm('确认清除所有通知吗？', '提示', { confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning' }).then(() => {
         userApi.consumeAllMsg().then(() => {
           this.msgList = []
@@ -868,9 +889,9 @@ export default {
           console.error('清除通知失败:', error)
           this.$message.error('清除通知失败')
         })
-      }).catch(() => {})
+      }).catch(() => { })
     },
-    handlePrivateMessage (message) {
+    handlePrivateMessage(message) {
       if (this.handledMessageIds.has(message.data.id)) { return }
       if (message.type === 'PRIVATE_MESSAGE') {
         this.privateMsgList.unshift({
@@ -882,24 +903,24 @@ export default {
         })
       }
     },
-    triggerSearch () {
+    triggerSearch() {
       if (this.searchKeyword.trim() !== '') {
         this.queryVideosByParam(this.searchKeyword)
         this.$refs.searchInput.blur()
         this.showSuggestions = false
       }
     },
-    handleSearchKeyup (event) {
+    handleSearchKeyup(event) {
       if (event.key === 'Enter') {
         this.triggerSearch()
       }
     },
-    handleWrapperMouseEnter () {
+    handleWrapperMouseEnter() {
       if (this.searchKeyword && this.searchKeyword.trim() !== '') {
         this.getSuggestions()
       }
     },
-    handleWrapperMouseLeave () {
+    handleWrapperMouseLeave() {
       this.showSuggestions = false
     }
   }
@@ -931,7 +952,9 @@ export default {
   padding: 0;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
   position: fixed;
-  top: 0; left: 0; right: 0;
+  top: 0;
+  left: 0;
+  right: 0;
   z-index: 1000;
   display: flex;
   align-items: center;
@@ -941,17 +964,27 @@ export default {
   transition: background-image 1s ease-in-out;
   animation: parallax 10s infinite alternate;
 }
+
 #header::before {
   content: '';
   position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   background-color: rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
 }
+
 @keyframes parallax {
-  0% { background-position: 0% 0%; }
-  100% { background-position: 100% 100%; }
+  0% {
+    background-position: 0% 0%;
+  }
+
+  100% {
+    background-position: 100% 100%;
+  }
 }
 
 .header-content {
@@ -967,12 +1000,22 @@ export default {
   padding: 0 24px;
 }
 
-.header-left, .header-right {
+.header-left,
+.header-right {
   display: flex;
   align-items: center;
 }
-.header-left { flex-shrink: 0; }
-.header-right { flex-shrink: 0; gap: 24px; } /* Increased gap for horizontal layout */
+
+.header-left {
+  flex-shrink: 0;
+}
+
+.header-right {
+  flex-shrink: 0;
+  gap: 24px;
+}
+
+/* Increased gap for horizontal layout */
 .header-center {
   flex-grow: 1;
   display: flex;
@@ -991,6 +1034,7 @@ export default {
   -webkit-text-fill-color: transparent;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
+
 .header-buttons {
   display: flex;
   gap: 12px;
@@ -1002,6 +1046,7 @@ export default {
   width: 100%;
   max-width: 500px;
 }
+
 .search-wrapper .el-input-group {
   border-radius: 8px;
   overflow: hidden;
@@ -1009,11 +1054,13 @@ export default {
   border: 1px solid transparent;
   transition: all 0.3s;
 }
+
 .search-wrapper .el-input-group:hover,
 .search-wrapper .el-input-group.is-focus {
   background: var(--bg-primary);
   border-color: var(--brand-color);
 }
+
 .search-wrapper .el-input__inner {
   border: none !important;
   background: transparent !important;
@@ -1022,6 +1069,7 @@ export default {
   line-height: 40px;
   font-size: 14px;
 }
+
 .search-wrapper .el-input-group__append {
   border: none !important;
   background: transparent !important;
@@ -1029,14 +1077,17 @@ export default {
   font-size: 18px;
   padding: 0 15px;
 }
+
 .search-wrapper .el-input-group__append .el-button {
   margin: 0;
   transition: color 0.2s;
 }
+
 .search-wrapper .el-input-group:hover .el-input-group__append .el-button,
 .search-wrapper .el-input-group.is-focus .el-input-group__append .el-button {
   color: var(--brand-color);
 }
+
 .custom-suggestions {
   position: absolute;
   top: calc(100% + 5px);
@@ -1051,9 +1102,24 @@ export default {
   overflow-y: auto;
   padding: 8px 0;
 }
-.suggestion-item { padding: 8px 16px; cursor: pointer; display: flex; align-items: center; font-size: 14px; transition: background-color 0.2s; }
-.suggestion-item:hover { background-color: var(--bg-secondary); }
-.suggestion-icon { margin-right: 10px; color: var(--text-light); }
+
+.suggestion-item {
+  padding: 8px 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  transition: background-color 0.2s;
+}
+
+.suggestion-item:hover {
+  background-color: var(--bg-secondary);
+}
+
+.suggestion-icon {
+  margin-right: 10px;
+  color: var(--text-light);
+}
 
 /* --- Right: User Controls (FIXED STYLES) --- */
 .header-action-item {
@@ -1071,9 +1137,11 @@ export default {
   height: 24px;
   vertical-align: middle;
 }
+
 .action-badge {
   line-height: 1;
 }
+
 .ai-assistant-btn {
   display: flex;
   align-items: center;
@@ -1087,9 +1155,10 @@ export default {
   transition: all 0.2s;
 }
 
-.ai-assistant-btn > span {
+.ai-assistant-btn>span {
   white-space: nowrap;
 }
+
 .upload-btn {
   background: var(--upload-color);
   border: none;
@@ -1099,10 +1168,13 @@ export default {
   padding: 0 18px;
   transition: filter 0.2s;
 }
+
 .upload-btn:hover {
-  background: var(--upload-color); /* Keep color on hover */
+  background: var(--upload-color);
+  /* Keep color on hover */
   filter: brightness(1.1);
 }
+
 .user-dropdown .el-avatar {
   border: 2px solid var(--b-blue);
   box-shadow: 0 0 8px rgba(0, 111, 255, 0.3);
@@ -1110,11 +1182,31 @@ export default {
   width: 40px !important;
   height: 40px !important;
 }
-.user-dropdown .el-dropdown-link:hover .el-avatar { transform: scale(1.1); }
-.user-dropdown-info { text-align: center; padding: 10px 20px !important; }
-.user-dropdown-info .user-nick { font-size: 16px; font-weight: 500; color: var(--text-primary); }
-.logout-item { color: #f56c6c; display: flex; align-items: center; }
-.logout-item i { margin-right: 8px; }
+
+.user-dropdown .el-dropdown-link:hover .el-avatar {
+  transform: scale(1.1);
+}
+
+.user-dropdown-info {
+  text-align: center;
+  padding: 10px 20px !important;
+}
+
+.user-dropdown-info .user-nick {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.logout-item {
+  color: #f56c6c;
+  display: flex;
+  align-items: center;
+}
+
+.logout-item i {
+  margin-right: 8px;
+}
 
 .notification-menu {
   width: 420px !important;
@@ -1122,57 +1214,334 @@ export default {
   border-radius: 8px !important;
   overflow: hidden;
   border: 1px solid var(--border-color) !important;
-  box-shadow: 0 8px 16px rgba(0,0,0,0.1) !important;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1) !important;
 }
-.notification-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; border-bottom: 1px solid var(--border-color); }
-.notification-header span { font-weight: 500; color: var(--text-primary); }
-.notification-content-wrapper { display: flex; height: 350px; }
-.notification-nav { width: 120px; border-right: 1px solid var(--border-color); background-color: #fafafc; padding: 8px 0; }
-.notification-main { flex: 1; overflow-y: auto; }
-.nav-item { padding: 10px 16px; cursor: pointer; display: flex; align-items: center; position: relative; transition: all 0.2s; color: var(--text-secondary); }
-.nav-item i { margin-right: 8px; font-size: 16px; }
-.nav-item:hover { background-color: var(--bg-hover); }
-.nav-item.active { background-color: var(--bg-primary); color: var(--brand-color); }
-.nav-badge { position: static; margin-left: auto; }
-.notification-list .el-dropdown-item { padding: 10px 16px !important; line-height: 1.5 !important; border-bottom: 1px solid #f0f0f0; }
-.notification-list .el-dropdown-item:last-child { border-bottom: none; }
-.notification-item { display: flex; flex-direction: column; gap: 4px; }
-.notification-content { display: flex; align-items: center; gap: 6px; }
-.sender-name, .uploader-name { color: var(--brand-color); font-weight: 500; }
-.notification-text { color: var(--text-secondary); font-size: 13px; }
-.video-title, .message-content { font-size: 13px; color: var(--text-primary); white-space: normal; word-break: break-word; }
-.empty-notification { display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-light); padding: 40px 0; gap: 10px; font-size: 14px; }
-.empty-notification i { font-size: 32px; }
-.clear-all { color: #aaa; &:hover { color: var(--brand-color); } }
+
+.notification-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.notification-header span {
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.notification-content-wrapper {
+  display: flex;
+  height: 350px;
+}
+
+.notification-nav {
+  width: 120px;
+  border-right: 1px solid var(--border-color);
+  background-color: #fafafc;
+  padding: 8px 0;
+}
+
+.notification-main {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.nav-item {
+  padding: 10px 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  position: relative;
+  transition: all 0.2s;
+  color: var(--text-secondary);
+}
+
+.nav-item i {
+  margin-right: 8px;
+  font-size: 16px;
+}
+
+.nav-item:hover {
+  background-color: var(--bg-hover);
+}
+
+.nav-item.active {
+  background-color: var(--bg-primary);
+  color: var(--brand-color);
+}
+
+.nav-badge {
+  position: static;
+  margin-left: auto;
+}
+
+.notification-list .el-dropdown-item {
+  padding: 10px 16px !important;
+  line-height: 1.5 !important;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.notification-list .el-dropdown-item:last-child {
+  border-bottom: none;
+}
+
+.notification-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.notification-content {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sender-name,
+.uploader-name {
+  color: var(--brand-color);
+  font-weight: 500;
+}
+
+.notification-text {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.video-title,
+.message-content {
+  font-size: 13px;
+  color: var(--text-primary);
+  white-space: normal;
+  word-break: break-word;
+}
+
+.empty-notification {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-light);
+  padding: 40px 0;
+  gap: 10px;
+  font-size: 14px;
+}
+
+.empty-notification i {
+  font-size: 32px;
+}
+
+.clear-all {
+  color: #aaa;
+
+  &:hover {
+    color: var(--brand-color);
+  }
+}
 
 /* --- Main Content & Search Results --- */
-#component { margin-top: 64px; padding: 20px; background-color: var(--bg-primary); min-height: calc(100vh - 64px); }
-.search-results-container { max-width: 1200px; margin: 20px auto; }
-.search-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid var(--border-color); }
-.search-header h2 { font-size: 24px; font-weight: 500; margin: 0; color: var(--text-primary); }
-.video-result-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; margin-bottom: 25px; }
-.video-result-card { cursor: pointer; transition: all 0.3s ease; border-radius: 6px; overflow: hidden; background-color: var(--bg-primary); display: flex; flex-direction: column; }
-.video-result-card:hover { transform: translateY(-5px); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); }
-.video-result-cover { position: relative; width: 100%; padding-bottom: 56.25%; background-color: var(--bg-secondary); }
-.video-result-cover .el-image { position: absolute; width: 100%; height: 100%; top: 0; left: 0; border-radius: 6px; }
-.cover-overlay { position: absolute; bottom: 0; left: 0; right: 0; height: 50%; background: linear-gradient(to top, rgba(0,0,0,0.6), transparent); border-radius: 0 0 6px 6px; }
-.video-duration { position: absolute; bottom: 8px; right: 8px; background: rgba(0, 0, 0, 0.5); color: white; padding: 2px 6px; border-radius: 4px; font-size: 12px; }
-.video-result-info { padding: 12px; flex-grow: 1; }
-.video-result-title { font-weight: 500; margin-bottom: 8px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; line-height: 1.4; font-size: 14px; min-height: 39.2px; color: var(--text-primary); }
-.video-result-metadata, .video-result-uploader { font-size: 12px; color: var(--text-light); display: flex; align-items: center; }
-.video-result-uploader { margin-bottom: 6px; }
-.video-result-uploader i { margin-right: 4px; }
-.video-result-metadata { gap: 12px; }
-.video-result-metadata span { display: flex; align-items: center; }
-.video-result-metadata i { margin-right: 4px; }
-.user-result-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
-.user-result-card { cursor: pointer; transition: all 0.3s ease; border-radius: 8px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); padding: 20px; background-color: var(--bg-primary); display: flex; align-items: center; gap: 15px; }
-.user-result-card:hover { transform: translateY(-5px); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); }
-.user-result-avatar .el-avatar { border: 2px solid var(--bg-primary); box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1); }
-.user-result-info-main { text-align: left; }
-.user-result-name { font-weight: bold; font-size: 16px; margin-bottom: 4px; color: var(--text-primary); }
-.user-result-desc { color: var(--text-secondary); font-size: 13px; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; }
-.pagination { display: flex; justify-content: center; margin-top: 40px; }
-.el-tabs__item { font-size: 16px; font-weight: 500; }
-.el-tabs__active-bar { background-color: var(--brand-color); }
+#component {
+  margin-top: 64px;
+  padding: 20px;
+  background-color: var(--bg-primary);
+  min-height: calc(100vh - 64px);
+}
+
+#component.no-padding {
+  padding: 0;
+  background-color: #0b0b0b;
+}
+
+.search-results-container {
+  max-width: 1200px;
+  margin: 20px auto;
+}
+
+.search-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.search-header h2 {
+  font-size: 24px;
+  font-weight: 500;
+  margin: 0;
+  color: var(--text-primary);
+}
+
+.video-result-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 20px;
+  margin-bottom: 25px;
+}
+
+.video-result-card {
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-radius: 6px;
+  overflow: hidden;
+  background-color: var(--bg-primary);
+  display: flex;
+  flex-direction: column;
+}
+
+.video-result-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.video-result-cover {
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%;
+  background-color: var(--bg-secondary);
+}
+
+.video-result-cover .el-image {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  border-radius: 6px;
+}
+
+.cover-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 50%;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.6), transparent);
+  border-radius: 0 0 6px 6px;
+}
+
+.video-duration {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.video-result-info {
+  padding: 12px;
+  flex-grow: 1;
+}
+
+.video-result-title {
+  font-weight: 500;
+  margin-bottom: 8px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.4;
+  font-size: 14px;
+  min-height: 39.2px;
+  color: var(--text-primary);
+}
+
+.video-result-metadata,
+.video-result-uploader {
+  font-size: 12px;
+  color: var(--text-light);
+  display: flex;
+  align-items: center;
+}
+
+.video-result-uploader {
+  margin-bottom: 6px;
+}
+
+.video-result-uploader i {
+  margin-right: 4px;
+}
+
+.video-result-metadata {
+  gap: 12px;
+}
+
+.video-result-metadata span {
+  display: flex;
+  align-items: center;
+}
+
+.video-result-metadata i {
+  margin-right: 4px;
+}
+
+.user-result-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.user-result-card {
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  padding: 20px;
+  background-color: var(--bg-primary);
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.user-result-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.user-result-avatar .el-avatar {
+  border: 2px solid var(--bg-primary);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.user-result-info-main {
+  text-align: left;
+}
+
+.user-result-name {
+  font-weight: bold;
+  font-size: 16px;
+  margin-bottom: 4px;
+  color: var(--text-primary);
+}
+
+.user-result-desc {
+  color: var(--text-secondary);
+  font-size: 13px;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 40px;
+}
+
+.el-tabs__item {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.el-tabs__active-bar {
+  background-color: var(--brand-color);
+}
 </style>

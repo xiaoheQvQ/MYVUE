@@ -1,11 +1,6 @@
 <template>
   <div class="live-container">
-    <!-- 余额显示 -->
-    <div class="balance-display">
-      <span class="balance-label">金币余额:</span>
-      <span class="balance-value">{{ balance }}</span>
-      <el-button type="text" @click="rechargeDialogVisible = true" class="recharge-btn">充值</el-button>
-    </div>
+
 
     <div class="video-section">
       <div class="video-dplayer">
@@ -27,15 +22,23 @@
       <!-- 聊天室部分保持不变 -->
       <div class="chat-header">
         <h3 class="section-title">💬 聊天室</h3>
-        <el-dropdown v-if="isHost" trigger="click" @command="handleManagementCommand">
-          <el-button type="primary" size="small" class="manage-btn">
-            管理直播间<i class="el-icon-arrow-down el-icon--right"></i>
-          </el-button>
-          <el-dropdown-menu slot="dropdown">
-            <el-dropdown-item command="notify">通知粉丝</el-dropdown-item>
-            <el-dropdown-item command="endLive" divided>结束直播</el-dropdown-item>
-          </el-dropdown-menu>
-        </el-dropdown>
+        <div class="header-actions">
+          <!-- 余额显示和充值按钮 -->
+          <div class="balance-display" :style="!isHost ? { marginRight: '-100px' } : {}">
+            <span class="balance-label">金币余额:</span>
+            <span class="balance-value">{{ balance }}</span>
+            <el-button type="text" @click="rechargeDialogVisible = true" class="recharge-btn">充值</el-button>
+          </div>
+          <el-dropdown class="manage-dropdown" v-if="isHost" trigger="click" @command="handleManagementCommand">
+            <el-button type="primary" size="small" class="manage-btn">
+              管理直播间<i class="el-icon-arrow-down el-icon--right"></i>
+            </el-button>
+            <el-dropdown-menu slot="dropdown">
+              <el-dropdown-item command="notify">通知粉丝</el-dropdown-item>
+              <el-dropdown-item command="endLive" divided>结束直播</el-dropdown-item>
+            </el-dropdown-menu>
+          </el-dropdown>
+        </div>
       </div>
 
       <div class="chat-messages" ref="chatMessages">
@@ -338,7 +341,7 @@ export default {
       }, 3000) // 每3秒检查一次
     },
 
-    // ... 其他现有方法保持不变
+
     handleManagementCommand(command) {
       if (command === 'notify') {
         this.notifyFans()
@@ -662,14 +665,15 @@ export default {
   margin: 0 auto;
   gap: 20px;
   width: 100%;
-  height: 680px;
+  height: calc(100vh - 100px);
+  min-height: 600px;
   position: relative;
 }
 
 .balance-display {
   position: absolute;
-  top: 10px;
-  right: 10px;
+  top: 15px;
+  right: 135px;
   background: rgba(0, 0, 0, 0.6);
   padding: 5px 15px;
   border-radius: 20px;
@@ -753,6 +757,47 @@ export default {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 15px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.manage-dropdown {
+  margin-bottom: 20px;
+}
+
+.balance-display {
+  background: rgba(127, 180, 43, 0.1);
+  padding: 5px 12px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  border: 1px solid #7fb42b;
+}
+
+.balance-label {
+  margin-right: 5px;
+  font-size: 13px;
+  color: #666;
+}
+
+.balance-value {
+  color: #FF9900;
+  font-weight: bold;
+  margin-right: 8px;
+  font-size: 14px;
+}
+
+.recharge-btn {
+  color: #7fb42b;
+  padding: 0;
+  font-weight: bold;
+  font-size: 13px;
 }
 
 .manage-btn {
@@ -862,6 +907,12 @@ export default {
   overflow-y: auto;
   padding: 5px;
   flex: 1;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.gift-list::-webkit-scrollbar {
+  display: none;
 }
 
 .gift-item {

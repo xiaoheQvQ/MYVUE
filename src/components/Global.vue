@@ -8,7 +8,7 @@ export default {
   data () {
     return {
       user: null,
-      socket: null,
+      socket: null
     }
   }
 }

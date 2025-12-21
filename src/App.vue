@@ -113,7 +113,7 @@
                 </el-dropdown-menu>
               </el-dropdown>
             </el-tooltip>
-        
+
             <el-tooltip content="消息" placement="bottom" effect="dark">
              <el-dropdown trigger="click" @command="handlePrivateMessageCommand" class="header-action-item">
                <el-badge :value="totalUnreadPrivateMessages" :hidden="totalUnreadPrivateMessages === 0" class="action-badge">
@@ -193,7 +193,7 @@
                 </el-dropdown-menu>
               </el-dropdown>
             </el-tooltip>
-        
+
             <div class="header-action-item">
               <ChatBar />
             </div>
@@ -311,7 +311,7 @@ export default {
     NavHeader,
     ChatBar
   },
-  data() {
+  data () {
     return {
       activePrivateMessageTab: 'private',
       replyMsgList: [], // Will hold both video comments and post replies
@@ -357,225 +357,224 @@ export default {
   },
   computed: {
     ...mapState(['notifications', 'notificationCount']),
-    isAdminRoute() {
+    isAdminRoute () {
       const isAdminPath = this.$route.path.startsWith('/admin')
       const isFromAdmin = this.$route.query.source === 'admin'
       return isAdminPath || isFromAdmin
     },
-    totalUnreadNotifications() {
+    totalUnreadNotifications () {
       return this.msgList.length + this.liveNotificationList.length
     },
-    totalUnreadPrivateMessages() {
-      return this.privateMsgList.length + this.replyMsgList.length + this.likeMsgList.length;
+    totalUnreadPrivateMessages () {
+      return this.privateMsgList.length + this.replyMsgList.length + this.likeMsgList.length
     },
-    sortedRecords() {
-      if (this.searchType !== 'videos') return this.records;
-      let arr = [...this.records];
+    sortedRecords () {
+      if (this.searchType !== 'videos') return this.records
+      let arr = [...this.records]
       if (this.videoSortType === 'play') {
-        arr.sort((a, b) => (b.playCount || 0) - (a.playCount || 0));
+        arr.sort((a, b) => (b.playCount || 0) - (a.playCount || 0))
       } else if (this.videoSortType === 'new') {
-        arr.sort((a, b) => new Date(b.createTime) - new Date(a.createTime));
+        arr.sort((a, b) => new Date(b.createTime) - new Date(a.createTime))
       } else if (this.videoSortType === 'like') {
-        arr.sort((a, b) => (b.like || 0) - (a.like || 0));
+        arr.sort((a, b) => (b.like || 0) - (a.like || 0))
       }
-      return arr;
+      return arr
     },
-    currentBackground() {
-      return this.backgroundImages[this.currentBackgroundIndex - 1];
+    currentBackground () {
+      return this.backgroundImages[this.currentBackgroundIndex - 1]
     }
   },
-  mounted() {
-    this.getInfo();
-    this.startBackgroundAnimation();
+  mounted () {
+    this.getInfo()
+    this.startBackgroundAnimation()
   },
-  created() {
-    console.log('当前环境:', process.env.NODE_ENV);
-    console.log('API地址:', process.env.API_URL);
+  created () {
+    console.log('当前环境:', process.env.NODE_ENV)
+    console.log('API地址:', process.env.API_URL)
     if (!this.isAdminRoute) {
       this.initWebSocket()
     }
     EventBus.$on('message-handled', (messageId) => {
-      this.handledMessageIds.add(messageId);
-    });
+      this.handledMessageIds.add(messageId)
+    })
   },
-  beforeDestroy() {
-    EventBus.$off('message-handled');
-    this.stopBackgroundAnimation();
+  beforeDestroy () {
+    EventBus.$off('message-handled')
+    this.stopBackgroundAnimation()
   },
   methods: {
-    startBackgroundAnimation() {
+    startBackgroundAnimation () {
       this.backgroundInterval = setInterval(() => {
-        this.currentBackgroundIndex = this.currentBackgroundIndex % 5 + 1;
-      }, 5000);
+        this.currentBackgroundIndex = this.currentBackgroundIndex % 5 + 1
+      }, 5000)
     },
-    stopBackgroundAnimation() {
+    stopBackgroundAnimation () {
       if (this.backgroundInterval) {
-        clearInterval(this.backgroundInterval);
-        this.backgroundInterval = null;
+        clearInterval(this.backgroundInterval)
+        this.backgroundInterval = null
       }
     },
-    sortVideos() {
+    sortVideos () {
       // computed will auto-update
     },
-    handleCommentNotification(message) {
-      this.replyMsgList.unshift(message); // Add to the unified reply list
-     
+    handleCommentNotification (message) {
+      this.replyMsgList.unshift(message) // Add to the unified reply list
     },
-    switchPrivateMessageTab(tab) {
-      this.activePrivateMessageTab = tab;
+    switchPrivateMessageTab (tab) {
+      this.activePrivateMessageTab = tab
     },
-    handlePrivateMessageCommand(command) {
+    handlePrivateMessageCommand (command) {
       if (command.type === 'private') {
-        this.playPrivateMessage(command.index);
+        this.playPrivateMessage(command.index)
       } else if (command.type === 'reply') {
-        this.handleReplyMessageClick(command.index);
+        this.handleReplyMessageClick(command.index)
       } else if (command.type === 'like') {
-        this.handleLikeMessageClick(command.index);
+        this.handleLikeMessageClick(command.index)
       }
     },
-    handleLikeMessageClick(index) {
-      this.likeMsgList.splice(index, 1);
+    handleLikeMessageClick (index) {
+      this.likeMsgList.splice(index, 1)
       this.$router.push('/feedPage').catch(err => {
         if (err.name !== 'NavigationDuplicated') {
-          throw err;
+          throw err
         }
-      });
-      this.$message.info('已跳转到动态页面');
+      })
+      this.$message.info('已跳转到动态页面')
     },
-    handleReplyMessageClick(index) {
-      const message = this.replyMsgList[index];
-      this.replyMsgList.splice(index, 1);
+    handleReplyMessageClick (index) {
+      const message = this.replyMsgList[index]
+      this.replyMsgList.splice(index, 1)
       if (message.type === 'NEW_COMMENT' && message.data.videoId) {
-        this.$router.push({ path: '/video-player', query: { videoId: message.data.videoId } });
+        this.$router.push({ path: '/video-player', query: { videoId: message.data.videoId } })
       } else if (message.type === 'POST_COMMENT' && message.data.postId) {
-        this.$router.push('/feedPage');
+        this.$router.push('/feedPage')
       } else {
-        this.$message.info('已将通知标记为已读');
+        this.$message.info('已将通知标记为已读')
       }
     },
-    selectSuggestion(suggestion) {
-      this.showSuggestions = false;
-      const tempDiv = document.createElement('div');
-      tempDiv.innerHTML = suggestion;
-      const textContent = tempDiv.textContent || tempDiv.innerText || '';
-      this.searchKeyword = textContent;
-      this.triggerSearch();
+    selectSuggestion (suggestion) {
+      this.showSuggestions = false
+      const tempDiv = document.createElement('div')
+      tempDiv.innerHTML = suggestion
+      const textContent = tempDiv.textContent || tempDiv.innerText || ''
+      this.searchKeyword = textContent
+      this.triggerSearch()
     },
-    handleInputFocus() {
-      this.getSuggestions();
+    handleInputFocus () {
+      this.getSuggestions()
     },
-    getSuggestions() {
+    getSuggestions () {
       if (!this.searchKeyword || this.searchKeyword.trim() === '') {
-        this.suggestions = [];
-        this.showSuggestions = false;
-        return;
+        this.suggestions = []
+        this.showSuggestions = false
+        return
       }
       videoApi.inputQuery({ keyword: this.searchKeyword })
         .then(res => {
           if (res && res.data) {
-            this.suggestions = Array.isArray(res.data) ? res.data : [];
-            this.showSuggestions = this.suggestions.length > 0;
+            this.suggestions = Array.isArray(res.data) ? res.data : []
+            this.showSuggestions = this.suggestions.length > 0
           } else {
-            this.suggestions = [];
-            this.showSuggestions = false;
+            this.suggestions = []
+            this.showSuggestions = false
           }
         })
         .catch(error => {
-          console.error("Error fetching suggestions:", error);
-          this.suggestions = [];
-          this.showSuggestions = false;
-        });
+          console.error('Error fetching suggestions:', error)
+          this.suggestions = []
+          this.showSuggestions = false
+        })
     },
-    initWebSocket() {
+    initWebSocket () {
       if (this.ws) {
-        this.ws.close();
+        this.ws.close()
       }
-      Global.socket = new WebSocket(`ws://localhost:8088//ws/notification`);
-      this.ws = Global.socket;
+      Global.socket = new WebSocket(`ws://localhost:8088//ws/notification`)
+      this.ws = Global.socket
       this.ws.onopen = () => {
-        console.log('WebSocket连接已建立');
+        console.log('WebSocket连接已建立')
         if (localStorage.getItem('accessToken')) {
           this.ws.send(JSON.stringify({
             type: 'auth',
             token: localStorage.getItem('accessToken')
-          }));
+          }))
         }
-      };
+      }
       this.ws.onmessage = (event) => {
-        const message = JSON.parse(event.data);
-        console.log("接受的消息类型：" + message.type);
+        const message = JSON.parse(event.data)
+        console.log('接受的消息类型：' + message.type)
         if (message.type === 'NEW_VIDEO') {
-          this.handleNewVideoNotification(message.data);
+          this.handleNewVideoNotification(message.data)
         } else if (message.type === 'VIDEO_STATUS_UPDATE') {
-          console.log('视频状态更新:', message.data);
+          console.log('视频状态更新:', message.data)
         } else if (message.type === 'PRIVATE_MESSAGE') {
-          console.log('收到私信:', message.data);
+          console.log('收到私信:', message.data)
           EventBus.$emit('websocket-message', message)
-          this.handlePrivateMessage(message);
+          this.handlePrivateMessage(message)
         } else if (message.type === 'VIDEO_CALL_REQUEST') {
           EventBus.$emit('websocket-video-message', message)
         } else if (message.type === 'VIDEO_CALL_RESPONSE') {
-          console.log('收到视频呼叫:', message);
+          console.log('收到视频呼叫:', message)
           EventBus.$emit('websocket-video-response-message', message)
         } else if (message.type === 'NEW_Live') {
-          console.log('收到直播间通知:', message);
-          this.handleLiveNotification(message);
+          console.log('收到直播间通知:', message)
+          this.handleLiveNotification(message)
         } else if (message.type === 'POST_LIKE') {
-          console.log('收到点赞通知:', message);
-          this.handlePostLikeNotification(message);
+          console.log('收到点赞通知:', message)
+          this.handlePostLikeNotification(message)
         } else if (message.type === 'NEW_COMMENT' || message.type === 'POST_COMMENT') {
-          console.log('收到评论/回复通知:', message);
-          this.handleCommentNotification(message);
+          console.log('收到评论/回复通知:', message)
+          this.handleCommentNotification(message)
         }
-      };
+      }
       this.ws.onclose = () => {
-        console.log('WebSocket连接已关闭');
-        setTimeout(() => { this.initWebSocket(); }, 5000);
-      };
+        console.log('WebSocket连接已关闭')
+        setTimeout(() => { this.initWebSocket() }, 5000)
+      }
       this.ws.onerror = (error) => {
-        console.error('WebSocket连接错误:', error);
-      };
+        console.error('WebSocket连接错误:', error)
+      }
     },
-    handleLiveNotification(message) {
-      console.log('处理直播通知:', message.data.roomId);
+    handleLiveNotification (message) {
+      console.log('处理直播通知:', message.data.roomId)
       this.liveNotificationList.unshift({
         roomId: String(message.data.roomId),
         currentUserName: message.data.currentUserName,
         createTime: new Date().getTime()
-      });
+      })
     },
-    switchNotificationTab(tab) {
-      this.activeNotificationTab = tab;
+    switchNotificationTab (tab) {
+      this.activeNotificationTab = tab
     },
-    handleNotificationCommand(command) {
+    handleNotificationCommand (command) {
       if (command.type === 'video') {
-        this.play(command.index);
+        this.play(command.index)
       } else if (command.type === 'live') {
-        this.goToLiveRoom(command.index);
+        this.goToLiveRoom(command.index)
       }
     },
-    goToLiveRoom(index) {
-      const data = this.liveNotificationList[index];
-      this.liveNotificationList.splice(index, 1);
+    goToLiveRoom (index) {
+      const data = this.liveNotificationList[index]
+      this.liveNotificationList.splice(index, 1)
       this.$router.push({
         name: 'LivePlayer',
         params: { roomId: data.roomId },
         query: {
           nick: this.user.nick, live_from: '71005', visit_id: '33llw6rlnmm0'
         }
-      });
+      })
     },
-    queryVideosByParam(keyword) {
-      console.log("queryVideosByParam called with keyword:", keyword)
+    queryVideosByParam (keyword) {
+      console.log('queryVideosByParam called with keyword:', keyword)
       if (!keyword || keyword.trim() === '') {
-        this.$message.warning('请输入搜索关键词');
-        return;
+        this.$message.warning('请输入搜索关键词')
+        return
       }
-      this.currentSearchKeyword = keyword;
-      this.showSearchResults = true;
-      this.searchType = 'videos';
-      this.param.current = 1;
-      this.userCurrentPage = 1;
+      this.currentSearchKeyword = keyword
+      this.showSearchResults = true
+      this.searchType = 'videos'
+      this.param.current = 1
+      this.userCurrentPage = 1
 
       videoApi.queryVideosByParam({
         keyword: keyword, current: this.param.current, size: this.param.size, type: 'video'
@@ -585,12 +584,12 @@ export default {
         this.param.pages = parseInt(data.pages)
         this.records = data.records
       }).catch(err => {
-        console.error("Error searching videos:", err);
-        this.records = [];
-      });
-      this.searchUsers(keyword);
+        console.error('Error searching videos:', err)
+        this.records = []
+      })
+      this.searchUsers(keyword)
     },
-    getInfo() {
+    getInfo () {
       if (localStorage.getItem('loginType') === 'admin' && this.isAdminRoute) {
         this.isGetInfo = true
         Global.user = null
@@ -607,7 +606,7 @@ export default {
           this.Global.user = res.data
           this.user = res.data
           this.getMsg()
-          this.getOfflineNotifications();
+          this.getOfflineNotifications()
           this.isGetInfo = true
           if (this.isAdminRoute === false && localStorage.getItem('loginType') === 'admin') {
             localStorage.removeItem('loginType')
@@ -619,37 +618,36 @@ export default {
         this.user = null
       })
     },
-    getOfflineNotifications() {
+    getOfflineNotifications () {
       // Get like notifications
       feedApi.getLikeNotifications().then(res => {
         if (res.data && res.data.length > 0) {
-          const parsedMessages = res.data.map(item => JSON.parse(item));
-          this.likeMsgList = [...parsedMessages, ...this.likeMsgList];
+          const parsedMessages = res.data.map(item => JSON.parse(item))
+          this.likeMsgList = [...parsedMessages, ...this.likeMsgList]
         }
       }).catch(err => {
-        console.error("获取离线点赞通知失败:", err);
-      });
+        console.error('获取离线点赞通知失败:', err)
+      })
 
       // Get comment notifications
       feedApi.getCommentNotifications().then(res => {
-         if (res.data && res.data.length > 0) {
-          const parsedMessages = res.data.map(item => JSON.parse(item));
-          this.replyMsgList = [...parsedMessages, ...this.replyMsgList];
+        if (res.data && res.data.length > 0) {
+          const parsedMessages = res.data.map(item => JSON.parse(item))
+          this.replyMsgList = [...parsedMessages, ...this.replyMsgList]
         }
       }).catch(err => {
-        console.error("获取离线评论通知失败:", err);
-      });
+        console.error('获取离线评论通知失败:', err)
+      })
     },
-    handlePostLikeNotification(message) {
-      this.likeMsgList.unshift(message);
-     
+    handlePostLikeNotification (message) {
+      this.likeMsgList.unshift(message)
     },
-    logout() {
+    logout () {
       this.$confirm('确认退出登录吗？', '退出登录', {
         confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning'
       }).then(() => {
         if (this.ws) {
-          this.ws.close();
+          this.ws.close()
         }
         this.user = null
         userApi.logout().then(() => {
@@ -663,15 +661,15 @@ export default {
           console.error('退出失败:', error)
           this.$message.error('退出失败')
         })
-      }).catch(() => {});
+      }).catch(() => {})
     },
-    getMsg() {
-      console.log("getMsg")
+    getMsg () {
+      console.log('getMsg')
       userApi.getMsg().then(res => {
         this.msgList = res.data
       })
     },
-    playPrivateMessage(index) {
+    playPrivateMessage (index) {
       const data = this.privateMsgList[index]
       userApi.consumePrivateMsg(index).then(() => {
         this.privateMsgList.splice(index, 1)
@@ -686,7 +684,7 @@ export default {
         this.$message.error('删除通知失败')
       })
     },
-    play(index) {
+    play (index) {
       const videoId = this.msgList[index].videoId
       userApi.consumeMsg(index).then(() => {
         this.msgList.splice(index, 1)
@@ -698,145 +696,144 @@ export default {
         this.$message.error('删除通知失败')
       })
     },
-    index() {
-      this.showSearchResults = false;
-      this.currentSearchKeyword = '';
-      this.$router.push('/').catch(err => { if (err.name !== 'NavigationDuplicated') { throw err; } });
+    index () {
+      this.showSearchResults = false
+      this.currentSearchKeyword = ''
+      this.$router.push('/').catch(err => { if (err.name !== 'NavigationDuplicated') { throw err } })
     },
-    detail(userId) {
+    detail (userId) {
       this.$router.push({
         path: '/user/profile', query: { id: userId || this.user.id, isModify: false }
       })
     },
-    modify() {
+    modify () {
       this.$router.push({
         path: '/user/detail', query: { isModify: true }
-      });
+      })
     },
-    history() { this.$router.push('/user/history') },
-    collection() { this.$router.push('/user/collection') },
-    works() { this.$router.push({ path: '/user/works', query: { id: this.user.id } }) },
-    vipEntry() { this.$router.push({ path: '/vip', }) },
-    liveSpmEntry() { this.$router.push({ path: '/liveSpm', }) },
-    animeUploadEntry() { this.$router.push({ path: '/animeUpload', }) },
-    animeListEntry() { this.$router.push({ path: '/animeList', }) },
-    liveEntry() {
+    history () { this.$router.push('/user/history') },
+    collection () { this.$router.push('/user/collection') },
+    works () { this.$router.push({ path: '/user/works', query: { id: this.user.id } }) },
+    vipEntry () { this.$router.push({ path: '/vip' }) },
+    liveSpmEntry () { this.$router.push({ path: '/liveSpm' }) },
+    animeUploadEntry () { this.$router.push({ path: '/animeUpload' }) },
+    animeListEntry () { this.$router.push({ path: '/animeList' }) },
+    liveEntry () {
       this.$confirm('是否选择开播？', '提示', {
         confirmButtonText: '是', cancelButtonText: '否', type: 'warning'
       }).then(() => {
         liveApi.getStream().then(res => {
           if (res.code === 200000) {
-            const streamUrl = res.data;
-            const roomId = streamUrl.split('live/')[1].split('_')[0];
+            const streamUrl = res.data
+            const roomId = streamUrl.split('live/')[1].split('_')[0]
             this.$prompt('您的直播流地址已获取，可一键复制到OBS开播', '直播流地址', {
               confirmButtonText: '复制并进入直播间',
               cancelButtonText: '取消',
               inputValue: streamUrl,
               inputReadonly: true
             }).then(() => {
-              navigator.clipboard.writeText(roomId);
-              this.$message.success('已复制直播间ID');
+              navigator.clipboard.writeText(roomId)
+              this.$message.success('已复制直播间ID')
               this.$router.push({
                 name: 'LivePlayer',
                 params: { roomId },
                 query: { nick: this.user.nick, live_from: '71005', visit_id: '33llw6rlnmm0' }
               })
-            }).catch(() => {});
-          } else { this.$message.error('获取直播流地址失败'); }
+            }).catch(() => {})
+          } else { this.$message.error('获取直播流地址失败') }
         }).catch(err => {
-          console.error('获取直播流地址失败:', err);
-          this.$message.error('获取直播流地址失败');
-        });
-      }).catch(() => { this.$message.info('您选择了取消'); });
+          console.error('获取直播流地址失败:', err)
+          this.$message.error('获取直播流地址失败')
+        })
+      }).catch(() => { this.$message.info('您选择了取消') })
     },
-    resume() {
+    resume () {
       this.$router.push({
-        path: '/feed' 
+        path: '/feed'
       })
     },
-        postList() {
+    postList () {
       this.$router.push({
-        path: '/feedList' 
+        path: '/feedList'
       })
     },
-        postCard() {
+    postCard () {
       this.$router.push({
-        path: '/feedCard' 
+        path: '/feedCard'
       })
     },
-     feedPage() {
+    feedPage () {
       this.$router.push({
-        path: '/feedPage' 
+        path: '/feedPage'
       })
     },
-    analyze() { this.$router.push('/analyze') },
-    music() { this.$router.push('/music') },
-    getRandomInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min },
-    searchUsers(keyword) {
-      if (!keyword || keyword.trim() === '') return;
+    analyze () { this.$router.push('/analyze') },
+    music () { this.$router.push('/music') },
+    getRandomInt (min, max) { return Math.floor(Math.random() * (max - min + 1)) + min },
+    searchUsers (keyword) {
+      if (!keyword || keyword.trim() === '') return
       videoApi.queryVideosByParam({
         keyword: keyword, current: this.userCurrentPage, size: this.userPageSize, type: 'user'
       }).then(res => {
-        let data = res.data;
-        this.userList = data.records || [];
-        this.userTotal = parseInt(data.total || 0);
+        let data = res.data
+        this.userList = data.records || []
+        this.userTotal = parseInt(data.total || 0)
       }).catch(err => {
-        console.error("Error searching users:", err);
-        this.userList = [];
-        this.userTotal = 0;
-      });
+        console.error('Error searching users:', err)
+        this.userList = []
+        this.userTotal = 0
+      })
     },
-    handleTabChange(tab) {
-      this.searchType = tab.name;
+    handleTabChange (tab) {
+      this.searchType = tab.name
       if (tab.name === 'users' && this.userList.length === 0) {
-        this.searchUsers(this.currentSearchKeyword);
+        this.searchUsers(this.currentSearchKeyword)
       } else if (tab.name === 'videos' && this.records.length === 0) {
-        this.queryVideosByParam(this.currentSearchKeyword);
+        this.queryVideosByParam(this.currentSearchKeyword)
       }
     },
-    handleVideoPageChange(page) {
-      this.param.current = page;
-      this.queryVideosByParam(this.currentSearchKeyword);
+    handleVideoPageChange (page) {
+      this.param.current = page
+      this.queryVideosByParam(this.currentSearchKeyword)
     },
-    handleUserPageChange(page) {
-      this.userCurrentPage = page;
-      this.searchUsers(this.currentSearchKeyword);
+    handleUserPageChange (page) {
+      this.userCurrentPage = page
+      this.searchUsers(this.currentSearchKeyword)
     },
-    goToVideoPlayer(videoId) {
-      this.showSearchResults = false;
+    goToVideoPlayer (videoId) {
+      this.showSearchResults = false
       this.$router.push({
         path: '/video-player', query: { videoId: videoId }
-      }).catch(err => { if (err.name !== 'NavigationDuplicated') { throw err; } });
+      }).catch(err => { if (err.name !== 'NavigationDuplicated') { throw err } })
     },
-    goToUserPage(userId) {
-      this.showSearchResults = false;
+    goToUserPage (userId) {
+      this.showSearchResults = false
       this.$router.push({
         path: '/user/profile', query: { id: userId }
-      }).catch(err => { if (err.name !== 'NavigationDuplicated') { throw err; } });
+      }).catch(err => { if (err.name !== 'NavigationDuplicated') { throw err } })
     },
-    formatDuration(seconds) {
-      if (!seconds) return '00:00';
-      const minutes = Math.floor(seconds / 60);
-      const remainingSeconds = Math.floor(seconds % 60);
-      return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
+    formatDuration (seconds) {
+      if (!seconds) return '00:00'
+      const minutes = Math.floor(seconds / 60)
+      const remainingSeconds = Math.floor(seconds % 60)
+      return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`
     },
-    formatDate(timestamp) {
-      if (!timestamp) return '';
-      const date = new Date(timestamp);
-      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+    formatDate (timestamp) {
+      if (!timestamp) return ''
+      const date = new Date(timestamp)
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
     },
-    handlePerformSearch(keyword) {
-      console.log("Search event received in App.vue with keyword:", keyword);
-      this.searchKeyword = keyword;
-      this.queryVideosByParam(keyword);
+    handlePerformSearch (keyword) {
+      console.log('Search event received in App.vue with keyword:', keyword)
+      this.searchKeyword = keyword
+      this.queryVideosByParam(keyword)
     },
-    handleNewVideoNotification(data) {
-     
+    handleNewVideoNotification (data) {
       this.msgList.unshift({
         videoId: data.videoId, nick: data.nick, title: data.title, description: data.description
-      });
+      })
     },
-    handleUploadClick() {
+    handleUploadClick () {
       if (!this.user) {
         this.$message.error('请先登录')
         this.$router.push('/login')
@@ -846,64 +843,64 @@ export default {
         path: '/upload-video', query: { timestamp: new Date().getTime() }
       }).catch(err => { if (err.name !== 'NavigationDuplicated') { throw err } })
     },
-    clearAllPrivateMessages() {
+    clearAllPrivateMessages () {
       this.$confirm('确认清除所有消息吗？', '提示', { confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning' }).then(() => {
-        this.privateMsgList = [];
-        this.replyMsgList = [];
-        this.likeMsgList = [];
+        this.privateMsgList = []
+        this.replyMsgList = []
+        this.likeMsgList = []
 
         // It's better to have a single backend endpoint to clear all notifications
         userApi.consumeAllChatMsg().then(() => {
-          this.$message({ type: 'success', message: '已清除所有消息' });
+          this.$message({ type: 'success', message: '已清除所有消息' })
         }).catch(error => {
-          console.error('清除消息失败:', error);
-          this.$message.error('清除消息失败');
-        });
-      }).catch(() => {});
+          console.error('清除消息失败:', error)
+          this.$message.error('清除消息失败')
+        })
+      }).catch(() => {})
     },
-    clearAllNotifications() {
+    clearAllNotifications () {
       this.$confirm('确认清除所有通知吗？', '提示', { confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning' }).then(() => {
         userApi.consumeAllMsg().then(() => {
-          this.msgList = [];
-          this.liveNotificationList = [];
-          this.$message({ type: 'success', message: '已清除所有通知' });
+          this.msgList = []
+          this.liveNotificationList = []
+          this.$message({ type: 'success', message: '已清除所有通知' })
         }).catch(error => {
-          console.error('清除通知失败:', error);
-          this.$message.error('清除通知失败');
-        });
-      }).catch(() => {});
+          console.error('清除通知失败:', error)
+          this.$message.error('清除通知失败')
+        })
+      }).catch(() => {})
     },
-    handlePrivateMessage(message) {
-      if (this.handledMessageIds.has(message.data.id)) { return; }
+    handlePrivateMessage (message) {
+      if (this.handledMessageIds.has(message.data.id)) { return }
       if (message.type === 'PRIVATE_MESSAGE') {
         this.privateMsgList.unshift({
           fromUserId: message.data.fromUserId,
           toUserId: message.data.toUserId,
           content: message.data.content,
           createTime: message.data.createTime,
-          fromUserNick: message.data.fromUserNick,
-        });
+          fromUserNick: message.data.fromUserNick
+        })
       }
     },
-    triggerSearch() {
+    triggerSearch () {
       if (this.searchKeyword.trim() !== '') {
-        this.queryVideosByParam(this.searchKeyword);
-        this.$refs.searchInput.blur();
-        this.showSuggestions = false;
+        this.queryVideosByParam(this.searchKeyword)
+        this.$refs.searchInput.blur()
+        this.showSuggestions = false
       }
     },
-    handleSearchKeyup(event) {
+    handleSearchKeyup (event) {
       if (event.key === 'Enter') {
-        this.triggerSearch();
+        this.triggerSearch()
       }
     },
-    handleWrapperMouseEnter() {
+    handleWrapperMouseEnter () {
       if (this.searchKeyword && this.searchKeyword.trim() !== '') {
-        this.getSuggestions();
+        this.getSuggestions()
       }
     },
-    handleWrapperMouseLeave() {
-      this.showSuggestions = false;
+    handleWrapperMouseLeave () {
+      this.showSuggestions = false
     }
   }
 }
@@ -1075,7 +1072,7 @@ export default {
   vertical-align: middle;
 }
 .action-badge {
-  line-height: 1; 
+  line-height: 1;
 }
 .ai-assistant-btn {
   display: flex;
@@ -1119,7 +1116,6 @@ export default {
 .logout-item { color: #f56c6c; display: flex; align-items: center; }
 .logout-item i { margin-right: 8px; }
 
-
 .notification-menu {
   width: 420px !important;
   padding: 0 !important;
@@ -1136,7 +1132,7 @@ export default {
 .nav-item { padding: 10px 16px; cursor: pointer; display: flex; align-items: center; position: relative; transition: all 0.2s; color: var(--text-secondary); }
 .nav-item i { margin-right: 8px; font-size: 16px; }
 .nav-item:hover { background-color: var(--bg-hover); }
-.nav-item.active { background-color: var(--bg-primary); color: var(--brand-color); } 
+.nav-item.active { background-color: var(--bg-primary); color: var(--brand-color); }
 .nav-badge { position: static; margin-left: auto; }
 .notification-list .el-dropdown-item { padding: 10px 16px !important; line-height: 1.5 !important; border-bottom: 1px solid #f0f0f0; }
 .notification-list .el-dropdown-item:last-child { border-bottom: none; }

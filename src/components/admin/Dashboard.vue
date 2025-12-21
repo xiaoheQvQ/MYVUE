@@ -177,50 +177,50 @@ import userApi from '@/api/user/user'
 
 export default {
   name: 'AdminDashboard',
-  data() {
+  data () {
     return {
       adminInfo: {},
       recentActivities: [
-        { 
-          content: '用户 "张三" 上传了新视频《Spring Boot 入门教程》', 
+        {
+          content: '用户 "张三" 上传了新视频《Spring Boot 入门教程》',
           time: '2024-04-17 15:30:40',
           type: 'success'
         },
-        { 
-          content: '管理员删除了不当评论 5 条', 
+        {
+          content: '管理员删除了不当评论 5 条',
           time: '2024-04-17 14:20:35',
           type: 'danger'
         },
-        { 
-          content: '新用户 "李四" 完成注册', 
+        {
+          content: '新用户 "李四" 完成注册',
           time: '2024-04-17 13:15:20',
           type: 'primary'
         },
-        { 
-          content: '视频《Vue.js 实战》播放量突破 1000', 
+        {
+          content: '视频《Vue.js 实战》播放量突破 1000',
           time: '2024-04-17 12:10:15',
           type: 'info'
         },
-        { 
-          content: '用户 "王五" 发布了 10 条评论', 
+        {
+          content: '用户 "王五" 发布了 10 条评论',
           time: '2024-04-17 10:05:30',
           type: 'warning'
         }
       ]
     }
   },
-  created() {
+  created () {
     // 检查是否是管理员登录
     if (localStorage.getItem('loginType') !== 'admin') {
       this.$router.push('/login')
       this.$message.error('请先以管理员身份登录')
     }
-    
+
     // 获取管理员信息
     this.getAdminInfo()
   },
   methods: {
-    getAdminInfo() {
+    getAdminInfo () {
       // 获取管理员信息
       userApi.getInfo().then(res => {
         this.adminInfo = res.data
@@ -228,7 +228,7 @@ export default {
         console.error('获取管理员信息失败', err)
       })
     },
-    logout() {
+    logout () {
       // 退出登录
       userApi.logout().then(() => {
         localStorage.removeItem('accessToken')

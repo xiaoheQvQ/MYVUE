@@ -28,30 +28,30 @@ const api = {
       timeout: 3600000
     })
   },
-// 修改视频信息(FormData格式)
-updateVideoFormData(data) {
-  return request({
-    url: `/video/change`,
-    method: 'post',
-    data: data,
-    headers: {
-      'Content-Type': 'multipart/form-data'
-    }
-  })
-},
+  // 修改视频信息(FormData格式)
+  updateVideoFormData (data) {
+    return request({
+      url: `/video/change`,
+      method: 'post',
+      data: data,
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
+  },
   getVideoDetail (videoId) {
     return request({
       url: `/video/${videoId}`,
       method: 'get'
     })
   },
-  selectUserVideoStatsGroupByDay(){
+  selectUserVideoStatsGroupByDay () {
     return request({
       url: `/video/selectUserVideoStatsGroupByDay`,
       method: 'get'
     })
   },
-  getVideoStatsLast7Days(){
+  getVideoStatsLast7Days () {
     return request({
       url: `/video/getVideoStatsLast7Days`,
       method: 'get'
@@ -70,14 +70,14 @@ updateVideoFormData(data) {
       method: 'get'
     })
   },
-  queryVideosByParam(param) {
+  queryVideosByParam (param) {
     return request({
       url: `/video/query`,
       params: param,
       method: 'get'
     })
   },
-  getAreaVideos(area){
+  getAreaVideos (area) {
     return request({
       url: `/video/areaVideo/${area}`,
       method: 'get'
@@ -103,7 +103,7 @@ updateVideoFormData(data) {
   },
 
   // 获取视频评论列表
-  getCommentList(params) {
+  getCommentList (params) {
     return request({
       url: '/video/comment/getAllCommentByVideoId',
       method: 'get',
@@ -114,7 +114,7 @@ updateVideoFormData(data) {
   },
 
   // 发表评论
-  publishComment(data) {
+  publishComment (data) {
     return request({
       url: '/video/comment/publish',
       method: 'post',
@@ -126,7 +126,7 @@ updateVideoFormData(data) {
   },
 
   // 回复评论
-  replyComment(data) {
+  replyComment (data) {
     return request({
       url: '/video/comment/reply',
       method: 'post',
@@ -134,7 +134,7 @@ updateVideoFormData(data) {
         videoId: data.videoId,
         content: data.content,
         parentId: data.parentId,
-        replyCommentId:data.replyCommentId,
+        replyCommentId: data.replyCommentId,
         replyToUserId: data.replyToId,
         toCreateTime: data.toCreateTime
       }
@@ -142,7 +142,7 @@ updateVideoFormData(data) {
   },
 
   // 删除评论
-  deleteComment(commentId) {
+  deleteComment (commentId) {
     return request({
       url: '/video/comment/delete',
       method: 'post',
@@ -151,7 +151,6 @@ updateVideoFormData(data) {
       }
     })
   },
-
 
   getAreas () {
     return request({
@@ -222,7 +221,7 @@ updateVideoFormData(data) {
       params
     })
   },
-  inputQuery(params) {
+  inputQuery (params) {
     return request({
       url: '/video/input/query',
       method: 'get',

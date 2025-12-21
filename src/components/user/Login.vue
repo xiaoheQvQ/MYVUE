@@ -79,12 +79,12 @@ export default {
         userApi.login(loginData).then(res => {
           // 保存登录类型到localStorage
           localStorage.setItem('loginType', 'admin')
-          
+
           // 不使用通用的登录成功处理函数，而是自定义管理员登录成功逻辑
           localStorage.setItem('accessToken', res.data.accessToken)
           localStorage.setItem('refreshToken', res.data.refreshToken)
           this.$message.success(res.msg)
-          
+
           // 登录成功后直接跳转到管理页面
           this.$router.push('/admin/users')
         }).catch(err => {

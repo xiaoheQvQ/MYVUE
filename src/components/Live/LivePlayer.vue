@@ -22,7 +22,7 @@
         </div>
       </div>
     </div>
-    
+
     <div class="chat-section">
       <!-- 聊天室部分保持不变 -->
       <div class="chat-header">
@@ -37,9 +37,9 @@
           </el-dropdown-menu>
         </el-dropdown>
       </div>
-      
+
       <div class="chat-messages" ref="chatMessages">
-        <div v-for="(message, index) in messages" :key="index" class="message" 
+        <div v-for="(message, index) in messages" :key="index" class="message"
              :class="{'message-self': message.userId === currentUserId}">
           <span class="message-user">
             {{ message.userName }}:
@@ -70,12 +70,12 @@
             </template>
           </el-table-column>
         </el-table>
-        
+
         <div style="margin-top: 20px; text-align: center">
-          <el-button 
-            @click="payGift" 
-            type="primary" 
-            size="medium" 
+          <el-button
+            @click="payGift"
+            type="primary"
+            size="medium"
             :disabled="balance < currentGift.price"
             v-loading="payLoading"
           >
@@ -87,7 +87,7 @@
         </div>
       </div>
     </el-dialog>
-    
+
     <!-- 充值弹窗 -->
     <el-dialog title="金币充值" :visible.sync="rechargeDialogVisible" width="30%" center>
       <div style="padding: 20px">
@@ -95,26 +95,26 @@
           <span style="font-size: 16px">当前金币余额: </span>
           <span style="font-size: 18px; font-weight: bold; color: #FF9900">{{ balance }}金币</span>
         </div>
-        
+
         <el-radio-group v-model="rechargeAmount" style="display: flex; flex-direction: column; gap: 15px">
           <el-radio :label="10">10元 (100金币)</el-radio>
           <el-radio :label="50">50元 (500金币)</el-radio>
           <el-radio :label="100">100元 (1000金币)</el-radio>
           <el-radio :label="500">500元 (5000金币)</el-radio>
         </el-radio-group>
-        
+
         <div style="margin-top: 30px; text-align: center">
-          <el-button 
-            @click="handleRecharge" 
-            type="primary" 
+          <el-button
+            @click="handleRecharge"
+            type="primary"
             size="medium"
             v-loading="rechargeLoading"
           >
             立即充值
           </el-button>
-          <el-button 
-            @click="rechargeDialogVisible = false" 
-            type="info" 
+          <el-button
+            @click="rechargeDialogVisible = false"
+            type="info"
             size="medium"
           >
             取消
@@ -122,7 +122,7 @@
         </div>
       </div>
     </el-dialog>
-    
+
     <!-- 支付结果弹窗 -->
     <el-dialog
       title="支付结果"
@@ -137,7 +137,7 @@
         <el-button type="primary" @click="payResultDialogVisible = false">确 定</el-button>
       </span>
     </el-dialog>
-    
+
     <!-- 结束直播确认对话框 -->
     <el-dialog
       title="提示"
@@ -159,10 +159,10 @@ import Hls from 'hls.js'
 import Global from '@/components/Global.vue'
 import liveApi from '@/api/live/live'
 
-const baseUrl = "http://localhost:8088"
+const baseUrl = 'http://localhost:8088'
 
 export default {
-  data() {
+  data () {
     return {
       currentUserId: Global.user ? String(Global.user.id) : null,
       currentUserName: Global.user ? Global.user.nick : '匿名用户',
@@ -182,11 +182,11 @@ export default {
       payLoading: false,
       endLiveDialogVisible: false,
       endingLive: false,
-      currentGift:  {
-      price: 0,
-      name: '',
-      id: null,
-      icon: ''
+      currentGift: {
+        price: 0,
+        name: '',
+        id: null,
+        icon: ''
       },
       hls: null,
       balance: 0,
@@ -206,17 +206,17 @@ export default {
     visit_id: {type: String, required: true}
   },
   computed: {
-    isHost() {
+    isHost () {
       return this.roomId === this.currentUserId
     }
   },
-  async mounted() {
+  async mounted () {
     await this.checkBalance()
     this.initPlayer()
     this.initWebSocket()
     this.checkPayCallback()
   },
-  beforeDestroy() {
+  beforeDestroy () {
     this.cleanupWebSocket()
     this.destroyPlayer()
     if (this.pollingInterval) {
@@ -224,7 +224,7 @@ export default {
     }
   },
   methods: {
-    async checkBalance() {
+    async checkBalance () {
       try {
         const response = await liveApi.getBalance()
         this.balance = response.data.coinBalance || 0
@@ -233,10 +233,10 @@ export default {
         this.$message.error('获取余额失败')
       }
     },
-    
-    async sendGift(gift) {
+
+    async sendGift (gift) {
       this.currentGift = gift
-      
+
       // 检查余额
       if (this.balance < gift.price) {
         this.$confirm(`您的金币不足，当前余额${this.balance}金币，需要${gift.price}金币，是否立即充值?`, '金币不足', {
@@ -248,26 +248,26 @@ export default {
         })
         return
       }
-      
+
       this.payDialogVisible = true
     },
-    
-    async payGift() {
+
+    async payGift () {
       if (!this.currentGift) return
-      
+
       this.payLoading = true
       const gift = this.currentGift
-      
+
       try {
         // 扣除金币
         const businessId = `GIFT_${Date.now()}`
         await liveApi.consumeCoins(
-    
-          gift.price, 
-          businessId, 
+
+          gift.price,
+          businessId,
           `赠送礼物: ${gift.name}`
         )
-        
+
         // 发送礼物消息
         if (Global.socket && Global.socket.readyState === WebSocket.OPEN) {
           const message = {
@@ -280,16 +280,15 @@ export default {
             giftPrice: gift.price,
             time: new Date().getTime()
           }
-          
+
           Global.socket.send(JSON.stringify(message))
         }
-        
+
         this.paySuccess = true
         this.payResultMessage = '礼物发送成功！'
         this.payResultDialogVisible = true
         this.payDialogVisible = false
         await this.checkBalance()
-        
       } catch (error) {
         console.error('支付失败:', error)
         this.paySuccess = false
@@ -299,8 +298,8 @@ export default {
         this.payLoading = false
       }
     },
-    
-    async handleRecharge() {
+
+    async handleRecharge () {
       this.rechargeLoading = true
       try {
         // 创建充值订单
@@ -308,50 +307,49 @@ export default {
           this.rechargeAmount,
           `金币充值-${this.rechargeAmount}元`
         )
-        
+
         const orderId = orderRes.data.orderId
         const amount = this.rechargeAmount
-        
+
         // 打开支付宝支付页面
-        const payUrl = `${baseUrl}/alipay/pay?traceNo=${orderId}&totalAmount=${amount}&subject=金币充值`;
+        const payUrl = `${baseUrl}/alipay/pay?traceNo=${orderId}&totalAmount=${amount}&subject=金币充值`
         const newWindow = window.open(payUrl, '_blank')
-        
+
         if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
           this.$message.warning('请允许弹出窗口以完成支付')
           this.rechargeLoading = false
           return
         }
-        
+
         // 开始轮询检查支付状态
         this.startPollingPaymentStatus(orderId, amount)
-        
+
         this.rechargeDialogVisible = false
         this.$message.info('请在支付宝页面完成支付')
-        
       } catch (error) {
         console.error('充值失败:', error)
         this.$message.error('充值失败: ' + (error.message || ''))
         this.rechargeLoading = false
       }
     },
-    
-    startPollingPaymentStatus(orderId, amount) {
+
+    startPollingPaymentStatus (orderId, amount) {
       // 先清除之前的轮询
       if (this.pollingInterval) {
         clearInterval(this.pollingInterval)
       }
-      
+
       // 开始新的轮询
       this.pollingInterval = setInterval(async () => {
         try {
           const res = await liveApi.checkPaymentStatus(orderId)
           if (res.data.paid) {
             clearInterval(this.pollingInterval)
-            
+
             // 支付成功，更新余额
             await liveApi.recharge(amount, orderId)
             await this.checkBalance()
-            
+
             this.paySuccess = true
             this.payResultMessage = `充值成功！${amount}元已到账`
             this.payResultDialogVisible = true
@@ -361,17 +359,17 @@ export default {
         }
       }, 3000) // 每3秒检查一次
     },
-    
+
     // ... 其他现有方法保持不变
-    handleManagementCommand(command) {
+    handleManagementCommand (command) {
       if (command === 'notify') {
         this.notifyFans()
       } else if (command === 'endLive') {
         this.endLiveDialogVisible = true
       }
     },
-    
-    notifyFans() {
+
+    notifyFans () {
       if (!this.nick) {
         console.error('用户昵称未定义')
         return
@@ -379,19 +377,19 @@ export default {
       liveApi.notify(this.nick).then(() => {
         this.$message.success('已通知粉丝')
       })
-      .catch(error => {
-        console.error('通知粉丝失败:', error)
-        this.$message.error('通知粉丝失败')
-      })
+        .catch(error => {
+          console.error('通知粉丝失败:', error)
+          this.$message.error('通知粉丝失败')
+        })
     },
-    
-    async confirmEndLive() {
+
+    async confirmEndLive () {
       this.endingLive = true
       try {
         await liveApi.unpublish()
         this.$message.success('直播已结束')
         this.endLiveDialogVisible = false
-        
+
         // 通知所有观众直播已结束
         if (Global.socket && Global.socket.readyState === WebSocket.OPEN) {
           Global.socket.send(JSON.stringify({
@@ -401,10 +399,10 @@ export default {
             userName: this.currentUserName
           }))
         }
-        
+
         // 销毁播放器
         this.destroyPlayer()
-        
+
         // 如果是主播，跳转到其他页面
         if (this.isHost) {
           setTimeout(() => {
@@ -418,8 +416,8 @@ export default {
         this.endingLive = false
       }
     },
-    
-    destroyPlayer() {
+
+    destroyPlayer () {
       if (this.dp) {
         this.dp.destroy()
         this.dp = null
@@ -429,33 +427,33 @@ export default {
         this.hls = null
       }
     },
-    
-    checkPayCallback() {
+
+    checkPayCallback () {
       const urlParams = new URLSearchParams(window.location.search)
       const paySuccess = urlParams.get('pay_success')
       const orderId = urlParams.get('order_id')
       const amount = urlParams.get('amount')
-      
+
       if (paySuccess === 'true' && orderId) {
         this.paySuccess = true
         this.payResultMessage = `支付成功！订单号: ${orderId}, 金额: ${amount}元`
         this.payResultDialogVisible = true
-        
+
         // 更新余额
         this.checkBalance()
-        
+
         // 清除URL参数
         window.history.replaceState({}, document.title, window.location.pathname)
       }
     },
-    
-    initPlayer() {
+
+    initPlayer () {
       const videoUrl = 'http://8.140.29.27:8080/live/livestream.m3u8'
-      
+
       if (Hls.isSupported()) {
         this.hls = new Hls()
         this.hls.loadSource(videoUrl)
-        
+
         this.dp = new DPlayer({
           container: document.getElementById('dplayer'),
           live: true,
@@ -504,29 +502,29 @@ export default {
         this.$message.error('您的浏览器不支持播放此视频')
       }
     },
-    
-    initWebSocket() {
+
+    initWebSocket () {
       if (!Global.socket) {
         console.error('WebSocket连接未初始化')
         return
       }
-      
+
       this.chatChannel = `live_room_${this.roomId}`
-      
+
       Global.socket.addEventListener('message', this.handleSocketMessage)
-      
+
       this.joinLiveRoom()
       this.loadHistoryMessages()
     },
-    
-    cleanupWebSocket() {
+
+    cleanupWebSocket () {
       if (Global.socket && this.chatChannel) {
         this.leaveLiveRoom()
         Global.socket.removeEventListener('message', this.handleSocketMessage)
       }
     },
-    
-    joinLiveRoom() {
+
+    joinLiveRoom () {
       if (Global.socket && Global.socket.readyState === WebSocket.OPEN) {
         Global.socket.send(JSON.stringify({
           type: 'JOIN_LIVE_ROOM',
@@ -536,8 +534,8 @@ export default {
         }))
       }
     },
-    
-    leaveLiveRoom() {
+
+    leaveLiveRoom () {
       if (Global.socket && Global.socket.readyState === WebSocket.OPEN) {
         Global.socket.send(JSON.stringify({
           type: 'LEAVE_LIVE_ROOM',
@@ -547,10 +545,10 @@ export default {
         }))
       }
     },
-    
-    sendMessage() {
+
+    sendMessage () {
       if (!this.newMessage.trim()) return
-      
+
       if (Global.socket && Global.socket.readyState === WebSocket.OPEN) {
         const message = {
           type: 'LIVE_CHAT_MESSAGE',
@@ -560,7 +558,7 @@ export default {
           text: this.newMessage,
           time: new Date().getTime()
         }
-        
+
         Global.socket.send(JSON.stringify(message))
         this.newMessage = ''
         this.scrollToBottom()
@@ -568,11 +566,11 @@ export default {
         console.error('WebSocket连接不可用')
       }
     },
-    
-    handleSocketMessage(event) {
+
+    handleSocketMessage (event) {
       try {
         const message = JSON.parse(event.data)
-       
+
         if (message.type === 'LIVE_CHAT_MESSAGE') {
           this.handleChatMessage(message)
         } else if (message.type === 'LIVE_GIFT_MESSAGE') {
@@ -588,8 +586,8 @@ export default {
         console.error('处理WebSocket消息出错:', error)
       }
     },
-    
-    handleChatMessage(message) {
+
+    handleChatMessage (message) {
       if (message.roomId === this.roomId) {
         this.messages.push({
           userId: String(message.userId),
@@ -600,8 +598,8 @@ export default {
         this.scrollToBottom()
       }
     },
-    
-    handleGiftMessage(message) {
+
+    handleGiftMessage (message) {
       if (message.roomId === this.roomId) {
         this.messages.push({
           userId: String(message.userId),
@@ -613,8 +611,8 @@ export default {
         this.scrollToBottom()
       }
     },
-    
-    handleLiveEnded(message) {
+
+    handleLiveEnded (message) {
       if (message.roomId === this.roomId) {
         this.messages.push({
           userId: 'system',
@@ -623,12 +621,12 @@ export default {
           time: new Date().getTime()
         })
         this.scrollToBottom()
-        
+
         this.destroyPlayer()
       }
     },
-    
-    handleUserJoin(message) {
+
+    handleUserJoin (message) {
       if (message.roomId === this.roomId) {
         this.messages.push({
           userId: 'system',
@@ -639,8 +637,8 @@ export default {
         this.scrollToBottom()
       }
     },
-    
-    handleUserLeave(message) {
+
+    handleUserLeave (message) {
       if (message.roomId === this.roomId) {
         this.messages.push({
           userId: 'system',
@@ -651,16 +649,16 @@ export default {
         this.scrollToBottom()
       }
     },
-    
-    async loadHistoryMessages() {
+
+    async loadHistoryMessages () {
       try {
         // 这里可以调用API获取历史消息
       } catch (error) {
         console.error('加载聊天记录失败:', error)
       }
     },
-    
-    scrollToBottom() {
+
+    scrollToBottom () {
       this.$nextTick(() => {
         const container = this.$refs.chatMessages
         if (container) {
@@ -668,8 +666,8 @@ export default {
         }
       })
     },
-    
-    formatTime(timestamp) {
+
+    formatTime (timestamp) {
       const date = new Date(timestamp)
       const hours = date.getHours().toString().padStart(2, '0')
       const minutes = date.getMinutes().toString().padStart(2, '0')

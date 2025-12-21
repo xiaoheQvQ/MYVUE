@@ -168,11 +168,11 @@ import { formatDate } from '@/utils/date'
 export default {
   name: 'UserManagement',
   filters: {
-    formatDate(time) {
+    formatDate (time) {
       return formatDate(new Date(time), 'yyyy-MM-dd hh:mm:ss')
     }
   },
-  data() {
+  data () {
     return {
       list: [], // 用户列表
       total: 0,
@@ -193,18 +193,18 @@ export default {
       }
     }
   },
-  created() {
+  created () {
     // 检查是否是管理员登录
     if (localStorage.getItem('loginType') !== 'admin') {
       this.$router.push('/login')
       this.$message.error('请先以管理员身份登录')
       return
     }
-    
+
     this.fetchData()
   },
   methods: {
-    formatGender(gender) {
+    formatGender (gender) {
       const genderMap = {
         0: '女',
         1: '男',
@@ -212,7 +212,7 @@ export default {
       }
       return genderMap[gender] || '未知'
     },
-    getGenderType(gender) {
+    getGenderType (gender) {
       const typeMap = {
         0: 'danger',
         1: 'primary',
@@ -220,9 +220,9 @@ export default {
       }
       return typeMap[gender] || 'info'
     },
-    fetchData() {
+    fetchData () {
       this.listLoading = true
-      
+
       // 调用后端API获取用户列表
       adminApi.getUserList(this.listQuery).then(res => {
         if (res.code === 200000) {
@@ -237,28 +237,28 @@ export default {
         this.listLoading = false
       })
     },
-    handleFilter() {
+    handleFilter () {
       this.listQuery.current = 1
       this.fetchData()
     },
-    handleSizeChange(val) {
+    handleSizeChange (val) {
       this.listQuery.size = val
       this.fetchData()
     },
-    handleCurrentChange(val) {
+    handleCurrentChange (val) {
       this.listQuery.current = val
       this.fetchData()
     },
     // 新增：查看用户视频统计数据
-    handleViewStats(userId) {
-      console.log('查看用户视频统计数据', userId);
-      
+    handleViewStats (userId) {
+      console.log('查看用户视频统计数据', userId)
+
       this.$router.push({
         path: '/admin/analyze',
         query: { userId }
       })
     },
-    handleDelete(row) {
+    handleDelete (row) {
       this.$confirm('确认删除该用户?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
@@ -280,7 +280,7 @@ export default {
         // 取消删除
       })
     },
-    updateUser() {
+    updateUser () {
       this.$refs.userForm.validate(valid => {
         if (valid) {
           this.$message.success('更新成功')
@@ -292,12 +292,12 @@ export default {
         }
       })
     },
-    handleUserCommand(command) {
+    handleUserCommand (command) {
       if (command === 'logout') {
         this.logout()
       }
     },
-    logout() {
+    logout () {
       // 退出登录
       userApi.logout().then(() => {
         localStorage.removeItem('accessToken')

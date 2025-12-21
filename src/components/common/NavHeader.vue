@@ -44,13 +44,13 @@ export default {
   },
   methods: {
     ...mapMutations(['clearNotifications']),
-    handleCommand(notification) {
+    handleCommand (notification) {
       // 跳转到视频播放页面
       this.$router.push(`/video/${notification.videoId}`)
       // 清除该通知
       this.$store.commit('removeNotification', notification.videoId)
     },
-    handleUserCommand(command) {
+    handleUserCommand (command) {
       switch (command) {
         case 'profile':
           this.$router.push('/user/profile')
@@ -63,7 +63,7 @@ export default {
           break
       }
     },
-    logout() {
+    logout () {
       this.$store.dispatch('logout')
       this.$router.push('/login')
     }

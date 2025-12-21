@@ -139,26 +139,26 @@ const api = {
       method: 'get'
     })
   },
-  searchUsers(params) {
+  searchUsers (params) {
     return request({
       url: '/user/search',
       method: 'get',
       params
     })
   },
-  checkSubscription(userId) {
+  checkSubscription (userId) {
     return request({
       url: `/user/is-subscription/${userId}`,
       method: 'get'
     })
   },
-  unsubscribe(userId) {
+  unsubscribe (userId) {
     return request({
       url: `/user/subscribe/${userId}`,
       method: 'delete'
     })
   },
-  getNewVideoNotifications() {
+  getNewVideoNotifications () {
     return request({
       url: '/video/new-video-notifications',
       method: 'get'

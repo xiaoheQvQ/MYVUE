@@ -1,7 +1,7 @@
 import request from '../request'
 
 const api = {
-  upload(videoInfo) {
+  upload (videoInfo) {
     let formDate = new FormData()
     formDate.append('videoFile', videoInfo.videoFile)
     formDate.append('coverFile', videoInfo.coverFile)
@@ -28,8 +28,8 @@ const api = {
       timeout: 3600000
     })
   },
-  
-  uploadSeriesVideo(videoInfo) {
+
+  uploadSeriesVideo (videoInfo) {
     let formDate = new FormData()
     formDate.append('videoFile', videoInfo.videoFile)
     formDate.append('coverFile', videoInfo.coverFile)
@@ -62,86 +62,86 @@ const api = {
       timeout: 3600000
     })
   },
-  
-  getVideoDetail(videoId) {
+
+  getVideoDetail (videoId) {
     return request({
       url: `/video/${videoId}`,
       method: 'get'
     })
   },
-  
-  getVideoSeries(seriesId) {
+
+  getVideoSeries (seriesId) {
     return request({
       url: `/video/series/${seriesId}`,
       method: 'get'
     })
   },
-  
-  getUserSeries(userId) {
+
+  getUserSeries (userId) {
     return request({
       url: `/video/user-series/${userId}`,
       method: 'get'
     })
   },
-  
+
   // 其他原有方法保持不变...
-  selectUserVideoStatsGroupByDay(){
+  selectUserVideoStatsGroupByDay () {
     return request({
       url: `/video/selectUserVideoStatsGroupByDay`,
       method: 'get'
     })
   },
-  getVideoStatsLast7Days(){
+  getVideoStatsLast7Days () {
     return request({
       url: `/video/getVideoStatsLast7Days`,
       method: 'get'
     })
   },
-  incrViewCounts(videoId) {
+  incrViewCounts (videoId) {
     return request({
       url: `/video/incr-view-counts/${videoId}`,
       method: 'put'
     })
   },
-  queryVideos(param) {
+  queryVideos (param) {
     return request({
       url: `/video`,
       params: param,
       method: 'get'
     })
   },
-  queryVideosByParam(param) {
+  queryVideosByParam (param) {
     return request({
       url: `/video/query`,
       params: param,
       method: 'get'
     })
   },
-  getAreaVideos(area){
+  getAreaVideos (area) {
     return request({
       url: `/video/areaVideo/${area}`,
       method: 'get'
     })
   },
-  like(videoId) {
+  like (videoId) {
     return request({
       url: `/video/like/${videoId}`,
       method: 'put'
     })
   },
-  collect(videoId) {
+  collect (videoId) {
     return request({
       url: `/video/collect/${videoId}`,
       method: 'put'
     })
   },
-  likeInfo(videoId) {
+  likeInfo (videoId) {
     return request({
       url: `/video/like-info/${videoId}`,
       method: 'get'
     })
   },
-  getCommentList(params) {
+  getCommentList (params) {
     return request({
       url: '/video/comment/getAllCommentByVideoId',
       method: 'get',
@@ -150,7 +150,7 @@ const api = {
       }
     })
   },
-  publishComment(data) {
+  publishComment (data) {
     return request({
       url: '/video/comment/publish',
       method: 'post',
@@ -160,7 +160,7 @@ const api = {
       }
     })
   },
-  replyComment(data) {
+  replyComment (data) {
     return request({
       url: '/video/comment/reply',
       method: 'post',
@@ -168,13 +168,13 @@ const api = {
         videoId: data.videoId,
         content: data.content,
         parentId: data.parentId,
-        replyCommentId:data.replyCommentId,
+        replyCommentId: data.replyCommentId,
         replyToUserId: data.replyToId,
         toCreateTime: data.toCreateTime
       }
     })
   },
-  deleteComment(commentId) {
+  deleteComment (commentId) {
     return request({
       url: '/video/comment/delete',
       method: 'post',
@@ -183,102 +183,102 @@ const api = {
       }
     })
   },
-  getAreas() {
+  getAreas () {
     return request({
       url: `/video/areas`,
       method: 'get'
     })
   },
-  getTags() {
+  getTags () {
     return request({
       url: `/video/tags`,
       method: 'get'
     })
   },
-  recommend() {
+  recommend () {
     return request({
       url: `/video/recommend`,
       method: 'get'
     })
   },
-  basedItemRecommend() {
+  basedItemRecommend () {
     return request({
       url: `/video/recommendItem`,
       method: 'get'
     })
   },
-  getHistory(videoId) {
+  getHistory (videoId) {
     return request({
       url: `/video/history/${videoId}`,
       method: 'get'
     })
   },
-  updateHistory(videoId, time) {
+  updateHistory (videoId, time) {
     return request({
       url: `/video/history/${videoId}/${time}`,
       method: 'put'
     })
   },
-  updateHistoryUnlogin(videoId, time) {
+  updateHistoryUnlogin (videoId, time) {
     return request({
       url: `/video/history/Unlogin/${videoId}/${time}`,
       method: 'put'
     })
   },
-  getHistoryList() {
+  getHistoryList () {
     return request({
       url: '/video/history',
       method: 'get'
     })
   },
-  getCollections() {
+  getCollections () {
     return request({
       url: '/video/collections',
       method: 'get'
     })
   },
   // 修改视频信息(FormData格式)
-updateVideoFormData(data) {
-  return request({
-    url: `/video/change`,
-    method: 'post',
-    data: data,
-    headers: {
-      'Content-Type': 'multipart/form-data'
-    }
-  })
-},
-  getWorks(userId) {
+  updateVideoFormData (data) {
+    return request({
+      url: `/video/change`,
+      method: 'post',
+      data: data,
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
+  },
+  getWorks (userId) {
     return request({
       url: `/video/list/${userId}`,
       method: 'get'
     })
   },
-  getUserVideos(params) {
+  getUserVideos (params) {
     return request({
       url: `/video/user-videos`,
       method: 'get',
       params
     })
   },
-  inputQuery(params) {
+  inputQuery (params) {
     return request({
       url: '/video/input/query',
       method: 'get',
       params
     })
   },
-   // 获取视频分P列表
-   getVideoSeriesList(videoId) {
+  // 获取视频分P列表
+  getVideoSeriesList (videoId) {
     return request({
       url: '/video/series/list',
       method: 'get',
       params: { videoId }
     })
   },
-  
+
   // 排序分P视频
-  sortVideoSeries(data) {
+  sortVideoSeries (data) {
     return request({
       url: '/video/series/sort',
       method: 'post',

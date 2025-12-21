@@ -6,7 +6,7 @@ const chat = {
    * @param {string} content 聊天内容
    * @returns {Promise} 请求Promise
    */
-  sendMessage(content) {
+  sendMessage (content) {
     return request({
       url: '/chat/message',
       method: 'post',
@@ -20,7 +20,7 @@ const chat = {
    * 清除聊天历史
    * @returns {Promise} 请求Promise
    */
-  clearHistory() {
+  clearHistory () {
     return request({
       url: '/chat/clear',
       method: 'post'
@@ -31,63 +31,63 @@ const chat = {
    * 创建新的聊天会话
    * @returns {Promise} 请求Promise
    */
-  createNewSession() {
+  createNewSession () {
     return request({
       url: '/chat/new-session',
       method: 'post'
     })
   },
-   getChatHistory(params) {
+  getChatHistory (params) {
     return request({
       url: '/chat/message/history',
       method: 'get',
       params
     })
   },
-   sendPrivateMessage(data) {
+  sendPrivateMessage (data) {
     return request({
       url: '/chat/message/send',
       method: 'post',
       data,
       headers: {
-        'Content-Type': 'application/json'  // 明确设置Content-Type
+        'Content-Type': 'application/json' // 明确设置Content-Type
       }
     })
   },
-  sendPrivateVideoChatMessage(data) {
+  sendPrivateVideoChatMessage (data) {
     return request({
       url: '/chat/videoChatMessage/send',
       method: 'post',
       data,
       headers: {
-        'Content-Type': 'application/json'  // 明确设置Content-Type
+        'Content-Type': 'application/json' // 明确设置Content-Type
       }
     })
   },
-  sendPrivateVideoChatResponseMessage(data) {
+  sendPrivateVideoChatResponseMessage (data) {
     return request({
       url: '/chat/videoChatResponseMessage/send',
       method: 'post',
       data,
       headers: {
-        'Content-Type': 'application/json'  // 明确设置Content-Type
+        'Content-Type': 'application/json' // 明确设置Content-Type
       }
     })
   },
-  sendPrivateVideoChatEndMessage(data) {
+  sendPrivateVideoChatEndMessage (data) {
     return request({
       url: '/chat/videoChatEndmessage/send',
       method: 'post',
       data,
       headers: {
-        'Content-Type': 'application/json'  // 明确设置Content-Type
+        'Content-Type': 'application/json' // 明确设置Content-Type
       }
     })
   },
   /**
    * 检查用户是否在线
    */
-  checkUserOnline(userId) {
+  checkUserOnline (userId) {
     return request({
       url: '/chat/online',
       method: 'get',
@@ -99,5 +99,4 @@ const chat = {
 
 }
 
-
-export default chat 
+export default chat

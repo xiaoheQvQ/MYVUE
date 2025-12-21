@@ -35,18 +35,18 @@ console.log('API地址:', apiBaseUrl)
 console.log('WebSocket地址:', wsBaseUrl)
 
 // 解析URL获取域名和端口
-function parseHostname(url) {
-  if (!url) return 'localhost:8088';
+function parseHostname (url) {
+  if (!url) return 'localhost:8088'
 
   try {
     // 移除协议
-    let hostname = url.replace(/^(https?|wss?):\/\//, '');
+    let hostname = url.replace(/^(https?|wss?):\/\//, '')
     // 移除路径
-    hostname = hostname.split('/')[0];
-    return hostname;
+    hostname = hostname.split('/')[0]
+    return hostname
   } catch (e) {
-    console.error('解析API地址失败:', e);
-    return 'localhost:8088';
+    console.error('解析API地址失败:', e)
+    return 'localhost:8088'
   }
 }
 

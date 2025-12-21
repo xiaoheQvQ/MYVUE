@@ -1,7 +1,7 @@
 <template>
   <div class="video-player-container">
     <div class="player-container">
-      
+
   <!-- 左侧主内容区 -->
   <div class="main-content">
 
@@ -17,7 +17,7 @@
             </div>
           </div>
           <d-player ref="player" id="player" :options="options"></d-player>
-          
+
           <!-- 分p列表 -->
           <div v-if="videoSeries && videoSeries.length > 0" class="video-series-container">
             <div class="series-header">
@@ -25,10 +25,10 @@
               <span class="series-count">共{{ videoSeries.length }}个视频</span>
             </div>
             <div class="series-list">
-              <div 
-                v-for="(item, index) in videoSeries" 
+              <div
+                v-for="(item, index) in videoSeries"
                 :key="item.id"
-                :class="['series-item', item.videoId === videoId ? 'active' : '']" 
+                :class="['series-item', item.videoId === videoId ? 'active' : '']"
                 @click="play(item.videoId)"
               >
                 <span class="series-index">{{ index + 1 }}</span>
@@ -130,9 +130,9 @@
                   <el-button type="text" icon="el-icon-star-off">表情</el-button>
                 </template>
                 <div class="emoji-container">
-                  <span 
-                    v-for="emoji in emojis" 
-                    :key="emoji" 
+                  <span
+                    v-for="emoji in emojis"
+                    :key="emoji"
                     @click="addEmoji(emoji)"
                     class="emoji-item"
                   >{{ emoji }}</span>
@@ -227,12 +227,12 @@
    <div class="sidebar" style="background-color: #FFFFFF;">
       <!-- Recommended Videos Section -->
       <div style="margin-top: -15px; border-top: 1px solid #f0f0f0; margin-left: 16px;">
-        <!-- up信息容器 -->  
+        <!-- up信息容器 -->
         <div class="user-info-container up-mar" v-if="videoInfo.userId">
           <UserPopUp :avatar="videoInfo.avatar" :id="videoInfo.userId" :nick="videoInfo.nick"></UserPopUp>
         </div>
       </div>
-    
+
       <div class="recommend-div" style="margin-top: -10px;">
         <el-card class="recommend" v-if="recommendList != null && recommendList.length > 0">
           <h3 class="section-title">猜你喜欢</h3>
@@ -278,7 +278,7 @@ export default {
     dPlayer,
     CommentNode
   },
-  data() {
+  data () {
     let that = this
     return {
       commentImage: '', // 存储上传成功的图片URL
@@ -334,8 +334,8 @@ export default {
           type: 'webvtt',
           fontSize: '25px',
           bottom: '10%',
-          color: '#b7daff',
-        },
+          color: '#b7daff'
+        }
       },
       isFromAdmin: this.$route.query.source === 'admin',
       replyIdCounter: 1000
@@ -343,17 +343,17 @@ export default {
   },
   directives: {
     'filter-hsx': {
-      bind(el, binding) {
-        el.value = binding.value.replace(/https:\/\/hsx[^\s]+/g, '');
+      bind (el, binding) {
+        el.value = binding.value.replace(/https:\/\/hsx[^\s]+/g, '')
       }
     }
   },
   computed: {
-    totalPages() {
+    totalPages () {
       return Math.ceil(this.allComments.length / this.pageSize)
     }
   },
-  beforeDestroy() {
+  beforeDestroy () {
     if (this.ws) {
       this.ws.close()
     }
@@ -361,11 +361,11 @@ export default {
       clearInterval(this.updateHistoryTimer)
     }
   },
-  mounted() {
+  mounted () {
     if (this.$route.query.videoId) {
       this.videoId = this.$route.query.videoId
       console.log('Initializing video with ID:', this.videoId)
-   
+
       videoApi.getVideoDetail(this.videoId)
         .then(res => {
           console.log('Video detail response:', res)
@@ -375,13 +375,12 @@ export default {
           }
 
           this.videoInfo = res.data
-          videoApi.getVideoSeries(this.videoId).then(res => { 
-              if (res.data) { 
-                console.log('Video series response:', res.data) 
-                this.videoSeries = res.data
-              } 
-            })
-        
+          videoApi.getVideoSeries(this.videoId).then(res => {
+            if (res.data) {
+              console.log('Video series response:', res.data)
+              this.videoSeries = res.data
+            }
+          })
 
           if (Global.user != null && !this.isFromAdmin) {
             videoApi.likeInfo(this.videoId)
@@ -419,55 +418,55 @@ export default {
     }
   },
   methods: {
-    handleReply(comment) {
+    handleReply (comment) {
       this.toggleReplyBox(comment)
     },
-    
+
     // 显示时过滤内容
-    filteredReplyContent(comment) {
+    filteredReplyContent (comment) {
       return (comment.replyContent && comment.replyContent.replace(/https:\/\/hsx[^\s]*/g, '')) || ''
     },
-  
+
     // 更新时保持原始数据
-    updateReplyContent(comment, newValue) {
+    updateReplyContent (comment, newValue) {
       comment.replyContent = newValue
     },
-    addReplyEmoji(comment, emoji) {
+    addReplyEmoji (comment, emoji) {
       this.$set(comment, 'replyContent', (comment.replyContent || '') + emoji)
     },
-    handleReplyImageSuccess(comment, res) {
-      console.log("res:"+res)
-      this.$set(comment, 'replyContent', (comment.replyContent || '') + ' ' + res+ ' ')
+    handleReplyImageSuccess (comment, res) {
+      console.log('res:' + res)
+      this.$set(comment, 'replyContent', (comment.replyContent || '') + ' ' + res + ' ')
       this.$set(comment, 'replyImage', res)
     },
-    extractHsxHbUrl(content) {
-      if (!content) return '';
+    extractHsxHbUrl (content) {
+      if (!content) return ''
       // 使用正则匹配 https://hsx-hb 开头的链接
-      const urlMatch = content.match(/https:\/\/hsx-hb[^\s]+/);
-      return urlMatch ? urlMatch[0] : ''; // 返回匹配到的第一个链接，如果没有则返回空
+      const urlMatch = content.match(/https:\/\/hsx-hb[^\s]+/)
+      return urlMatch ? urlMatch[0] : '' // 返回匹配到的第一个链接，如果没有则返回空
     },
-   
-    isImageUrl(text) {
-      return text.startsWith('https://hsx') && 
-            (text.toLowerCase().endsWith('.jpg') || 
-              text.toLowerCase().endsWith('.jpeg') || 
+
+    isImageUrl (text) {
+      return text.startsWith('https://hsx') &&
+            (text.toLowerCase().endsWith('.jpg') ||
+              text.toLowerCase().endsWith('.jpeg') ||
               text.toLowerCase().endsWith('.png'))
     },
-    splitContent(content) {
+    splitContent (content) {
       if (!content) return []
       const regex = /(https:\/\/hsx[^\s]+\.(?:jpg|jpeg|png))/gi
       return content.split(regex)
     },
-    previewImage(url) {
+    previewImage (url) {
       this.$alert(`<img src="${url}" style="max-width: 100%;"/>`, '图片预览', {
         dangerouslyUseHTMLString: true,
         customClass: 'image-preview-modal'
       })
     },
-    beforeImageUpload(file) {
+    beforeImageUpload (file) {
       const isJPG = file.type === 'image/jpeg' || file.type === 'image/png'
-      const isLt10M = file.size / 1024 / 1024 < 10; // 检查文件是否小于 10MB
-      
+      const isLt10M = file.size / 1024 / 1024 < 10 // 检查文件是否小于 10MB
+
       if (!isJPG) {
         this.$message.error('上传图片只能是 JPG/PNG 格式!')
       }
@@ -476,86 +475,86 @@ export default {
       }
       return isJPG && isLt10M
     },
-    handleImageSuccess(response) {
+    handleImageSuccess (response) {
       this.commentImage = response
-      console.log("上传返回的图片:"+response)
+      console.log('上传返回的图片:' + response)
     },
-    removeImage() {
+    removeImage () {
       this.commentImage = ''
     },
-  
-    addEmoji(emoji) {
+
+    addEmoji (emoji) {
       this.commentContent += emoji
     },
     // 分页变化处理
-    handlePageChange(page) {
+    handlePageChange (page) {
       this.currentPage = page
       this.updatePagedComments()
     },
 
     // 更新当前页显示的评论
-    updatePagedComments() {
+    updatePagedComments () {
       const start = (this.currentPage - 1) * this.pageSize
       const end = start + this.pageSize
       this.pagedComments = this.allComments.slice(start, end)
     },
 
     // 加载评论
-    async loadComments() {
-  try {
-    const res = await videoApi.getCommentList({
-      videoId: this.videoId
-    });
+    async loadComments () {
+      try {
+        const res = await videoApi.getCommentList({
+          videoId: this.videoId
+        })
 
-    console.log('加载出来的评论:', res);
+        console.log('加载出来的评论:', res)
 
-    if (res.code === 200000 && Array.isArray(res.data)) {
-      // 扁平化处理评论数据
-      const flattenComments = (comments, parentComment = null) => {
-        let result = [];
-        comments.forEach(comment => {
-          // 如果是回复评论，设置replyToUser
-          if (parentComment) {
-            comment.replyToUser = parentComment.user;
+        if (res.code === 200000 && Array.isArray(res.data)) {
+          // 扁平化处理评论数据
+          const flattenComments = (comments, parentComment = null) => {
+            let result = []
+            comments.forEach(comment => {
+              // 如果是回复评论，设置replyToUser
+              if (parentComment) {
+                comment.replyToUser = parentComment.user
+              }
+
+              const newComment = {
+                ...comment,
+                showReplyBox: false,
+                replyContent: '',
+                showReplies: false,
+                replyImage: '',
+                user: comment.user || { nick: '未知用户', avatar: '' },
+                isReply: parentComment !== null
+              }
+
+              result.push(newComment)
+
+              // 递归处理子评论
+              if (comment.sons && comment.sons.length > 0) {
+                result = result.concat(flattenComments(comment.sons, comment))
+              }
+            })
+            return result
           }
-          
-          const newComment = {
-            ...comment,
-            showReplyBox: false,
-            replyContent: '',
-            showReplies: false,
-            replyImage: '',
-            user: comment.user || { nick: '未知用户', avatar: '' },
-            isReply: parentComment !== null
-          };
-          
-          result.push(newComment);
-          
-          // 递归处理子评论
-          if (comment.sons && comment.sons.length > 0) {
-            result = result.concat(flattenComments(comment.sons, comment));
-          }
-        });
-        return result;
-      };
 
-      this.allComments = flattenComments(res.data);
-      this.updatePagedComments();
-    } else {
-      console.warn('API返回数据格式不符合预期:', res);
-      this.allComments = [];
-      this.pagedComments = [];
-    }
-  } catch (error) {
-    console.error('获取评论失败:', error);
-    this.$message.error('获取评论失败，请稍后重试');
-    this.allComments = [];
-    this.pagedComments = [];
-  }
-},
+          this.allComments = flattenComments(res.data)
+          this.updatePagedComments()
+        } else {
+          console.warn('API返回数据格式不符合预期:', res)
+          this.allComments = []
+          this.pagedComments = []
+        }
+      } catch (error) {
+        console.error('获取评论失败:', error)
+        this.$message.error('获取评论失败，请稍后重试')
+        this.allComments = []
+        this.pagedComments = []
+      }
+    },
 
     // 发表评论
-    async publishComment() {
+    async publishComment () {
       if (!this.commentContent.trim() && !this.commentImage) {
         this.$message.error('请输入评论内容或上传图片')
         return
@@ -567,7 +566,7 @@ export default {
         const res = await videoApi.publishComment({
           videoId: this.videoId,
           content: this.commentContent + (this.commentImage ? ' ' + this.commentImage : ''),
-          parentId: 0,
+          parentId: 0
         })
 
         if (res.code === 200000) {
@@ -590,7 +589,7 @@ export default {
     },
 
     // 回复评论
-    async submitReply(comment, replyTo = null) {
+    async submitReply (comment, replyTo = null) {
       const replyContent = replyTo ? replyTo.replyContent : comment.replyContent
 
       if (!replyContent.trim()) {
@@ -604,18 +603,18 @@ export default {
         const parentId = replyTo ? replyTo.id : comment.id
         const replyToId = replyTo ? replyTo.user.id : comment.user.id
 
-        console.log("createTime"+comment.createTime);
-        console.log("parentId"+comment.parentId);
-        console.log("replyToId"+comment.replyToId);
+        console.log('createTime' + comment.createTime)
+        console.log('parentId' + comment.parentId)
+        console.log('replyToId' + comment.replyToId)
 
         const res = await videoApi.replyComment({
           videoId: this.videoId,
           content: replyContent.trim() + (replyTo ? (replyTo.replyImage ? ' ' + replyTo.replyImage : '') : (comment.replyImage ? ' ' + comment.replyImage : '')),
           parentId: parentId,
-          replyCommentId:comment.id,
+          replyCommentId: comment.id,
           replyToId: comment.user.id,
           toCreateTime: comment.createTime
-         
+
         })
 
         if (res.code === 200000) {
@@ -643,14 +642,14 @@ export default {
     },
 
     // 删除评论
-    async deleteComment(comment) {
+    async deleteComment (comment) {
       try {
         await this.$confirm('确定要删除这条评论吗?', '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning'
         })
-        console.log("commentId："+comment.id)
+        console.log('commentId：' + comment.id)
 
         const res = await videoApi.deleteComment(comment.id)
 
@@ -674,14 +673,14 @@ export default {
     },
 
     // 其他原有方法保持不变...
-    wsOpen() {
+    wsOpen () {
     },
-    wsClose() {
+    wsClose () {
       this.viewers--
     },
-    wsMessage(message) {
+    wsMessage (message) {
       let res = JSON.parse(message.data)
-      console.log("res="+res)
+      console.log('res=' + res)
       this.viewers = res.viewers
       if (res.text === null || !this.dp || !this.dp.danmaku || res.text === undefined) {
         return
@@ -692,28 +691,28 @@ export default {
         type: res.type
       })
     },
-    likeVideo() {
+    likeVideo () {
       videoApi.like(this.videoId).then(() => {
         this.like = !this.like
         let likeCount = this.videoInfo.like
         this.videoInfo.like = this.like ? parseInt(likeCount) + 1 : parseInt(likeCount) - 1
       })
     },
-    collectVideo() {
+    collectVideo () {
       videoApi.collect(this.videoId).then(() => {
         this.collect = !this.collect
         let collectionCount = this.videoInfo.collect
         this.videoInfo.collect = this.collect ? collectionCount + 1 : collectionCount - 1
       })
     },
-    updateHistory() {
+    updateHistory () {
       if (Global.user !== null) {
         videoApi.updateHistory(this.videoId, this.dp.video.currentTime)
-      }else{
+      } else {
         videoApi.updateHistoryUnlogin(this.videoId, this.dp.video.currentTime)
       }
     },
-    getHistory() {
+    getHistory () {
       videoApi.getHistory(this.videoId).then(res => {
         if (res.data !== -1) {
           this.$message('已为你跳转到上次的播放位置')
@@ -721,12 +720,12 @@ export default {
         }
       })
     },
-    getBasedItemRecommendList() {
+    getBasedItemRecommendList () {
       videoApi.basedItemRecommend().then(res => {
         this.recommendList = res.data
       })
     },
-    formatTime(seconds) {
+    formatTime (seconds) {
       const hours = Math.floor(seconds / 3600)
       const minutes = Math.floor((seconds % 3600) / 60)
       const remainingSeconds = Math.floor(seconds % 60)
@@ -741,7 +740,7 @@ export default {
         return `${formattedHours}:${formattedMinutes}:${formattedSeconds}`
       }
     },
-    play(videoId) {
+    play (videoId) {
       const query = {
         videoId: videoId
       }
@@ -755,11 +754,11 @@ export default {
         query: query
       }).catch(err => {
         if (err.name !== 'NavigationDuplicated') {
-          throw err;
+          throw err
         }
-      });
+      })
     },
-    queryVideos(tagName) {
+    queryVideos (tagName) {
       this.$router.push({
         name: 'Index',
         query: {
@@ -767,7 +766,7 @@ export default {
         }
       })
     },
-    setupPlayerEvents() {
+    setupPlayerEvents () {
       if (!this.dp) return
 
       let that = this
@@ -787,31 +786,31 @@ export default {
         }
       })
     },
-    setupDanmakuWebSocket() {
+    setupDanmakuWebSocket () {
       let videoId = this.$route.query.videoId
       this.ws = new WebSocket(`ws://${apiHostname}/danmaku/${videoId}`)
       this.ws.onopen = this.wsOpen
       this.ws.onmessage = this.wsMessage
       this.ws.onclose = this.wsClose
     },
-    goBackToAdmin() {
+    goBackToAdmin () {
       this.$router.push({
         path: '/admin/videos',
         query: { preventRefresh: 'true' }
       })
     },
-    toggleReplyBox(comment) {
-  comment.showReplyBox = !comment.showReplyBox
-  /* if (comment.showReplyBox) {
+    toggleReplyBox (comment) {
+      comment.showReplyBox = !comment.showReplyBox
+      /* if (comment.showReplyBox) {
     this.$set(comment, 'replyContent', `@${comment.user.nick} `)
   } else {
     this.$set(comment, 'replyContent', '')
   } */
-},
-    toggleShowReplies(comment) {
+    },
+    toggleShowReplies (comment) {
       comment.showReplies = !comment.showReplies
     },
-    getReplyToNick(comment, reply) {
+    getReplyToNick (comment, reply) {
       if (reply.parentId === comment.id) {
         return comment.user.nick
       }
@@ -819,14 +818,14 @@ export default {
       const parentReply = comment.sons.find(r => r.id === reply.parentId)
       return parentReply ? parentReply.user.nick : ''
     },
-    canDeleteComment(comment) {
+    canDeleteComment (comment) {
       if (this.isFromAdmin) return true
       if (!Global.user) return false
       return Global.user.id === comment.user.id || Global.user.role === 'admin'
     }
   },
   watch: {
-    $route(to, from) {
+    $route (to, from) {
       if (to.path === from.path && to.query !== from.query) {
         location.reload()
       }
@@ -1107,13 +1106,11 @@ export default {
   flex-grow: 1;
 }
 
-
 .username {
   font-weight: bold;
   font-size: 14px;
   color: #6d757a;
 }
-
 
 .comment-meta {
   margin-top: 8px;
@@ -1505,7 +1502,6 @@ export default {
   white-space: pre-wrap;
   word-break: break-word;
 }
-
 
 .comment-actions {
   display: flex;

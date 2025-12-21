@@ -7,7 +7,7 @@
             <img :src="imageUrl || user.avatar" class="avatar" alt="用户头像">
             <div v-if="isCurrentUser" class="avatar-edit-hint">点击修改头像</div>
           </div>
-          
+
           <el-dialog title="修改头像" :visible.sync="showAvatarUploader" width="30%">
             <el-upload
               class="avatar-uploader"
@@ -69,7 +69,7 @@
                   {{ user.gender || '未知' }}
                 </el-tag>
               </div>
-              <el-button 
+              <el-button
                 v-if="!isCurrentUser"
                 type="text"
                 icon="el-icon-message"
@@ -86,25 +86,25 @@
         </div>
       </div>
     </el-card>
-    
+
     <!-- 作品列表部分 -->
     <el-card class="works-card">
       <div slot="header" class="works-header">
         <span>作品列表</span>
       </div>
-      
+
       <!-- 用户视频列表 -->
       <div class="user-videos-section">
         <h3 class="section-title">
           <i class="el-icon-video-camera"></i> 视频
         </h3>
-        
+
         <el-empty v-if="videos.length === 0" description="暂无视频"></el-empty>
-        
+
         <div class="video-grid">
-          <div 
-            v-for="video in videos" 
-            :key="video.id" 
+          <div
+            v-for="video in videos"
+            :key="video.id"
             class="video-card"
             @click="goToVideoPlayer(video.id)">
             <div class="video-cover">
@@ -120,7 +120,7 @@
             </div>
           </div>
         </div>
-        
+
         <!-- 分页 -->
         <el-pagination
           v-if="videos.length > 0"
@@ -162,154 +162,154 @@ export default {
       imageUrl: null,
       currentPage: 1,
       pageSize: 12,
-      total: 0,
+      total: 0
     }
   },
   computed: {
-    isCurrentUser() {
-      return Global.user && Global.user.id === (this.$route.query.id || Global.user.id);
+    isCurrentUser () {
+      return Global.user && Global.user.id === (this.$route.query.id || Global.user.id)
     },
-    userId() {
-      return this.$route.query.id || (Global.user && Global.user.id);
+    userId () {
+      return this.$route.query.id || (Global.user && Global.user.id)
     }
   },
   mounted () {
     this.getUserInfo()
     this.getIsModify()
-    this.loadUserVideos();
+    this.loadUserVideos()
   },
   methods: {
-    loadUserVideos() {
+    loadUserVideos () {
       if (!this.userId) {
-        console.error('No user ID available');
-        return;
+        console.error('No user ID available')
+        return
       }
-      
+
       videoApi.getUserVideos({
         userId: this.userId,
         current: this.currentPage,
         size: this.pageSize
       }).then(res => {
-        this.videos = res.data.records || [];
-        this.total = Number(res.data.total) || 0;
-        this.currentPage = Number(res.data.current) || 1;
+        this.videos = res.data.records || []
+        this.total = Number(res.data.total) || 0
+        this.currentPage = Number(res.data.current) || 1
       }).catch(error => {
-        console.error('Error loading user videos:', error);
-        this.$message.error('加载视频失败');
-      });
+        console.error('Error loading user videos:', error)
+        this.$message.error('加载视频失败')
+      })
     },
-   
-    handlePrivateMessage() {
+
+    handlePrivateMessage () {
       if (!Global.user) {
-        this.$message.warning('请先登录');
-        this.$router.push('/login');
-        return;
+        this.$message.warning('请先登录')
+        this.$router.push('/login')
+        return
       }
-      
+
       this.$router.push({
         path: '/chat',
         query: {
           toUserId: this.user.id,
           toUserName: this.user.nick
         }
-      });
+      })
     },
-    
-    getUserInfo() {
+
+    getUserInfo () {
       if (!this.userId) {
-        this.$message.error('用户ID不存在');
-        this.$router.push('/');
-        return;
+        this.$message.error('用户ID不存在')
+        this.$router.push('/')
+        return
       }
-      
+
       userApi.getUserInfo(this.userId).then(res => {
-        this.user = res.data;
+        this.user = res.data
       }).catch(() => {
-        this.$message.error('查看资料失败');
-      });
+        this.$message.error('查看资料失败')
+      })
     },
-    
-    getIsModify() {
-      this.isModify = this.$route.query.isModify;
+
+    getIsModify () {
+      this.isModify = this.$route.query.isModify
     },
-    
-    goToVideoPlayer(videoId) {
+
+    goToVideoPlayer (videoId) {
       this.$router.push({
         path: '/video-player',
         query: {
           videoId: videoId
         }
-      });
+      })
     },
-    
-    beforeAvatarUpload(file) {
-      const isJPG = file.type === 'image/jpeg' || file.type === 'image/png';
-      const isLt10M = file.size / 1024 / 1024 < 10;
+
+    beforeAvatarUpload (file) {
+      const isJPG = file.type === 'image/jpeg' || file.type === 'image/png'
+      const isLt10M = file.size / 1024 / 1024 < 10
 
       if (!isJPG) {
-        this.$message.error('上传头像图片只能是 JPG/PNG 格式!');
+        this.$message.error('上传头像图片只能是 JPG/PNG 格式!')
       }
       if (!isLt10M) {
-        this.$message.error('上传头像图片大小不能超过 10MB!');
+        this.$message.error('上传头像图片大小不能超过 10MB!')
       }
-      return isJPG && isLt10M;
+      return isJPG && isLt10M
     },
-    
-    handleAvatarChange(file) {
-      this.tempAvatarUrl = URL.createObjectURL(file.raw);
-      this.tempAvatarFile = file.raw;
+
+    handleAvatarChange (file) {
+      this.tempAvatarUrl = URL.createObjectURL(file.raw)
+      this.tempAvatarFile = file.raw
     },
-    
-    confirmAvatar() {
+
+    confirmAvatar () {
       if (!this.tempAvatarFile) {
-        this.$message.warning('请选择头像图片');
-        return;
+        this.$message.warning('请选择头像图片')
+        return
       }
-      this.user.avatarFile = this.tempAvatarFile;
-      this.imageUrl = this.tempAvatarUrl;
-      this.showAvatarUploader = false;
-      this.$message.success('头像已更新，请点击保存按钮保存修改');
+      this.user.avatarFile = this.tempAvatarFile
+      this.imageUrl = this.tempAvatarUrl
+      this.showAvatarUploader = false
+      this.$message.success('头像已更新，请点击保存按钮保存修改')
     },
-    
-    formatDuration(seconds) {
-      if (!seconds) return '00:00';
-      const mins = Math.floor(seconds / 60);
-      const secs = seconds % 60;
-      return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+
+    formatDuration (seconds) {
+      if (!seconds) return '00:00'
+      const mins = Math.floor(seconds / 60)
+      const secs = seconds % 60
+      return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
     },
-    
-    formatDate(timestamp) {
-      if (!timestamp) return '';
-      const date = new Date(timestamp);
-      return `${date.getFullYear()}-${(date.getMonth()+1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+
+    formatDate (timestamp) {
+      if (!timestamp) return ''
+      const date = new Date(timestamp)
+      return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`
     },
-    
-    submit() {
+
+    submit () {
       userApi.updateInfo(this.user).then(() => {
         if (Global.user) {
-          Global.user.sign = this.user.sign;
-          Global.user.nick = this.user.nick;
-          Global.user.avatar = this.imageUrl || this.user.avatar;
+          Global.user.sign = this.user.sign
+          Global.user.nick = this.user.nick
+          Global.user.avatar = this.imageUrl || this.user.avatar
         }
-        this.$message.success('修改成功');
-        this.isModify = false;
-        this.getUserInfo();
+        this.$message.success('修改成功')
+        this.isModify = false
+        this.getUserInfo()
       }).catch(error => {
-        this.$message.error('修改失败: ' + (error.message || '未知错误'));
-      });
+        this.$message.error('修改失败: ' + (error.message || '未知错误'))
+      })
     },
-    
-    handlePageChange(page) {
-      this.currentPage = page;
-      this.loadUserVideos();
+
+    handlePageChange (page) {
+      this.currentPage = page
+      this.loadUserVideos()
     }
   },
   watch: {
-    $route(to, from) {
+    $route (to, from) {
       if (to.name === from.name && to.query !== from.query) {
-        this.isModify = to.query.isModify;
-        this.getUserInfo();
-        this.loadUserVideos();
+        this.isModify = to.query.isModify
+        this.getUserInfo()
+        this.loadUserVideos()
       }
     }
   }

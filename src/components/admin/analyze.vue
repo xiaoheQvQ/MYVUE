@@ -47,7 +47,7 @@ export default {
       default: ''
     }
   },
-  data() {
+  data () {
     return {
       chart: null,
       allStatsChart: null, // 新增的图表实例
@@ -58,14 +58,14 @@ export default {
       defaultDates: [] // 存储最近7天日期作为备用
     }
   },
-  mounted() {
+  mounted () {
     this.generateDefaultDates() // 生成最近7天日期
     this.initChart()
     this.initAllStatsChart() // 初始化新增的图表
     this.fetchData()
     this.fetchAllVideoStats() // 获取新增的用户所有视频数据
   },
-  beforeDestroy() {
+  beforeDestroy () {
     if (this.chart) {
       this.chart.dispose()
     }
@@ -76,7 +76,7 @@ export default {
   },
   methods: {
     // 生成最近7天的日期作为备用
-    generateDefaultDates() {
+    generateDefaultDates () {
       const dates = []
       const today = new Date()
       for (let i = 6; i >= 0; i--) {
@@ -87,7 +87,7 @@ export default {
       this.defaultDates = dates
     },
     // 格式化日期为 YYYY-MM-DD
-    formatDate(date) {
+    formatDate (date) {
       if (typeof date === 'string') {
         // 如果已经是字符串格式，直接返回
         return date
@@ -97,7 +97,7 @@ export default {
       const day = String(date.getDate()).padStart(2, '0')
       return `${year}-${month}-${day}`
     },
-    initChart() {
+    initChart () {
       this.chart = echarts.init(this.$refs.statsChart)
       const option = {
         title: {
@@ -170,7 +170,7 @@ export default {
       window.addEventListener('resize', this.resizeCharts)
     },
     // 初始化新增的用户所有视频统计图表
-    initAllStatsChart() {
+    initAllStatsChart () {
       this.allStatsChart = echarts.init(this.$refs.allStatsChart)
       const option = {
         title: {
@@ -241,7 +241,7 @@ export default {
       }
       this.allStatsChart.setOption(option)
     },
-    resizeCharts() {
+    resizeCharts () {
       if (this.chart) {
         this.chart.resize()
       }
@@ -249,12 +249,12 @@ export default {
         this.allStatsChart.resize()
       }
     },
-    async fetchData() {
+    async fetchData () {
       try {
         const response = await commentApi.selectUserVideoStatsGroupByDay(String(this.userId))
-    
-        console.log("API响应数据:", response)
-        
+
+        console.log('API响应数据:', response)
+
         if (response.code === 200000) {
           this.statsData = response.data || []
           this.processData()
@@ -268,11 +268,11 @@ export default {
       }
     },
     // 新增：获取用户所有视频统计数据
-    async fetchAllVideoStats() {
+    async fetchAllVideoStats () {
       try {
         const response = await commentApi.getVideoStatsLast7Days(String(this.userId))
-        console.log("用户所有视频API响应数据:", response)
-        
+        console.log('用户所有视频API响应数据:', response)
+
         if (response.code === 200000) {
           this.allVideoStatsData = response.data || []
           this.processAllVideoData()
@@ -285,10 +285,10 @@ export default {
         this.$message.error('获取用户所有视频统计数据失败')
       }
     },
-    processData() {
+    processData () {
       // 创建日期到数据的映射
       const dateDataMap = {}
-      
+
       // 首先填充默认日期，确保所有7天都有数据
       this.defaultDates.forEach(date => {
         dateDataMap[date] = {
@@ -299,7 +299,7 @@ export default {
           danmakuCount: 0
         }
       })
-      
+
       // 然后用API返回的数据覆盖默认数据
       this.statsData.forEach(item => {
         // 确保日期格式与defaultDates一致
@@ -352,10 +352,10 @@ export default {
       this.resizeCharts()
     },
     // 新增：处理用户所有视频数据
-    processAllVideoData() {
+    processAllVideoData () {
       // 创建日期到数据的映射
       const dateDataMap = {}
-      
+
       // 首先填充默认日期，确保所有7天都有数据
       this.defaultDates.forEach(date => {
         dateDataMap[date] = {
@@ -366,7 +366,7 @@ export default {
           danmakuCount: 0
         }
       })
-      
+
       // 然后用API返回的数据覆盖默认数据
       this.allVideoStatsData.forEach(item => {
         // 确保日期格式与defaultDates一致

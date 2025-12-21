@@ -1,10 +1,10 @@
 <template>
   <div class="history-container">
     <div class="history-grid">
-      <div 
-        v-for="history in paginatedHistory" 
-        :key="history.id" 
-        class="history-card" 
+      <div
+        v-for="history in paginatedHistory"
+        :key="history.id"
+        class="history-card"
       >
         <div class="card" style="border-radius: 8px; ">
           <div class="cover-container" @click="play(history.id)">
@@ -27,7 +27,7 @@
         </div>
       </div>
     </div>
-    
+
     <el-pagination
       class="pagination"
       layout="prev, pager, next"
@@ -58,10 +58,10 @@ export default {
     this.getHistoryList()
   },
   computed: {
-    paginatedHistory() {
-      const start = (this.currentPage - 1) * 12;
-      const end = start + 12;
-      return this.historyList.slice(start, end);
+    paginatedHistory () {
+      const start = (this.currentPage - 1) * 12
+      const end = start + 12
+      return this.historyList.slice(start, end)
     }
   },
   methods: {
@@ -73,7 +73,6 @@ export default {
       }
       videoApi.getHistoryList().then(res => {
         this.historyList = res.data
-      
       })
     },
     play (videoId) {
@@ -84,31 +83,31 @@ export default {
         }
       })
     },
-    formatDuration(seconds) {
-      const mins = Math.floor(seconds / 60);
-      const secs = seconds % 60;
-      return `${mins}:${secs < 10 ? '0' + secs : secs}`;
+    formatDuration (seconds) {
+      const mins = Math.floor(seconds / 60)
+      const secs = seconds % 60
+      return `${mins}:${secs < 10 ? '0' + secs : secs}`
     },
-    handlePageChange(page) {
-      this.currentPage = page;
+    handlePageChange (page) {
+      this.currentPage = page
     },
-    formatViewTime(timestamp) {
-      const now = new Date();
-      const viewTime = new Date(timestamp);
-      const diffMs = now - viewTime;
-      const diffMins = Math.floor(diffMs / (1000 * 60));
-      const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-      
+    formatViewTime (timestamp) {
+      const now = new Date()
+      const viewTime = new Date(timestamp)
+      const diffMs = now - viewTime
+      const diffMins = Math.floor(diffMs / (1000 * 60))
+      const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
+
       if (diffMins < 60) {
-        return `${diffMins}分钟前`;
+        return `${diffMins}分钟前`
       } else if (diffHours < 24) {
-        return `${diffHours}小时前`;
+        return `${diffHours}小时前`
       } else {
-        const month = viewTime.getMonth() + 1;
-        const day = viewTime.getDate();
-        const hours = viewTime.getHours().toString().padStart(2, '0');
-        const minutes = viewTime.getMinutes().toString().padStart(2, '0');
-        return `${month}月${day}日 ${hours}:${minutes}`;
+        const month = viewTime.getMonth() + 1
+        const day = viewTime.getDate()
+        const hours = viewTime.getHours().toString().padStart(2, '0')
+        const minutes = viewTime.getMinutes().toString().padStart(2, '0')
+        return `${month}月${day}日 ${hours}:${minutes}`
       }
     }
   }
@@ -132,7 +131,7 @@ export default {
   overflow: hidden;
   transition: all 0.3s;
   box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.1);
- 
+
 }
 
 .card:hover {

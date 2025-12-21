@@ -1,7 +1,7 @@
 <template>
   <div class="markdown-editor-container" :class="{ 'dark-mode': isDarkMode }">
     <el-container>
-  
+
         <div class="toolbar">
           <el-button-group class="toolbar-group">
             <el-button @click="insertText('**', '**')" title="加粗" class="toolbar-button">
@@ -72,7 +72,7 @@
               <el-button title="上传图片" class="toolbar-button">
                 <i class="el-icon-picture"></i>
               </el-button>
-            </el-upload>        
+            </el-upload>
           </el-button-group>
         </div>
 
@@ -113,13 +113,13 @@
 </template>
 
 <script>
-import marked from 'marked';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
+import marked from 'marked'
+import html2canvas from 'html2canvas'
+import jsPDF from 'jspdf'
 
 export default {
   name: 'MarkdownEditor',
-  data() {
+  data () {
     return {
       selectedTemplate: '',
       markdownTemplates: [
@@ -208,7 +208,7 @@ export default {
 * 设计并实现组件库，提升代码复用率达70%，显著减少开发时间
 * 主导性能优化项目，使客户端首屏加载时间减少50%，接入APM监控系统
 * 指导初级工程师，组织技术分享会，提升团队整体技术水平
-` },
+` }
         // 可以添加更多模板
       ],
       markdownText: `
@@ -274,289 +274,289 @@ export default {
         ol: 'decimal'
       },
       isDarkMode: false
-    };
+    }
   },
-  mounted() {
-    this.updatePreview();
+  mounted () {
+    this.updatePreview()
     marked.setOptions({
       breaks: true,
       gfm: true,
-      highlight: function(code, lang) {
-        return code;
+      highlight: function (code, lang) {
+        return code
       }
-    });
-    
+    })
+
     this.$nextTick(() => {
-      this.initDraggableAndResizable();
-    });
+      this.initDraggableAndResizable()
+    })
   },
   methods: {
-    applyTemplate() {
-      this.markdownText = this.selectedTemplate;
-      this.updatePreview();
+    applyTemplate () {
+      this.markdownText = this.selectedTemplate
+      this.updatePreview()
     },
-    toggleDarkMode() {
-      this.isDarkMode = !this.isDarkMode;
-      this.updatePreview();
+    toggleDarkMode () {
+      this.isDarkMode = !this.isDarkMode
+      this.updatePreview()
     },
-    parseCustomMarkdown() {
+    parseCustomMarkdown () {
       // 匹配 :::left 和多个 :::right 的模式
-      const leftRightRegex = /:::left\s*([\s\S]*?)\s*:::\s*((?::::right\s*[\s\S]*?\s*:::)*)/g;
-      
+      const leftRightRegex = /:::left\s*([\s\S]*?)\s*:::\s*((?::::right\s*[\s\S]*?\s*:::)*)/g
+
       let compiled = this.markdownText.replace(leftRightRegex, (match, leftContent, rightContents) => {
         // 解析所有右侧内容块
-        const rightContentRegex = /:::right\s*([\s\S]*?)\s*:::/g;
-        let rightContentItems = [];
-        let rightMatch;
-        
+        const rightContentRegex = /:::right\s*([\s\S]*?)\s*:::/g
+        let rightContentItems = []
+        let rightMatch
+
         while ((rightMatch = rightContentRegex.exec(rightContents))) {
-          rightContentItems.push(rightMatch[1]); // 保持原始顺序
+          rightContentItems.push(rightMatch[1]) // 保持原始顺序
         }
-        
+
         // 生成右侧内容HTML（使用flex-row-reverse实现反向排列）
-        let rightContentHTML = rightContentItems.map(content => 
+        let rightContentHTML = rightContentItems.map(content =>
           `<div class="right-content-item">${marked(content)}</div>`
-        ).join('');
-        
+        ).join('')
+
         return `<div class="left-right-container">
                   <div class="left-content">${marked(leftContent)}</div>
                   <div class="right-content">
                     ${rightContentHTML}
                   </div>
-                </div>`;
-      });
-      
+                </div>`
+      })
+
       // 处理非分栏部分的markdown
-      compiled = marked(compiled.replace(/:::left[\s\S]*?:::/g, ''));
+      compiled = marked(compiled.replace(/:::left[\s\S]*?:::/g, ''))
 
       // 添加对列表的处理
       compiled = marked(compiled, {
-          renderer: new marked.Renderer(),
-          gfm: true,
-          tables: true,
-          breaks: true,
-          sanitize: false,
-          smartLists: true,
-          smartypants: false
-      });
-      
-      this.compiledMarkdown = compiled;
+        renderer: new marked.Renderer(),
+        gfm: true,
+        tables: true,
+        breaks: true,
+        sanitize: false,
+        smartLists: true,
+        smartypants: false
+      })
+
+      this.compiledMarkdown = compiled
     },
-    updatePreview() {
-      this.parseCustomMarkdown();
+    updatePreview () {
+      this.parseCustomMarkdown()
       this.$nextTick(() => {
-        this.initDraggableAndResizable();
-        this.applyCustomStyles();
-      });
+        this.initDraggableAndResizable()
+        this.applyCustomStyles()
+      })
     },
-    applyCustomStyles() {
-      const preview = this.$refs.previewContainer;
+    applyCustomStyles () {
+      const preview = this.$refs.previewContainer
       if (!preview) return;
 
       // 应用标题间距
       ['h1', 'h2', 'h3', 'h4', 'h5'].forEach(tag => {
-        const elements = preview.querySelectorAll(tag);
+        const elements = preview.querySelectorAll(tag)
         elements.forEach(el => {
-          el.style.marginTop = this.spacingOptions.heading;
-          el.style.marginBottom = this.spacingOptions.heading;
-        });
-      });
+          el.style.marginTop = this.spacingOptions.heading
+          el.style.marginBottom = this.spacingOptions.heading
+        })
+      })
 
       // 应用段落间距
-      const paragraphs = preview.querySelectorAll('p');
+      const paragraphs = preview.querySelectorAll('p')
       paragraphs.forEach(p => {
-        p.style.marginTop = this.spacingOptions.paragraph;
-        p.style.marginBottom = this.spacingOptions.paragraph;
-      });
+        p.style.marginTop = this.spacingOptions.paragraph
+        p.style.marginBottom = this.spacingOptions.paragraph
+      })
 
       // 应用列表样式
-      const ulElements = preview.querySelectorAll('ul');
+      const ulElements = preview.querySelectorAll('ul')
       ulElements.forEach(ul => {
-        ul.style.marginTop = this.spacingOptions.list;
-        ul.style.marginBottom = this.spacingOptions.list;
-        ul.style.listStyleType = this.listStyles.ul;
-      });
+        ul.style.marginTop = this.spacingOptions.list
+        ul.style.marginBottom = this.spacingOptions.list
+        ul.style.listStyleType = this.listStyles.ul
+      })
 
-      const olElements = preview.querySelectorAll('ol');
+      const olElements = preview.querySelectorAll('ol')
       olElements.forEach(ol => {
-        ol.style.marginTop = this.spacingOptions.list;
-        ol.style.marginBottom = this.spacingOptions.list;
-        ol.style.listStyleType = this.listStyles.ol;
-      });
+        ol.style.marginTop = this.spacingOptions.list
+        ol.style.marginBottom = this.spacingOptions.list
+        ol.style.listStyleType = this.listStyles.ol
+      })
     },
-    async exportToPDF() {
-        try {
-            this.$message.info('正在生成PDF，请稍候...');
-            
-            // Clone the preview container to avoid affecting the original
-            const originalElement = this.$refs.previewContainer;
-            const clone = originalElement.cloneNode(true);
-            clone.style.position = 'absolute';
-            clone.style.left = '-9999px';
-            clone.style.width = originalElement.offsetWidth + 'px';
-            document.body.appendChild(clone);
-            
-            // Remove all resize handles from the clone
-            const resizeHandles = clone.querySelectorAll('.resize-handle');
-            resizeHandles.forEach(handle => handle.parentNode.removeChild(handle));
-            
-            // Add all uploaded images to the clone
-            this.uploadedImages.forEach(img => {
-                const imgElement = document.createElement('img');
-                imgElement.src = img.url;
-                imgElement.className = 'exported-image';
-                imgElement.style.position = 'absolute';
-                imgElement.style.left = img.x + 'px';
-                imgElement.style.top = img.y + 'px';
-                imgElement.style.width = img.width + 'px';
-                imgElement.style.height = img.height === 'auto' ? 'auto' : img.height + 'px';
-                clone.appendChild(imgElement);
-            });
-            
-            // Wait for images to load
-            await new Promise(resolve => setTimeout(resolve, 500));
-            
-            const canvas = await html2canvas(clone, {
-                scale: 2,
-                useCORS: true,
-                allowTaint: true,
-                scrollX: 0,
-                scrollY: 0,
-                windowWidth: clone.scrollWidth,
-                windowHeight: clone.scrollHeight
-            });
-            
-            document.body.removeChild(clone);
-            
-            const imgData = canvas.toDataURL('image/png');
-            const pdf = new jsPDF('p', 'mm', 'a4');
-            const imgWidth = 190;
-            const pageHeight = 277;
-            const imgHeight = canvas.height * imgWidth / canvas.width;
-            let heightLeft = imgHeight;
-            let position = 10;
-            
-            pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
-            heightLeft -= pageHeight;
-            
-            while (heightLeft >= 0) {
-                position = heightLeft - imgHeight;
-                pdf.addPage();
-                pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
-                heightLeft -= pageHeight;
-            }
-            
-            pdf.save('markdown-preview.pdf');
-            this.$message.success('PDF导出成功');
-        } catch (error) {
-            console.error('导出PDF失败:', error);
-            this.$message.error('PDF导出失败: ' + error.message);
+    async exportToPDF () {
+      try {
+        this.$message.info('正在生成PDF，请稍候...')
+
+        // Clone the preview container to avoid affecting the original
+        const originalElement = this.$refs.previewContainer
+        const clone = originalElement.cloneNode(true)
+        clone.style.position = 'absolute'
+        clone.style.left = '-9999px'
+        clone.style.width = originalElement.offsetWidth + 'px'
+        document.body.appendChild(clone)
+
+        // Remove all resize handles from the clone
+        const resizeHandles = clone.querySelectorAll('.resize-handle')
+        resizeHandles.forEach(handle => handle.parentNode.removeChild(handle))
+
+        // Add all uploaded images to the clone
+        this.uploadedImages.forEach(img => {
+          const imgElement = document.createElement('img')
+          imgElement.src = img.url
+          imgElement.className = 'exported-image'
+          imgElement.style.position = 'absolute'
+          imgElement.style.left = img.x + 'px'
+          imgElement.style.top = img.y + 'px'
+          imgElement.style.width = img.width + 'px'
+          imgElement.style.height = img.height === 'auto' ? 'auto' : img.height + 'px'
+          clone.appendChild(imgElement)
+        })
+
+        // Wait for images to load
+        await new Promise(resolve => setTimeout(resolve, 500))
+
+        const canvas = await html2canvas(clone, {
+          scale: 2,
+          useCORS: true,
+          allowTaint: true,
+          scrollX: 0,
+          scrollY: 0,
+          windowWidth: clone.scrollWidth,
+          windowHeight: clone.scrollHeight
+        })
+
+        document.body.removeChild(clone)
+
+        const imgData = canvas.toDataURL('image/png')
+        const pdf = new jsPDF('p', 'mm', 'a4')
+        const imgWidth = 190
+        const pageHeight = 277
+        const imgHeight = canvas.height * imgWidth / canvas.width
+        let heightLeft = imgHeight
+        let position = 10
+
+        pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight)
+        heightLeft -= pageHeight
+
+        while (heightLeft >= 0) {
+          position = heightLeft - imgHeight
+          pdf.addPage()
+          pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight)
+          heightLeft -= pageHeight
         }
+
+        pdf.save('markdown-preview.pdf')
+        this.$message.success('PDF导出成功')
+      } catch (error) {
+        console.error('导出PDF失败:', error)
+        this.$message.error('PDF导出失败: ' + error.message)
+      }
     },
-    getCursorPosition() {
-      const textarea = this.$refs.textarea.$refs.textarea;
+    getCursorPosition () {
+      const textarea = this.$refs.textarea.$refs.textarea
       return {
         start: textarea.selectionStart,
         end: textarea.selectionEnd
-      };
+      }
     },
-    setCursorPosition(start, end) {
-      const textarea = this.$refs.textarea.$refs.textarea;
-      textarea.focus();
+    setCursorPosition (start, end) {
+      const textarea = this.$refs.textarea.$refs.textarea
+      textarea.focus()
       setTimeout(() => {
-        textarea.setSelectionRange(start, end);
-      }, 0);
+        textarea.setSelectionRange(start, end)
+      }, 0)
     },
-    insertText(before, after) {
-      const { start, end } = this.getCursorPosition();
-      const selectedText = this.markdownText.substring(start, end);
-      
-      this.markdownText = 
-        this.markdownText.substring(0, start) + 
-        before + selectedText + after + 
-        this.markdownText.substring(end);
-      
-      this.updatePreview();
-      
+    insertText (before, after) {
+      const { start, end } = this.getCursorPosition()
+      const selectedText = this.markdownText.substring(start, end)
+
+      this.markdownText =
+        this.markdownText.substring(0, start) +
+        before + selectedText + after +
+        this.markdownText.substring(end)
+
+      this.updatePreview()
+
       // 设置光标位置
       if (selectedText.length > 0) {
-        this.setCursorPosition(start + before.length, end + before.length);
+        this.setCursorPosition(start + before.length, end + before.length)
       } else {
-        this.setCursorPosition(start + before.length, start + before.length);
+        this.setCursorPosition(start + before.length, start + before.length)
       }
     },
-    insertHeading(level) {
-      const { start } = this.getCursorPosition();
-      const heading = '#'.repeat(level) + ' ';
-      
+    insertHeading (level) {
+      const { start } = this.getCursorPosition()
+      const heading = '#'.repeat(level) + ' '
+
       // 获取当前行开始位置
-      let lineStart = start;
+      let lineStart = start
       while (lineStart > 0 && this.markdownText.charAt(lineStart - 1) !== '\n') {
-        lineStart--;
+        lineStart--
       }
-      
+
       // 检查当前行是否已经是标题
-      const currentLine = this.markdownText.substring(lineStart, start);
+      const currentLine = this.markdownText.substring(lineStart, start)
       if (currentLine.trim().startsWith('#')) {
         // 已经是标题，替换标题级别
-        const match = currentLine.match(/^#+/);
+        const match = currentLine.match(/^#+/)
         if (match) {
-          const currentLevel = match[0].length;
-          this.markdownText = 
-            this.markdownText.substring(0, lineStart) + 
-            heading + this.markdownText.substring(lineStart + currentLevel).trimLeft() + 
-            this.markdownText.substring(start);
+          const currentLevel = match[0].length
+          this.markdownText =
+            this.markdownText.substring(0, lineStart) +
+            heading + this.markdownText.substring(lineStart + currentLevel).trimLeft() +
+            this.markdownText.substring(start)
         }
       } else {
         // 不是标题，插入新标题
-        this.markdownText = 
-          this.markdownText.substring(0, lineStart) + 
-          heading + this.markdownText.substring(lineStart);
+        this.markdownText =
+          this.markdownText.substring(0, lineStart) +
+          heading + this.markdownText.substring(lineStart)
       }
-      
-      this.updatePreview();
-      this.setCursorPosition(lineStart + heading.length, lineStart + heading.length);
+
+      this.updatePreview()
+      this.setCursorPosition(lineStart + heading.length, lineStart + heading.length)
     },
-    insertLink() {
-      const { start, end } = this.getCursorPosition();
-      const selectedText = this.markdownText.substring(start, end);
-      const linkText = selectedText || '链接文本';
-      
-      this.markdownText = 
-        this.markdownText.substring(0, start) + 
-        `[${linkText}](url)` + 
-        this.markdownText.substring(end);
-      
-      this.updatePreview();
-      
+    insertLink () {
+      const { start, end } = this.getCursorPosition()
+      const selectedText = this.markdownText.substring(start, end)
+      const linkText = selectedText || '链接文本'
+
+      this.markdownText =
+        this.markdownText.substring(0, start) +
+        `[${linkText}](url)` +
+        this.markdownText.substring(end)
+
+      this.updatePreview()
+
       if (selectedText.length > 0) {
-        this.setCursorPosition(start + linkText.length + 3, start + linkText.length + 6);
+        this.setCursorPosition(start + linkText.length + 3, start + linkText.length + 6)
       } else {
-        this.setCursorPosition(start + 1, start + 1 + linkText.length);
+        this.setCursorPosition(start + 1, start + 1 + linkText.length)
       }
     },
-    insertTable() {
-      const { start } = this.getCursorPosition();
+    insertTable () {
+      const { start } = this.getCursorPosition()
       const table = `
 | 标题1 | 标题2 | 标题3 |
 |-------|-------|-------|
 | 内容1 | 内容2 | 内容3 |
 | 内容4 | 内容5 | 内容6 |
-`;
-      
-      this.markdownText = 
-        this.markdownText.substring(0, start) + 
-        table + 
-        this.markdownText.substring(start);
-      
-      this.updatePreview();
-      this.setCursorPosition(start + table.indexOf('内容1'), start + table.indexOf('内容1') + 3);
+`
+
+      this.markdownText =
+        this.markdownText.substring(0, start) +
+        table +
+        this.markdownText.substring(start)
+
+      this.updatePreview()
+      this.setCursorPosition(start + table.indexOf('内容1'), start + table.indexOf('内容1') + 3)
     },
-    handleImageUpload(file) {
-      const reader = new FileReader();
+    handleImageUpload (file) {
+      const reader = new FileReader()
       reader.onload = (e) => {
-        const imageUrl = e.target.result;
-        this.currentImageId++;
+        const imageUrl = e.target.result
+        this.currentImageId++
         this.uploadedImages.push({
           id: this.currentImageId,
           url: imageUrl,
@@ -566,33 +566,33 @@ export default {
           height: 'auto',
           originalWidth: 200,
           originalHeight: 'auto'
-        });
-        this.updatePreview();
-      };
-      reader.readAsDataURL(file.raw);
+        })
+        this.updatePreview()
+      }
+      reader.readAsDataURL(file.raw)
     },
-    clearAllImages() {
-      this.uploadedImages = [];
-      this.updatePreview();
+    clearAllImages () {
+      this.uploadedImages = []
+      this.updatePreview()
     },
-    setSpacing(type) {
+    setSpacing (type) {
       this.$prompt(`请输入${type === 'heading' ? '标题' : type === 'paragraph' ? '段落' : '列表'}间距(如1em, 10px)`, '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         inputValue: this.spacingOptions[type],
         inputValidator: (value) => {
           if (!value) {
-            return '请输入有效的间距值';
+            return '请输入有效的间距值'
           }
-          return true;
+          return true
         }
       }).then(({ value }) => {
-        this.spacingOptions[type] = value;
-        this.updatePreview();
-        this.$message.success('间距设置成功');
-      }).catch(() => {});
+        this.spacingOptions[type] = value
+        this.updatePreview()
+        this.$message.success('间距设置成功')
+      }).catch(() => {})
     },
-    setListStyle(type) {
+    setListStyle (type) {
       const options = type === 'ul' ? [
         { value: 'disc', label: '实心圆点' },
         { value: 'circle', label: '空心圆点' },
@@ -604,8 +604,8 @@ export default {
         { value: 'upper-roman', label: '大写罗马数字(I, II, III)' },
         { value: 'lower-alpha', label: '小写字母(a, b, c)' },
         { value: 'upper-alpha', label: '大写字母(A, B, C)' }
-      ];
-      
+      ]
+
       this.$prompt('请选择列表样式', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
@@ -614,174 +614,174 @@ export default {
         inputOptions: options,
         inputValidator: (value) => {
           if (!value) {
-            return '请选择列表样式';
+            return '请选择列表样式'
           }
-          return true;
+          return true
         }
       }).then(({ value }) => {
-        this.listStyles[type] = value;
-        this.updatePreview();
-        this.$message.success('列表样式设置成功');
-      }).catch(() => {});
+        this.listStyles[type] = value
+        this.updatePreview()
+        this.$message.success('列表样式设置成功')
+      }).catch(() => {})
     },
-    initDraggableAndResizable() {
-      const container = this.$refs.previewContainer;
-      if (!container) return;
-      
+    initDraggableAndResizable () {
+      const container = this.$refs.previewContainer
+      if (!container) return
+
       // Remove existing event listeners
-      const existingImages = container.querySelectorAll('.uploaded-image');
+      const existingImages = container.querySelectorAll('.uploaded-image')
       existingImages.forEach(img => {
-        img.onmousedown = null;
-        const resizeHandle = img.nextElementSibling;
+        img.onmousedown = null
+        const resizeHandle = img.nextElementSibling
         if (resizeHandle && resizeHandle.classList.contains('resize-handle')) {
-          resizeHandle.onmousedown = null;
-          img.parentNode.removeChild(resizeHandle);
+          resizeHandle.onmousedown = null
+          img.parentNode.removeChild(resizeHandle)
         }
-      });
-      
+      })
+
       // Add new images and handlers
       this.uploadedImages.forEach(imgData => {
-        let img = container.querySelector(`.image-${imgData.id}`);
-        
+        let img = container.querySelector(`.image-${imgData.id}`)
+
         if (!img) {
-          img = document.createElement('img');
-          img.className = `uploaded-image image-${imgData.id}`;
-          img.src = imgData.url;
-          img.draggable = false;
-          
-          img.style.position = 'absolute';
-          img.style.left = imgData.x + 'px';
-          img.style.top = imgData.y + 'px';
-          img.style.width = imgData.width + 'px';
-          img.style.height = imgData.height === 'auto' ? 'auto' : imgData.height + 'px';
-          img.style.maxWidth = '100%';
-          img.style.cursor = 'move';
-          img.style.zIndex = '100';
-          
+          img = document.createElement('img')
+          img.className = `uploaded-image image-${imgData.id}`
+          img.src = imgData.url
+          img.draggable = false
+
+          img.style.position = 'absolute'
+          img.style.left = imgData.x + 'px'
+          img.style.top = imgData.y + 'px'
+          img.style.width = imgData.width + 'px'
+          img.style.height = imgData.height === 'auto' ? 'auto' : imgData.height + 'px'
+          img.style.maxWidth = '100%'
+          img.style.cursor = 'move'
+          img.style.zIndex = '100'
+
           // Create resize handle
-          const resizeHandle = document.createElement('div');
-          resizeHandle.className = 'resize-handle';
-          resizeHandle.style.position = 'absolute';
-          resizeHandle.style.width = '10px';
-          resizeHandle.style.height = '10px';
-          resizeHandle.style.right = '-5px';
-          resizeHandle.style.bottom = '-5px';
-          resizeHandle.style.backgroundColor = this.isDarkMode ? '#67C23A' : '#409EFF';
-          resizeHandle.style.borderRadius = '50%';
-          resizeHandle.style.cursor = 'nwse-resize';
-          resizeHandle.style.zIndex = '101';
-          
-          container.appendChild(img);
-          container.appendChild(resizeHandle);
-          
+          const resizeHandle = document.createElement('div')
+          resizeHandle.className = 'resize-handle'
+          resizeHandle.style.position = 'absolute'
+          resizeHandle.style.width = '10px'
+          resizeHandle.style.height = '10px'
+          resizeHandle.style.right = '-5px'
+          resizeHandle.style.bottom = '-5px'
+          resizeHandle.style.backgroundColor = this.isDarkMode ? '#67C23A' : '#409EFF'
+          resizeHandle.style.borderRadius = '50%'
+          resizeHandle.style.cursor = 'nwse-resize'
+          resizeHandle.style.zIndex = '101'
+
+          container.appendChild(img)
+          container.appendChild(resizeHandle)
+
           // Drag functionality
           img.onmousedown = (e) => {
-            if (e.target !== img) return;
-            
-            e.preventDefault();
-            e.stopPropagation();
-            
-            const startX = e.clientX;
-            const startY = e.clientY;
-            const startLeft = parseInt(img.style.left);
-            const startTop = parseInt(img.style.top);
-            
-            const containerRect = container.getBoundingClientRect();
-            
+            if (e.target !== img) return
+
+            e.preventDefault()
+            e.stopPropagation()
+
+            const startX = e.clientX
+            const startY = e.clientY
+            const startLeft = parseInt(img.style.left)
+            const startTop = parseInt(img.style.top)
+
+            const containerRect = container.getBoundingClientRect()
+
             const onMouseMove = (e) => {
-              const dx = e.clientX - startX;
-              const dy = e.clientY - startY;
-              
-              let newLeft = startLeft + dx;
-              let newTop = startTop + dy;
-              
+              const dx = e.clientX - startX
+              const dy = e.clientY - startY
+
+              let newLeft = startLeft + dx
+              let newTop = startTop + dy
+
               // Boundary checks
-              newLeft = Math.max(0, Math.min(newLeft, containerRect.width - img.offsetWidth));
-              newTop = Math.max(0, Math.min(newTop, containerRect.height - img.offsetHeight));
-              
-              img.style.left = newLeft + 'px';
-              img.style.top = newTop + 'px';
-              
+              newLeft = Math.max(0, Math.min(newLeft, containerRect.width - img.offsetWidth))
+              newTop = Math.max(0, Math.min(newTop, containerRect.height - img.offsetHeight))
+
+              img.style.left = newLeft + 'px'
+              img.style.top = newTop + 'px'
+
               // Update position in uploadedImages array
-              const imgIndex = this.uploadedImages.findIndex(i => i.id === imgData.id);
+              const imgIndex = this.uploadedImages.findIndex(i => i.id === imgData.id)
               if (imgIndex !== -1) {
-                this.uploadedImages[imgIndex].x = newLeft;
-                this.uploadedImages[imgIndex].y = newTop;
+                this.uploadedImages[imgIndex].x = newLeft
+                this.uploadedImages[imgIndex].y = newTop
               }
-              
+
               // Update resize handle position
-              resizeHandle.style.left = (newLeft + img.offsetWidth - 5) + 'px';
-              resizeHandle.style.top = (newTop + img.offsetHeight - 5) + 'px';
-            };
-            
+              resizeHandle.style.left = (newLeft + img.offsetWidth - 5) + 'px'
+              resizeHandle.style.top = (newTop + img.offsetHeight - 5) + 'px'
+            }
+
             const onMouseUp = () => {
-              document.removeEventListener('mousemove', onMouseMove);
-              document.removeEventListener('mouseup', onMouseUp);
-            };
-            
-            document.addEventListener('mousemove', onMouseMove);
-            document.addEventListener('mouseup', onMouseUp);
-          };
-          
+              document.removeEventListener('mousemove', onMouseMove)
+              document.removeEventListener('mouseup', onMouseUp)
+            }
+
+            document.addEventListener('mousemove', onMouseMove)
+            document.addEventListener('mouseup', onMouseUp)
+          }
+
           // Resize functionality
           resizeHandle.onmousedown = (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            
-            const startX = e.clientX;
-            const startY = e.clientY;
-            const startWidth = img.offsetWidth;
-            const startHeight = img.offsetHeight;
-            const aspectRatio = startWidth / (imgData.height === 'auto' ? startWidth : startHeight);
-            
-            const containerRect = container.getBoundingClientRect();
-            const maxWidth = containerRect.width - parseInt(img.style.left);
-            const maxHeight = containerRect.height - parseInt(img.style.top);
-            
+            e.preventDefault()
+            e.stopPropagation()
+
+            const startX = e.clientX
+            const startY = e.clientY
+            const startWidth = img.offsetWidth
+            const startHeight = img.offsetHeight
+            const aspectRatio = startWidth / (imgData.height === 'auto' ? startWidth : startHeight)
+
+            const containerRect = container.getBoundingClientRect()
+            const maxWidth = containerRect.width - parseInt(img.style.left)
+            const maxHeight = containerRect.height - parseInt(img.style.top)
+
             const onMouseMove = (e) => {
-              const dx = e.clientX - startX;
-              const dy = e.clientY - startY;
-              
-              let newWidth = Math.max(50, Math.min(startWidth + dx, maxWidth));
-              let newHeight = imgData.height === 'auto' ? 'auto' : Math.max(50, Math.min(startHeight + dy, maxHeight));
-              
+              const dx = e.clientX - startX
+              const dy = e.clientY - startY
+
+              let newWidth = Math.max(50, Math.min(startWidth + dx, maxWidth))
+              let newHeight = imgData.height === 'auto' ? 'auto' : Math.max(50, Math.min(startHeight + dy, maxHeight))
+
               if (imgData.height !== 'auto') {
                 // Maintain aspect ratio if height is not auto
-                newHeight = newWidth / aspectRatio;
+                newHeight = newWidth / aspectRatio
               }
-              
-              img.style.width = newWidth + 'px';
+
+              img.style.width = newWidth + 'px'
               if (imgData.height !== 'auto') {
-                img.style.height = newHeight + 'px';
+                img.style.height = newHeight + 'px'
               }
-              
+
               // Update size in uploadedImages array
-              const imgIndex = this.uploadedImages.findIndex(i => i.id === imgData.id);
+              const imgIndex = this.uploadedImages.findIndex(i => i.id === imgData.id)
               if (imgIndex !== -1) {
-                this.uploadedImages[imgIndex].width = newWidth;
+                this.uploadedImages[imgIndex].width = newWidth
                 if (imgData.height !== 'auto') {
-                  this.uploadedImages[imgIndex].height = newHeight;
+                  this.uploadedImages[imgIndex].height = newHeight
                 }
               }
-              
+
               // Update resize handle position
-              resizeHandle.style.left = (parseInt(img.style.left) + newWidth - 5) + 'px';
-              resizeHandle.style.top = (parseInt(img.style.top) + (imgData.height === 'auto' ? img.offsetHeight : newHeight) - 5) + 'px';
-            };
-            
+              resizeHandle.style.left = (parseInt(img.style.left) + newWidth - 5) + 'px'
+              resizeHandle.style.top = (parseInt(img.style.top) + (imgData.height === 'auto' ? img.offsetHeight : newHeight) - 5) + 'px'
+            }
+
             const onMouseUp = () => {
-              document.removeEventListener('mousemove', onMouseMove);
-              document.removeEventListener('mouseup', onMouseUp);
-            };
-            
-            document.addEventListener('mousemove', onMouseMove);
-            document.addEventListener('mouseup', onMouseUp);
-          };
+              document.removeEventListener('mousemove', onMouseMove)
+              document.removeEventListener('mouseup', onMouseUp)
+            }
+
+            document.addEventListener('mousemove', onMouseMove)
+            document.addEventListener('mouseup', onMouseUp)
+          }
         }
-      });
+      })
     }
   }
-};
+}
 </script>
 
 <style>
@@ -1168,19 +1168,19 @@ export default {
   .editor-col, .preview-col {
     width: 100% !important;
   }
-  
+
   .preview-col {
     margin-top: 20px;
   }
-  
+
   .left-right-container {
     flex-direction: column;
   }
-  
+
   .left-content, .right-content {
     width: 100%;
   }
-  
+
   .right-content {
     margin-top: 10px;
     flex-direction: row;
@@ -1192,7 +1192,7 @@ export default {
     flex-direction: column;
     align-items: stretch;
   }
-  
+
   .toolbar-group {
     margin-right: 0;
     margin-bottom: 5px;

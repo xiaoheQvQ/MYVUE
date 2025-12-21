@@ -7,7 +7,7 @@
       </div>
       <div class="video-info">
         <div class="title">{{ video.title }}</div>
-      
+
         <div class="actions">
           <div class="action-group">
             <div class="action-item">
@@ -38,29 +38,29 @@ import Global from '@/components/Global.vue'
 import videoApi from '@/api/video/video'
 
 export default {
-  data() {
+  data () {
     return {
-      videoList: [],
+      videoList: []
     }
   },
   methods: {
-    async fetchVideos() {
-      const userId = Global.user.id 
+    async fetchVideos () {
+      const userId = Global.user.id
       videoApi.getWorks(userId).then(res => {
         this.videoList = res.data
       })
     },
-    formatDuration(seconds) {
+    formatDuration (seconds) {
       if (!seconds) return '00:00'
       const m = Math.floor(seconds / 60)
       const s = Math.floor(seconds % 60)
       return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`
     },
-    formatDate(dateStr) {
+    formatDate (dateStr) {
       if (!dateStr) return ''
       return dateStr.split('T')[0]
     },
-    handleEdit(video) {
+    handleEdit (video) {
       this.$router.push({
         path: '/change',
         query: {
@@ -68,7 +68,7 @@ export default {
         }
       })
     },
-    handleDelete(video) {
+    handleDelete (video) {
       this.$confirm('确定要删除这个视频吗?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
@@ -85,7 +85,7 @@ export default {
       })
     }
   },
-  mounted() {
+  mounted () {
     this.fetchVideos()
   }
 }

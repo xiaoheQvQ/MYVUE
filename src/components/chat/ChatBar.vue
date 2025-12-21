@@ -81,7 +81,7 @@ import Global from '@/components/Global.vue'
 
 export default {
   name: 'ChatBar',
-  data() {
+  data () {
     return {
       popoverVisible: false,
       messages: [],
@@ -92,17 +92,17 @@ export default {
     }
   },
   methods: {
-    handlePopoverShow() {
+    handlePopoverShow () {
       this.$nextTick(() => {
         this.scrollToBottom()
       })
     },
-    scrollToBottom() {
+    scrollToBottom () {
       if (this.$refs.chatMessages) {
         this.$refs.chatMessages.scrollTop = this.$refs.chatMessages.scrollHeight
       }
     },
-    sendMessage() {
+    sendMessage () {
       if (!this.messageInput.trim() || this.isLoading) return
 
       if (!Global.user) {
@@ -154,7 +154,7 @@ export default {
           this.isLoading = false
         })
     },
-    clearHistory() {
+    clearHistory () {
       this.$confirm('确认清除所有历史对话记录？', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
@@ -175,7 +175,7 @@ export default {
         })
       }).catch(() => {})
     },
-    createNewSession() {
+    createNewSession () {
       this.$confirm('确认开始新的对话会话？', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
@@ -196,7 +196,7 @@ export default {
         })
       }).catch(() => {})
     },
-    formatTime(date) {
+    formatTime (date) {
       const hours = date.getHours().toString().padStart(2, '0')
       const minutes = date.getMinutes().toString().padStart(2, '0')
       return `${hours}:${minutes}`

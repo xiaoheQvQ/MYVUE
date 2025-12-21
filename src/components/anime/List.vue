@@ -12,43 +12,43 @@
             @clear="handleFilter"
           />
         </el-form-item>
-        
+
         <el-form-item label="地区">
-          <el-select 
-            v-model="filterParams.area" 
-            placeholder="请选择地区" 
+          <el-select
+            v-model="filterParams.area"
+            placeholder="请选择地区"
             clearable
             @change="handleFilter"
           >
-            <el-option 
-              v-for="area in availableAreas" 
-              :key="area" 
-              :label="area" 
-              :value="area" 
+            <el-option
+              v-for="area in availableAreas"
+              :key="area"
+              :label="area"
+              :value="area"
             />
           </el-select>
         </el-form-item>
-        
+
         <el-form-item label="标签">
-          <el-select 
-            v-model="filterParams.tag" 
-            placeholder="请选择标签" 
+          <el-select
+            v-model="filterParams.tag"
+            placeholder="请选择标签"
             clearable
             @change="handleFilter"
           >
-            <el-option 
-              v-for="tag in availableTags" 
-              :key="tag" 
-              :label="tag" 
-              :value="tag" 
+            <el-option
+              v-for="tag in availableTags"
+              :key="tag"
+              :label="tag"
+              :value="tag"
             />
           </el-select>
         </el-form-item>
-        
+
         <el-form-item>
-          <el-button 
-            type="primary" 
-            icon="el-icon-search" 
+          <el-button
+            type="primary"
+            icon="el-icon-search"
             @click="handleFilter"
           >
             搜索
@@ -56,29 +56,29 @@
         </el-form-item>
       </el-form>
     </div>
-    
+
     <div class="anime-list">
       <el-row :gutter="20">
-        <el-col 
-          v-for="anime in animeList" 
-          :key="anime.id" 
-          :xs="12" 
-          :sm="8" 
-          :md="6" 
-          :lg="4" 
+        <el-col
+          v-for="anime in animeList"
+          :key="anime.id"
+          :xs="12"
+          :sm="8"
+          :md="6"
+          :lg="4"
           :xl="3"
         >
-          <el-card 
-            :body-style="{ padding: '0px' }" 
-            class="anime-card" 
+          <el-card
+            :body-style="{ padding: '0px' }"
+            class="anime-card"
             shadow="hover"
             @click.native="showAnimeDetail(anime.id)"
           >
             <div class="cover-container">
               <img :src="anime.coverUrl" class="anime-cover" />
               <div class="status-tag">
-                <el-tag 
-                  :type="getStatusTagType(anime.status)" 
+                <el-tag
+                  :type="getStatusTagType(anime.status)"
                   size="mini"
                 >
                   {{ getStatusText(anime.status) }}
@@ -89,10 +89,10 @@
               <div class="title">{{ anime.title }}</div>
               <div class="season">第{{ anime.seasonNumber }}季</div>
               <div class="tags">
-                <el-tag 
-                  v-for="tag in anime.tags" 
-                  :key="tag" 
-                  size="mini" 
+                <el-tag
+                  v-for="tag in anime.tags"
+                  :key="tag"
+                  size="mini"
                   type="info"
                 >
                   {{ tag }}
@@ -103,7 +103,7 @@
         </el-col>
       </el-row>
     </div>
-    
+
     <div class="pagination-container">
       <el-pagination
         background
@@ -116,11 +116,11 @@
         @current-change="handleCurrentChange"
       />
     </div>
-    
+
     <!-- 番剧详情对话框 -->
-    <el-dialog 
-      :title="currentAnime.title" 
-      :visible.sync="dialogVisible" 
+    <el-dialog
+      :title="currentAnime.title"
+      :visible.sync="dialogVisible"
       width="70%"
     >
       <div class="anime-detail">
@@ -140,9 +140,9 @@
                 <span>状态: {{ getStatusText(currentAnime.status) }}</span>
               </div>
               <div class="tags">
-                <el-tag 
-                  v-for="tag in currentAnime.tags" 
-                  :key="tag" 
+                <el-tag
+                  v-for="tag in currentAnime.tags"
+                  :key="tag"
                   type="info"
                 >
                   {{ tag }}
@@ -151,7 +151,7 @@
             </div>
           </el-col>
         </el-row>
-        
+
         <div class="episodes">
           <h3>分集列表</h3>
           <el-table :data="currentAnime.episodes" border style="width: 100%">
@@ -171,9 +171,9 @@
             </el-table-column>
             <el-table-column label="操作" width="120">
               <template slot-scope="scope">
-                <el-button 
-                  size="mini" 
-                  type="primary" 
+                <el-button
+                  size="mini"
+                  type="primary"
                   :disabled="scope.row.status !== 2"
                   @click="playEpisode(scope.row)"
                 >
@@ -193,7 +193,7 @@ import animeApi from '@/api/anime/anime'
 
 export default {
   name: 'AnimeList',
-  data() {
+  data () {
     return {
       filterParams: {
         title: '',
@@ -201,7 +201,7 @@ export default {
         area: ''
       },
       animeList: [],
-      availableAreas: [ '中国大陆','日本', '欧美', '其他'],
+      availableAreas: [ '中国大陆', '日本', '欧美', '其他'],
       availableTags: ['热血', '恋爱', '搞笑', '玄幻', '科幻', '悬疑', '治愈', '校园'],
       pagination: {
         current: 1,
@@ -223,19 +223,19 @@ export default {
       allTitles: [] // 用于存储所有番剧标题用于自动完成
     }
   },
-  created() {
+  created () {
     this.fetchData()
     // 初始化时获取所有标题用于自动完成
     this.getAllTitles()
   },
   methods: {
-    fetchData() {
+    fetchData () {
       const params = {
         ...this.filterParams,
         page: this.pagination.current,
         size: this.pagination.size
       }
-      
+
       animeApi.listAnimeSeries(params).then(response => {
         this.animeList = response.data
         this.pagination.total = response.total || 0
@@ -244,9 +244,9 @@ export default {
         this.$message.error('获取番剧列表失败')
       })
     },
-    
+
     // 获取所有番剧标题用于自动完成
-    getAllTitles() {
+    getAllTitles () {
       animeApi.listAnimeSeries({ size: 1000 }).then(response => {
         this.allTitles = response.data.map(item => ({
           value: item.title,
@@ -254,32 +254,32 @@ export default {
         }))
       })
     },
-    
-    querySearchAsync(queryString, cb) {
-  const results = queryString
-    ? this.allTitles.filter(item => 
-        item.value.toLowerCase().includes(queryString.toLowerCase()))
-    : this.allTitles.slice(0, 10)
-  
-  cb(results)
-},
-    
-    handleFilter() {
+
+    querySearchAsync (queryString, cb) {
+      const results = queryString
+        ? this.allTitles.filter(item =>
+          item.value.toLowerCase().includes(queryString.toLowerCase()))
+        : this.allTitles.slice(0, 10)
+
+      cb(results)
+    },
+
+    handleFilter () {
       this.pagination.current = 1
       this.fetchData()
     },
-    
-    handleSizeChange(size) {
+
+    handleSizeChange (size) {
       this.pagination.size = size
       this.fetchData()
     },
-    
-    handleCurrentChange(current) {
+
+    handleCurrentChange (current) {
       this.pagination.current = current
       this.fetchData()
     },
-    
-    showAnimeDetail(id) {
+
+    showAnimeDetail (id) {
       animeApi.getAnimeSeries(id).then(response => {
         this.currentAnime = response.data
         this.dialogVisible = true
@@ -288,8 +288,8 @@ export default {
         this.$message.error('获取番剧详情失败')
       })
     },
-    
-    playEpisode(episode) {
+
+    playEpisode (episode) {
       this.$message.success(`开始播放: ${this.currentAnime.title} 第${episode.episodeNumber}集`)
       this.$router.push({
         path: '/player',
@@ -299,8 +299,8 @@ export default {
         }
       })
     },
-    
-    getStatusText(status) {
+
+    getStatusText (status) {
       const statusMap = {
         0: '未发布',
         1: '已发布',
@@ -308,8 +308,8 @@ export default {
       }
       return statusMap[status] || '未知'
     },
-    
-    getStatusTagType(status) {
+
+    getStatusTagType (status) {
       const typeMap = {
         0: 'info',
         1: 'success',
@@ -317,8 +317,8 @@ export default {
       }
       return typeMap[status] || 'info'
     },
-    
-    getEpisodeStatusText(status) {
+
+    getEpisodeStatusText (status) {
       const statusMap = {
         0: '上传中',
         1: '转码中',
@@ -327,8 +327,8 @@ export default {
       }
       return statusMap[status] || '未知'
     },
-    
-    getEpisodeStatusTagType(status) {
+
+    getEpisodeStatusTagType (status) {
       const typeMap = {
         0: 'info',
         1: 'warning',
@@ -337,8 +337,8 @@ export default {
       }
       return typeMap[status] || 'info'
     },
-    
-    formatDuration(seconds) {
+
+    formatDuration (seconds) {
       if (!seconds) return '00:00'
       const mins = Math.floor(seconds / 60)
       const secs = seconds % 60

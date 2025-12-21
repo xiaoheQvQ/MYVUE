@@ -17,26 +17,26 @@
       </el-table-column>
       <el-table-column label="操作">
         <template v-slot="scope">
-          <el-button 
-            @click="pay(scope.row)" 
-            type="primary" 
-            size="small" 
+          <el-button
+            @click="pay(scope.row)"
+            type="primary"
+            size="small"
             :disabled="scope.row.state"
           >
             支付
           </el-button>
-          <el-button 
-            @click="refund(scope.row)" 
-            type="warning" 
-            size="small" 
+          <el-button
+            @click="refund(scope.row)"
+            type="warning"
+            size="small"
             :disabled="!scope.row.state"
           >
             退款
           </el-button>
-          <el-button 
-            @click="cancel(scope.row.id)" 
-            type="danger" 
-            size="small" 
+          <el-button
+            @click="cancel(scope.row.id)"
+            type="danger"
+            size="small"
             :disabled="scope.row.state"
           >
             取消
@@ -48,21 +48,21 @@
 </template>
 
 <script>
-const baseUrl = "http://localhost:8088"
+const baseUrl = 'http://localhost:8088'
 
 export default {
   name: 'Orders',
-  data() {
+  data () {
     return {
       tableData: []
     }
   },
-  created() {
+  created () {
     // 生成假数据
     this.generateMockData()
   },
   methods: {
-    generateMockData() {
+    generateMockData () {
       // 模拟5条订单数据
       this.tableData = [
         {
@@ -117,22 +117,22 @@ export default {
         }
       ]
     },
-    
-    formatDate(date) {
+
+    formatDate (date) {
       const year = date.getFullYear()
       const month = String(date.getMonth() + 1).padStart(2, '0')
       const day = String(date.getDate()).padStart(2, '0')
       const hours = String(date.getHours()).padStart(2, '0')
       const minutes = String(date.getMinutes()).padStart(2, '0')
       const seconds = String(date.getSeconds()).padStart(2, '0')
-      
+
       return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
     },
-    
-    pay(row) {
+
+    pay (row) {
       // 调用支付宝支付接口
       window.open(`${baseUrl}/alipay/pay?subject=${row.name}&traceNo=${row.orderId}&totalAmount=${row.total}`)
-      
+
       // 模拟支付成功后的状态更新
       setTimeout(() => {
         const index = this.tableData.findIndex(item => item.id === row.id)
@@ -144,8 +144,8 @@ export default {
         }
       }, 3000)
     },
-    
-    refund(row) {
+
+    refund (row) {
       // 调用退款接口
       this.$confirm('确定要退款吗?', '提示', {
         confirmButtonText: '确定',
@@ -173,8 +173,8 @@ export default {
         this.$message.info('已取消退款')
       })
     },
-    
-    cancel(id) {
+
+    cancel (id) {
       this.$confirm('确定要取消订单吗?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',

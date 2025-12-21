@@ -1,9 +1,9 @@
 <template>
   <div class="collection-container">
     <div class="collection-grid">
-      <div 
-        v-for="collection in paginatedCollections" 
-        :key="collection.id" 
+      <div
+        v-for="collection in paginatedCollections"
+        :key="collection.id"
         class="collection-card"
       >
         <div class="card">
@@ -25,7 +25,7 @@
         </div>
       </div>
     </div>
-    
+
     <!-- Element UI 分页组件 -->
     <el-pagination
       v-if="allCollections.length > pageSize"
@@ -50,14 +50,14 @@ export default {
   },
   data () {
     return {
-      allCollections: [],  // 所有收藏视频
-      currentPage: 1,      // 当前页码
-      pageSize: 8         // 每页显示的视频数量
+      allCollections: [], // 所有收藏视频
+      currentPage: 1, // 当前页码
+      pageSize: 8 // 每页显示的视频数量
     }
   },
   computed: {
     // 获取当前页的视频
-    paginatedCollections() {
+    paginatedCollections () {
       const start = (this.currentPage - 1) * this.pageSize
       const end = start + this.pageSize
       return this.allCollections.slice(start, end)
@@ -86,28 +86,28 @@ export default {
         this.getCollections()
       })
     },
-    formatDuration(seconds) {
-      const mins = Math.floor(seconds / 60);
-      const secs = seconds % 60;
-      return `${mins}:${secs < 10 ? '0' + secs : secs}`;
+    formatDuration (seconds) {
+      const mins = Math.floor(seconds / 60)
+      const secs = seconds % 60
+      return `${mins}:${secs < 10 ? '0' + secs : secs}`
     },
-    formatTime(timestamp) {
-      const now = new Date();
-      const date = new Date(timestamp);
-      const diff = (now - date) / 1000; // 秒数差
-      
+    formatTime (timestamp) {
+      const now = new Date()
+      const date = new Date(timestamp)
+      const diff = (now - date) / 1000 // 秒数差
+
       if (diff < 60) {
-        return '刚刚';
+        return '刚刚'
       } else if (diff < 3600) {
-        return `${Math.floor(diff / 60)}分钟前`;
+        return `${Math.floor(diff / 60)}分钟前`
       } else if (diff < 86400) {
-        return `${Math.floor(diff / 3600)}小时前`;
+        return `${Math.floor(diff / 3600)}小时前`
       } else {
-        return `${date.getMonth() + 1}月${date.getDate()}日 ${date.getHours()}:${date.getMinutes()}`;
+        return `${date.getMonth() + 1}月${date.getDate()}日 ${date.getHours()}:${date.getMinutes()}`
       }
     },
     // 分页切换
-    handleCurrentChange(val) {
+    handleCurrentChange (val) {
       this.currentPage = val
       // 滚动到顶部，提升用户体验
       window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -175,7 +175,6 @@ export default {
   flex-direction: column;
 }
 
-
 .title {
   margin: 0 0 12px 0;
   font-size: 16px;
@@ -188,7 +187,6 @@ export default {
   text-overflow: ellipsis;      /* 显示省略号 */
   width: 100%;                 /* 确保容器有宽度限制 */
 }
-
 
 .cancel-btn {
   align-self: flex-start;

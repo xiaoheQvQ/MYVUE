@@ -6,7 +6,7 @@ const api = {
    * @param {Object} params 查询参数
    * @returns {Promise}
    */
-  getCommentList(params) {
+  getCommentList (params) {
     return request({
       url: '/admin/comment/page',
       method: 'get',
@@ -19,30 +19,30 @@ const api = {
    * @param {number|string} id 弹幕ID
    * @returns {Promise}
    */
-  deleteComment(id) {
+  deleteComment (id) {
     return request({
       url: `/admin/comment/delete/${id}`,
       method: 'delete'
     })
   },
-  selectUserVideoStatsGroupByDay(userId){
+  selectUserVideoStatsGroupByDay (userId) {
     return request({
       url: `/admin/video/selectUserVideoStatsGroupByDay`,
       method: 'get',
-      params:{
+      params: {
         userId
       }
     })
   },
-  getVideoStatsLast7Days(userId){
+  getVideoStatsLast7Days (userId) {
     return request({
       url: `/admin/video/getVideoStatsLast7Days`,
       method: 'get',
-      params:{
-      userId
-    }
+      params: {
+        userId
+      }
     })
-  },
+  }
 }
 
-export default api 
+export default api

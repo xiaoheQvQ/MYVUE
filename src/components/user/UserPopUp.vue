@@ -9,17 +9,17 @@
       </div>
       <el-dropdown-menu slot="dropdown" class="user-menu">
         <el-dropdown-item class="menu-item">
-          <el-button 
-            type="primary" 
-            size="mini" 
-            v-if="!isSubscribe" 
+          <el-button
+            type="primary"
+            size="mini"
+            v-if="!isSubscribe"
             @click="subscribe()"
             class="subscribe-btn"
           >关注</el-button>
-          <el-button 
-            type="warning" 
-            size="mini" 
-            v-if="isSubscribe" 
+          <el-button
+            type="warning"
+            size="mini"
+            v-if="isSubscribe"
             @click="cancelSubscribe()"
             class="unsubscribe-btn"
           >取消关注</el-button>
@@ -71,7 +71,7 @@ export default {
       })
     },
     getDetail () {
-      console.log("查看用户详情执行了,用户id:"+this.id)
+      console.log('查看用户详情执行了,用户id:' + this.id)
       this.$router.push({
         name: 'userDetail',
         query: {

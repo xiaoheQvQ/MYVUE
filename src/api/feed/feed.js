@@ -3,25 +3,25 @@ import request from '../request'
 export default {
 
   // 新增：获取动态的评论列表
-  getPostComments(postId, params) {
+  getPostComments (postId, params) {
     return request({
       url: `/api/posts/${postId}/comments`,
       method: 'get',
       params
-    });
+    })
   },
- 
+
   // 新增：添加评论
-  addPostComment(postId, data) {
+  addPostComment (postId, data) {
     return request({
       url: `/api/posts/${postId}/comments`,
       method: 'post',
       data
-    });
+    })
   },
- 
+
   // 新增：获取评论通知
-  getCommentNotifications() {
+  getCommentNotifications () {
     return request({
       url: '/api/posts/notifications/comment',
       method: 'get'
@@ -29,14 +29,14 @@ export default {
   },
 
   // 新增：获取点赞通知
-  getLikeNotifications() {
+  getLikeNotifications () {
     return request({
       url: '/api/posts/notifications/like',
       method: 'get'
-    });
+    })
   },
   // 创建动态
-  createPost(data) {
+  createPost (data) {
     return request({
       url: '/api/posts',
       method: 'post',
@@ -45,7 +45,7 @@ export default {
   },
 
   // 获取动态列表
-  getPostFeed(params) {
+  getPostFeed (params) {
     return request({
       url: '/api/posts/feed',
       method: 'get',
@@ -54,7 +54,7 @@ export default {
   },
 
   // 点赞动态
-  likePost(postId) {
+  likePost (postId) {
     return request({
       url: `/api/posts/${postId}/like`,
       method: 'post'
@@ -62,7 +62,7 @@ export default {
   },
 
   // 取消点赞
-  unlikePost(postId) {
+  unlikePost (postId) {
     return request({
       url: `/api/posts/${postId}/like`,
       method: 'delete'
@@ -70,7 +70,7 @@ export default {
   },
 
   // 上传图片（单文件）
-  uploadImage(file) {
+  uploadImage (file) {
     const formData = new FormData()
     formData.append('file', file)
     return request({
@@ -84,7 +84,7 @@ export default {
   },
 
   // 修改后的批量上传方法 - 逐个上传
-  async uploadImages(files) {
+  async uploadImages (files) {
     const results = []
     for (const file of files) {
       try {

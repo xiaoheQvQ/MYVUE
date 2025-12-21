@@ -1,21 +1,21 @@
 import request from '../request'
 
 export default {
-  getLivingStreams() {
+  getLivingStreams () {
     return request({
       url: '/live/livingList',
       method: 'get'
     })
   },
-  
-  getStream() {
+
+  getStream () {
     return request({
       url: '/live/getStream',
       method: 'get'
     })
   },
-  
-  notify(nick) {
+
+  notify (nick) {
     return request({
       url: '/live/notify',
       method: 'post',
@@ -24,43 +24,43 @@ export default {
       }
     })
   },
-  
-  unpublish() {
+
+  unpublish () {
     return request({
       url: '/live/unpublish',
-      method: 'post',
+      method: 'post'
     })
   },
-  
-  getStatus(roomId) {
+
+  getStatus (roomId) {
     return request({
       url: '/live/status',
       method: 'get',
       params: { roomId }
     })
   },
-  
+
   // 余额相关API
-  getBalance() {
+  getBalance () {
     return request({
       url: '/balance/info',
       method: 'get'
     })
   },
-  
-  recharge(amount, orderId) {
+
+  recharge (amount, orderId) {
     return request({
       url: '/balance/recharge',
       method: 'post',
-      params: { 
+      params: {
 
         amount,
         orderId
       }
     })
   },
-  
-  consumeCoins( coins, businessId, remark) {
+
+  consumeCoins (coins, businessId, remark) {
     return request({
       url: '/balance/consume',
       method: 'post',
@@ -71,9 +71,9 @@ export default {
       }
     })
   },
-  
+
   // 支付接口
-  createRechargeOrder(amount, subject) {
+  createRechargeOrder (amount, subject) {
     return request({
       url: '/alipay/create-order',
       method: 'get',
@@ -83,8 +83,8 @@ export default {
       }
     })
   },
-  
-  checkPaymentStatus(orderId) {
+
+  checkPaymentStatus (orderId) {
     return request({
       url: '/alipay/check-pay',
       method: 'get',
@@ -92,8 +92,6 @@ export default {
         orderId
       }
     })
-  },
-
-
+  }
 
 }

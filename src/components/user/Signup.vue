@@ -9,46 +9,46 @@
         ]">
           <el-input v-model="user.nick" prefix-icon="el-icon-user" placeholder="请输入昵称"></el-input>
         </el-form-item>
-        
+
         <el-form-item prop="email" :rules="[
           { required: true, message: '请输入邮箱地址', trigger: 'blur' },
           { type: 'email', message: '请输入正确的邮箱地址', trigger: ['blur', 'change'] }
         ]">
           <el-input v-model="user.email" prefix-icon="el-icon-message" placeholder="请输入邮箱"></el-input>
         </el-form-item>
-        
+
         <el-form-item prop="password" :rules="[
           { required: true, message: '请输入密码', trigger: 'blur' },
           { min: 6, max: 16, message: '长度在 6 到 16 之间', trigger: 'blur' }
         ]">
           <el-input type="password" v-model="user.password" prefix-icon="el-icon-lock" placeholder="请输入密码"></el-input>
         </el-form-item>
-        
+
         <el-form-item prop="captcha" :rules="[
           {required: true, message: '请输入验证码', trigger: 'blur'},
           { min: 6, max: 6, message: '请输入正确的验证码', trigger: 'blur' }
         ]">
           <div class="captcha-container">
-            <el-input 
-              v-model="user.captcha" 
-              prefix-icon="el-icon-key" 
-              placeholder="请输入验证码" 
+            <el-input
+              v-model="user.captcha"
+              prefix-icon="el-icon-key"
+              placeholder="请输入验证码"
               class="captcha-input">
             </el-input>
-            <el-button 
-              @click="getCaptcha" 
-              :disabled="disableGetCaptcha" 
-              class="captcha-btn" 
+            <el-button
+              @click="getCaptcha"
+              :disabled="disableGetCaptcha"
+              class="captcha-btn"
               type="primary">
               {{ getCaptchaMessage }}
             </el-button>
           </div>
         </el-form-item>
-        
+
         <el-form-item class="signup-btn-container">
           <el-button type="primary" @click="signup" class="signup-btn" :loading="loading">注册</el-button>
         </el-form-item>
-        
+
         <div class="signup-options">
           <router-link to="/login" class="login-link">已有账号？立即登录</router-link>
           <router-link to="/" class="home-link">返回首页</router-link>
@@ -102,7 +102,7 @@ export default {
         this.$message.error('请先输入邮箱')
         return
       }
-      
+
       /* 定时器，禁止按钮 */
       let time = 60
       let timer = setInterval(() => {
@@ -116,7 +116,7 @@ export default {
           clearInterval(timer)
         }
       }, 1000)
-      
+
       /* 获取验证码 */
       userApi.getCaptcha(this.user.email).then(res => {
         this.$message.success('验证码已发送到邮箱，请查收')

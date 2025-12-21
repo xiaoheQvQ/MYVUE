@@ -72,8 +72,8 @@
             :header-cell-style="{background: '#f5f7fa', color: '#606266', padding: '12px 0'}">
             <el-table-column align="center" label="封面" width="160">
               <template slot-scope="scope">
-                <el-image 
-                  :src="scope.row.cover" 
+                <el-image
+                  :src="scope.row.cover"
                   fit="cover"
                   style="width: 120px; height: 70px; border-radius: 4px;"
                   :preview-src-list="[scope.row.cover]">
@@ -103,11 +103,11 @@
                 <span>{{ scope.row.count || 0 }}</span>
               </template>
             </el-table-column>
-          
+
             <el-table-column align="center" label="状态" width="120">
               <template slot-scope="scope">
-                <el-tag 
-                  :type="getStatusType(scope.row)" 
+                <el-tag
+                  :type="getStatusType(scope.row)"
                   size="medium">
                   {{ formatStatus(scope.row) }}
                 </el-tag>
@@ -183,11 +183,11 @@ import { formatDate } from '@/utils/date'
 export default {
   name: 'VideoManagement',
   filters: {
-    formatDate(time) {
+    formatDate (time) {
       return formatDate(new Date(time), 'yyyy-MM-dd hh:mm:ss')
     }
   },
-  data() {
+  data () {
     return {
       list: [], // 视频列表
       total: 0,
@@ -199,36 +199,35 @@ export default {
       }
     }
   },
-  created() {
+  created () {
     // 检查是否是管理员登录
     if (localStorage.getItem('loginType') !== 'admin') {
       this.$router.push('/login')
       this.$message.error('请先以管理员身份登录')
       return
     }
-    
+
     this.fetchData()
   },
   methods: {
-    handleAddSubtitle(row) {
-    console.log("videoId:"+row.videoId);
-    console.log("id:"+row.id);
-    adminVideoApi.WavSub(row.videoId).then(res => {
-      
-    })
-    
-  },
-    formatDuration(seconds) {
+    handleAddSubtitle (row) {
+      console.log('videoId:' + row.videoId)
+      console.log('id:' + row.id)
+      adminVideoApi.WavSub(row.videoId).then(res => {
+
+      })
+    },
+    formatDuration (seconds) {
       if (!seconds) return '00:00'
-      
+
       const minutes = Math.floor(seconds / 60)
       const remainingSeconds = seconds % 60
-      
+
       return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`
     },
-    fetchData() {
+    fetchData () {
       this.listLoading = true
-      
+
       // 调用后端API获取视频列表
       adminVideoApi.getVideoList(this.listQuery).then(res => {
         if (res.code === 200000) {
@@ -243,19 +242,19 @@ export default {
         this.listLoading = false
       })
     },
-    handleFilter() {
+    handleFilter () {
       this.listQuery.current = 1
       this.fetchData()
     },
-    handleSizeChange(val) {
+    handleSizeChange (val) {
       this.listQuery.size = val
       this.fetchData()
     },
-    handleCurrentChange(val) {
+    handleCurrentChange (val) {
       this.listQuery.current = val
       this.fetchData()
     },
-    formatStatus(row) {
+    formatStatus (row) {
       // 判断视频状态
       if (row.status === 'Checking' || row.auditStatus === 'Init') {
         return '审核中'
@@ -267,7 +266,7 @@ export default {
         return row.status || '未知'
       }
     },
-    getStatusType(row) {
+    getStatusType (row) {
       // 判断视频状态，返回对应的Tag类型
       if (row.status === 'Checking' || row.auditStatus === 'Init') {
         return 'warning'
@@ -279,7 +278,7 @@ export default {
         return 'info'
       }
     },
-    handlePreview(row) {
+    handlePreview (row) {
       // 检查视频状态
       if (row.status === 'Checking' || row.auditStatus === 'Init') {
         this.$message.warning('该视频正在审核中，暂时无法预览。')
@@ -288,7 +287,7 @@ export default {
         this.$message.error('该视频审核未通过，无法预览。')
         return
       }
-      
+
       // 打开视频预览，添加来源参数
       this.$router.push({
         path: '/video-player',
@@ -298,7 +297,7 @@ export default {
         }
       })
     },
-    handleDelete(row) {
+    handleDelete (row) {
       this.$confirm('确认删除该视频?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
@@ -320,7 +319,7 @@ export default {
         // 取消删除
       })
     },
-    handleApprove(row) {
+    handleApprove (row) {
       this.$confirm('确认通过该视频的审核?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
@@ -347,12 +346,12 @@ export default {
         // 取消操作
       })
     },
-    handleUserCommand(command) {
+    handleUserCommand (command) {
       if (command === 'logout') {
         this.logout()
       }
     },
-    logout() {
+    logout () {
       // 退出登录
       userApi.logout().then(() => {
         localStorage.removeItem('accessToken')

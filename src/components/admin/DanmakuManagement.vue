@@ -134,11 +134,11 @@ import { formatDate } from '@/utils/date'
 export default {
   name: 'commentManagement',
   filters: {
-    formatDate(time) {
+    formatDate (time) {
       return formatDate(new Date(time), 'yyyy-MM-dd hh:mm:ss')
     }
   },
-  data() {
+  data () {
     return {
       list: [], // 评论列表
       total: 0,
@@ -151,34 +151,34 @@ export default {
       }
     }
   },
-  created() {
+  created () {
     // 检查是否是管理员登录
     if (localStorage.getItem('loginType') !== 'admin') {
       this.$router.push('/login')
       this.$message.error('请先以管理员身份登录')
       return
     }
-    
+
     this.fetchData()
   },
   methods: {
-    fetchData() {
+    fetchData () {
       this.listLoading = true
-      
+
       // 构建查询参数
       const params = {
         current: this.listQuery.current,
         size: this.listQuery.size
       }
-      
+
       if (this.listQuery.content) {
         params.content = this.listQuery.content
       }
-      
+
       if (this.listQuery.userName) {
         params.userName = this.listQuery.userName
       }
-      
+
       // 使用新的danmakuApi获取评论列表
       commentApi.getCommentList(params)
         .then(res => {
@@ -196,19 +196,19 @@ export default {
           this.listLoading = false
         })
     },
-    handleFilter() {
+    handleFilter () {
       this.listQuery.current = 1
       this.fetchData()
     },
-    handleSizeChange(val) {
+    handleSizeChange (val) {
       this.listQuery.size = val
       this.fetchData()
     },
-    handleCurrentChange(val) {
+    handleCurrentChange (val) {
       this.listQuery.current = val
       this.fetchData()
     },
-    handleDelete(row) {
+    handleDelete (row) {
       this.$confirm('确认删除该评论?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
@@ -232,12 +232,12 @@ export default {
         // 取消删除
       })
     },
-    handleUserCommand(command) {
+    handleUserCommand (command) {
       if (command === 'logout') {
         this.logout()
       }
     },
-    logout() {
+    logout () {
       // 退出登录
       userApi.logout().then(() => {
         localStorage.removeItem('accessToken')
@@ -376,4 +376,4 @@ export default {
 .avatar-dropdown {
   cursor: pointer;
 }
-</style> 
+</style>

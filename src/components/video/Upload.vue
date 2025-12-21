@@ -173,9 +173,9 @@
                 <el-radio label="new">创建新系列</el-radio>
                 <el-radio label="existing">选择现有系列</el-radio>
               </el-radio-group>
-              <el-select 
+              <el-select
                 v-if="seriesOption === 'existing'"
-                v-model="videoInfo.seriesId" 
+                v-model="videoInfo.seriesId"
                 placeholder="选择现有系列"
                 style="width: 100%; margin-top: 10px;"
                 filterable>
@@ -300,7 +300,7 @@ export default {
     }
   },
   computed: {
-    currentStatusStep() {
+    currentStatusStep () {
       const statusSteps = {
         'INIT': 1,
         'UPLOADING': 2,
@@ -309,7 +309,7 @@ export default {
       }
       return statusSteps[this.videoInfo.status] || 0
     },
-    statusMessage() {
+    statusMessage () {
       const messages = {
         'INIT': '请填写视频信息',
         'UPLOADING': '视频上传中，请稍候...',
@@ -319,7 +319,7 @@ export default {
       }
       return messages[this.videoInfo.status] || '处理中...'
     },
-    getStatusIcon() {
+    getStatusIcon () {
       const icons = {
         'INIT': 'el-icon-edit',
         'UPLOADING': 'el-icon-loading',
@@ -330,7 +330,7 @@ export default {
       return icons[this.videoInfo.status] || 'el-icon-loading'
     }
   },
-  created() {
+  created () {
     if (!localStorage.getItem('accessToken')) {
       this.$router.push('/login')
       return
@@ -339,19 +339,19 @@ export default {
     this.getAreas()
     this.getTags()
   },
-  beforeDestroy() {
+  beforeDestroy () {
     this.clearAllTimers()
     if (this.statusWebSocket) {
       this.statusWebSocket.close()
     }
   },
   watch: {
-    '$route'(to, from) {
+    '$route' (to, from) {
       if (to.path === '/upload-video') {
         this.resetComponent()
       }
     },
-    isSeriesVideo(newVal) {
+    isSeriesVideo (newVal) {
       if (newVal) {
         this.getUserSeries()
       } else {
@@ -361,7 +361,7 @@ export default {
     }
   },
   methods: {
-    resetComponent() {
+    resetComponent () {
       this.videoInfo = {
         title: '',
         description: '',
@@ -394,7 +394,7 @@ export default {
         this.$refs.covers.clearFiles()
       }
     },
-    clearAllTimers() {
+    clearAllTimers () {
       if (this.statusPollingTimer) {
         clearInterval(this.statusPollingTimer)
         this.statusPollingTimer = null
@@ -404,16 +404,16 @@ export default {
         this.seriesPollingTimer = null
       }
     },
-    resetForm() {
+    resetForm () {
       this.$refs.form.resetFields()
       this.resetComponent()
     },
-    handleSeriesOptionChange(val) {
+    handleSeriesOptionChange (val) {
       if (val === 'new') {
         this.videoInfo.seriesId = null
       }
     },
-    handleSeriesChange() {
+    handleSeriesChange () {
       if (this.isSeriesVideo) {
         this.getUserSeries()
       } else {
@@ -421,7 +421,7 @@ export default {
         this.seriesOption = 'new'
       }
     },
-    getUserSeries() {
+    getUserSeries () {
       if (Global.user && Global.user.id) {
         videoApi.getUserSeries(Global.user.id).then(res => {
           this.existingSeries = res.data || []
@@ -431,7 +431,7 @@ export default {
         })
       }
     },
-    onChangeVideoFileHandler(file) {
+    onChangeVideoFileHandler (file) {
       this.$refs.videos.uploadFiles = []
       this.$refs.videos.uploadFiles.push(file)
 
@@ -447,44 +447,44 @@ export default {
         videoElement.src = URL.createObjectURL(file.raw)
       }
     },
-    handlePictureCardPreview(file) {
+    handlePictureCardPreview (file) {
       this.dialogImageUrl = file.url
       this.dialogVisible = true
     },
-    onChangeCoverFileHandler(file) {
+    onChangeCoverFileHandler (file) {
       this.$refs.covers.uploadFiles = []
       this.$refs.covers.uploadFiles.push(file)
     },
-    handleTagClose(index) {
-      this.videoInfo.tags.splice(index, 1);
+    handleTagClose (index) {
+      this.videoInfo.tags.splice(index, 1)
     },
-    showInput() {
-      this.inputVisible = true;
+    showInput () {
+      this.inputVisible = true
       this.$nextTick(_ => {
-        this.$refs.saveTagInput.$refs.input.focus();
-      });
+        this.$refs.saveTagInput.$refs.input.focus()
+      })
     },
-    handleInputConfirm() {
-      let inputValue = this.inputValue;
+    handleInputConfirm () {
+      let inputValue = this.inputValue
       if (inputValue) {
-        this.videoInfo.tags.push(inputValue);
+        this.videoInfo.tags.push(inputValue)
       }
-      this.inputVisible = false;
-      this.inputValue = '';
+      this.inputVisible = false
+      this.inputValue = ''
     },
-    addPredefinedTag(tag) {
+    addPredefinedTag (tag) {
       const exists = this.videoInfo.tags.some(t =>
         (typeof t === 'object' && t.id === tag.id) ||
         (typeof t === 'string' && t === tag.name)
-      );
+      )
 
       if (!exists) {
-        this.videoInfo.tags.push(tag);
+        this.videoInfo.tags.push(tag)
       } else {
-        this.$message.warning('该标签已添加');
+        this.$message.warning('该标签已添加')
       }
     },
-    upload() {
+    upload () {
       this.$refs.form.validate(valid => {
         if (valid) {
           this.fullscreenLoading = true
@@ -591,7 +591,7 @@ export default {
         }
       })
     },
-    startSeriesPolling() {
+    startSeriesPolling () {
       if (this.seriesPollingTimer) {
         clearInterval(this.seriesPollingTimer)
       }
@@ -601,17 +601,17 @@ export default {
         }
       }, 5000)
     },
-    getAreas() {
+    getAreas () {
       videoApi.getAreas().then(res => {
         this.areas = res.data
       })
     },
-    getTags() {
+    getTags () {
       videoApi.getTags().then(res => {
         this.tags = res.data
       })
     },
-    connectStatusWebSocket() {
+    connectStatusWebSocket () {
       if (Global.user) {
         const wsUrl = `ws://${apiHostname}/ws/notification`
         this.statusWebSocket = new WebSocket(wsUrl)
@@ -663,7 +663,7 @@ export default {
         }
       }
     },
-    handlePublishedStatus() {
+    handlePublishedStatus () {
       videoApi.getVideoDetail(this.videoId)
         .then(res => {
           this.videoInfo = {
@@ -673,7 +673,7 @@ export default {
           }
           this.clearStatusPolling()
           this.fullscreenLoading = false
-          
+
           // 如果是分P视频，获取系列列表
           if (this.isSeriesVideo && this.videoInfo.seriesId) {
             this.getVideoSeries(this.videoInfo.seriesId)
@@ -685,7 +685,7 @@ export default {
           this.fullscreenLoading = false
         })
     },
-    getVideoSeries(seriesId) {
+    getVideoSeries (seriesId) {
       videoApi.getVideoSeries(seriesId).then(res => {
         this.videoSeries = res.data || []
         // 如果所有视频都已发布，停止轮询
@@ -697,19 +697,19 @@ export default {
         console.error('获取视频系列失败:', err)
       })
     },
-    startStatusPolling() {
+    startStatusPolling () {
       this.clearStatusPolling()
       this.statusPollingTimer = setInterval(() => {
         this.checkVideoStatus()
       }, 10000)
     },
-    clearStatusPolling() {
+    clearStatusPolling () {
       if (this.statusPollingTimer) {
         clearInterval(this.statusPollingTimer)
         this.statusPollingTimer = null
       }
     },
-    checkVideoStatus() {
+    checkVideoStatus () {
       videoApi.getVideoDetail(this.videoId)
         .then(res => {
           if (res.data && res.data.status) {
@@ -725,7 +725,7 @@ export default {
           console.error('Failed to check video status:', err)
         })
     },
-    goToVideoPlayer() {
+    goToVideoPlayer () {
       this.$router.push({
         path: '/video-player',
         query: {
@@ -733,7 +733,7 @@ export default {
         }
       })
     },
-    goToSeriesVideo(videoId) {
+    goToSeriesVideo (videoId) {
       this.$router.push({
         path: '/video-player',
         query: {
@@ -741,13 +741,13 @@ export default {
         }
       })
     },
-    formatDuration(seconds) {
+    formatDuration (seconds) {
       if (!seconds) return '00:00'
       const mins = Math.floor(seconds / 60)
       const secs = Math.floor(seconds % 60)
       return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
     },
-    getStatusTagType(status) {
+    getStatusTagType (status) {
       const types = {
         'UPLOADING': 'warning',
         'PROCESSING': 'info',
@@ -756,7 +756,7 @@ export default {
       }
       return types[status] || ''
     },
-    getStatusText(status) {
+    getStatusText (status) {
       const texts = {
         'UPLOADING': '上传中',
         'PROCESSING': '处理中',

@@ -28,8 +28,7 @@ import feed from '@/components/feed/postCreate.vue'
 import feedCard from '@/components/feed/postCard.vue'
 import feedList from '@/components/feed/postList.vue'
 import feedPage from '@/components/feed/feedPage.vue'
-import MusicPage from '@/components/music/MusicPlayer.vue'
-
+import MusicPlayer from '@/components/music/MusicPlayer.vue'
 Vue.use(Router)
 
 const router = new Router({
@@ -39,6 +38,10 @@ const router = new Router({
       path: '/',
       name: 'Index',
       component: Index
+    }, {
+      path: '/music',
+      name: 'MusicPlayer',
+      component: MusicPlayer
     },
     {
       path: '/vip',
@@ -68,7 +71,7 @@ const router = new Router({
     {
       path: '/feed',
       name: 'feed',
-      component: feed,
+      component: feed
     },
     {
       path: '/feedtList',
@@ -100,7 +103,7 @@ const router = new Router({
       name: 'adminAnalyze',
       component: adminAnalyze,
       props: (route) => ({
-        userId: route.query.userId,
+        userId: route.query.userId
       })
     },
     {
@@ -211,54 +214,49 @@ const router = new Router({
       name: 'danmakuManagement',
       component: DanmakuManagement,
       meta: { requiresAuth: true, requiresAdmin: true }
-    },
-
-    {
-      path: '/music',
-      name: 'musicPage',
-      component: MusicPage
     }
-  ],
+
+  ]
 }
 )
 
 // 导航守卫
 router.beforeEach((to, from, next) => {
   // 检查是否需要令牌
-  const needsAuth = to.matched.some(record => record.meta.requiresAuth);
+  const needsAuth = to.matched.some(record => record.meta.requiresAuth)
   // 检查是否需要管理员权限
-  const needsAdmin = to.matched.some(record => record.meta.requiresAdmin);
+  const needsAdmin = to.matched.some(record => record.meta.requiresAdmin)
   // 检查是否有令牌
-  const hasToken = !!localStorage.getItem('accessToken');
+  const hasToken = !!localStorage.getItem('accessToken')
   // 检查是否是管理员
-  const isAdmin = localStorage.getItem('loginType') === 'admin';
+  const isAdmin = localStorage.getItem('loginType') === 'admin'
 
   // 通过路径判断是否请求访问管理员页面
-  const requestingAdminPage = to.path.startsWith('/admin');
+  const requestingAdminPage = to.path.startsWith('/admin')
 
   // 情况1: 请求需要认证的页面，但没有令牌
   if (needsAuth && !hasToken) {
     return next({
       path: '/login',
       query: { redirect: to.fullPath }
-    });
+    })
   }
 
   // 情况2: 请求管理员页面，但不是管理员
   if (needsAdmin && !isAdmin) {
     return next({
       path: '/'
-    });
+    })
   }
 
   // 情况3: 有令牌的管理员请求用户端页面
   if (hasToken && isAdmin && !requestingAdminPage) {
     // 允许管理员访问用户端页面，将由App.vue的getInfo方法处理
-    return next();
+    return next()
   }
 
   // 其他情况正常通过
-  next();
-});
+  next()
+})
 
 export default router

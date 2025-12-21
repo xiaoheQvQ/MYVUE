@@ -85,21 +85,21 @@
             <div class="tag-tip">最多可添加5个标签</div>
           </el-form-item>
           <el-form-item label="视频描述">
-            <el-input 
-              type="textarea" 
-              v-model="videoInfo.description" 
-              :rows="4" 
-              maxlength="500" 
+            <el-input
+              type="textarea"
+              v-model="videoInfo.description"
+              :rows="4"
+              maxlength="500"
               show-word-limit
               placeholder="请输入视频描述，500字以内"></el-input>
           </el-form-item>
-          
+
           <!-- 分P视频排序区域 -->
           <el-form-item label="分P排序" v-if="seriesList && seriesList.length > 0">
             <div class="series-sort-container">
               <div class="series-sort-hint">拖动可调整分P顺序</div>
-              <draggable 
-                v-model="seriesList" 
+              <draggable
+                v-model="seriesList"
                 @end="handleSeriesSortEnd"
                 handle=".drag-handle"
                 class="series-list">
@@ -111,7 +111,7 @@
               </draggable>
             </div>
           </el-form-item>
-          
+
           <el-form-item>
             <el-button type="primary" @click="saveChange" :loading="loading">保存修改</el-button>
             <el-button @click="goBack">取消</el-button>
@@ -131,7 +131,7 @@ export default {
   components: {
     draggable
   },
-  data() {
+  data () {
     return {
       videoInfo: {
         title: '',
@@ -156,7 +156,7 @@ export default {
       isSeriesVideo: false // 是否是分P视频
     }
   },
-  created() {
+  created () {
     this.videoId = this.$route.query.videoId || this.$route.params.videoId
     if (!this.videoId) {
       this.$message.error('缺少视频ID参数')
@@ -168,7 +168,7 @@ export default {
     this.loadVideoSeries()
   },
   methods: {
-    loadVideoInfo() {
+    loadVideoInfo () {
       this.loading = true
       videoApi.getVideoDetail(this.videoId).then(res => {
         if (res.data) {
@@ -179,7 +179,7 @@ export default {
             area: res.data.area || '',
             tags: res.data.tags || []
           }
-          
+
           if (res.data.cover) {
             this.coverFileList = [{
               name: 'cover',
@@ -194,14 +194,14 @@ export default {
         this.loading = false
       })
     },
-    loadAreasAndTags() {
+    loadAreasAndTags () {
       videoApi.getAreas().then(res => {
         this.areas = res.data || {}
       }).catch(err => {
         console.error('获取分区失败:', err)
         this.areas = {}
       })
-      
+
       videoApi.getTags().then(res => {
         this.tags = res.data || []
       }).catch(err => {
@@ -210,7 +210,7 @@ export default {
       })
     },
     // 加载分P视频列表
-    loadVideoSeries() {
+    loadVideoSeries () {
       videoApi.getVideoSeriesList(this.videoId).then(res => {
         if (res.data && res.data.seriesList && res.data.seriesList.length > 0) {
           this.seriesList = res.data.seriesList
@@ -222,18 +222,18 @@ export default {
       })
     },
     // 处理分P排序结束事件
-    handleSeriesSortEnd() {
-      console.log('分P排序结束'+ this.seriesList[0].sortOrder)
-      console.log('分P排序结束'+ this.mainVideo.seriesId)
+    handleSeriesSortEnd () {
+      console.log('分P排序结束' + this.seriesList[0].sortOrder)
+      console.log('分P排序结束' + this.mainVideo.seriesId)
       const sortList = this.seriesList.map((item, index) => ({
         id: item.id,
         sortOrder: index + 1
       }))
-      
-      //const seriesId = this.seriesList[0] && this.seriesList[0].seriesId
-      const seriesId = this.mainVideo.seriesId 
+
+      // const seriesId = this.seriesList[0] && this.seriesList[0].seriesId
+      const seriesId = this.mainVideo.seriesId
       if (!seriesId) return
-      
+
       const dto = {
         seriesId,
         sortList
@@ -247,11 +247,11 @@ export default {
         this.loadVideoSeries()
       })
     },
-    onChangeCoverFileHandler(file) {
+    onChangeCoverFileHandler (file) {
       this.hasCoverChanged = true
       const isImage = file.raw.type.includes('image/')
       const isLt5M = file.size / 1024 / 1024 < 5
-      
+
       if (!isImage) {
         this.$message.error('只能上传图片文件!')
         return false
@@ -260,24 +260,24 @@ export default {
         this.$message.error('封面图片大小不能超过5MB!')
         return false
       }
-      
+
       this.$refs.covers.uploadFiles = []
       this.$refs.covers.uploadFiles.push(file)
       this.coverFile = file.raw
     },
-    handleCoverRemove() {
+    handleCoverRemove () {
       this.hasCoverChanged = true
       this.videoInfo.cover = ''
       this.coverFile = null
     },
-    handlePictureCardPreview(file) {
+    handlePictureCardPreview (file) {
       this.dialogImageUrl = file.url
       this.dialogVisible = true
     },
-    handleTagClose(index) {
+    handleTagClose (index) {
       this.videoInfo.tags.splice(index, 1)
     },
-    showInput() {
+    showInput () {
       if (this.videoInfo.tags.length >= 5) {
         this.$message.warning('最多只能添加5个标签')
         return
@@ -287,7 +287,7 @@ export default {
         this.$refs.saveTagInput.$refs.input.focus()
       })
     },
-    handleInputConfirm() {
+    handleInputConfirm () {
       let inputValue = this.inputValue.trim()
       if (inputValue) {
         if (this.videoInfo.tags.length >= 5) {
@@ -296,12 +296,12 @@ export default {
           this.inputValue = ''
           return
         }
-        
+
         const exists = this.videoInfo.tags.some(tag => {
-          return (typeof tag === 'object' && tag.name === inputValue) || 
+          return (typeof tag === 'object' && tag.name === inputValue) ||
                  (typeof tag === 'string' && tag === inputValue)
         })
-        
+
         if (!exists) {
           this.videoInfo.tags.push(inputValue)
         } else {
@@ -311,12 +311,12 @@ export default {
       this.inputVisible = false
       this.inputValue = ''
     },
-    addPredefinedTag(tag) {
+    addPredefinedTag (tag) {
       if (this.videoInfo.tags.length >= 5) {
         this.$message.warning('最多只能添加5个标签')
         return
       }
-      
+
       const exists = this.videoInfo.tags.some(t =>
         (typeof t === 'object' && t.id === tag.id) ||
         (typeof t === 'string' && t === tag.name)
@@ -327,16 +327,16 @@ export default {
         this.$message.warning('该标签已添加')
       }
     },
-    saveChange() {
+    saveChange () {
       this.$refs.form.validate(valid => {
         if (valid) {
           this.loading = true
-          
+
           // 处理标签格式
           const processedTags = this.videoInfo.tags.map(tag => {
             return typeof tag === 'object' ? tag : {name: tag}
           })
-          
+
           // 创建FormData对象
           const formData = new FormData()
           formData.append('id', this.videoId)
@@ -344,12 +344,12 @@ export default {
           formData.append('description', this.videoInfo.description)
           formData.append('area', this.videoInfo.area)
           formData.append('tags', JSON.stringify(processedTags))
-          
+
           // 如果有封面变更，添加封面文件
           if (this.hasCoverChanged && this.coverFile) {
             formData.append('coverFile', this.coverFile)
           }
-          
+
           // 修改API调用方式
           videoApi.updateVideoFormData(formData).then(res => {
             this.$message.success('修改成功！')
@@ -362,7 +362,7 @@ export default {
         }
       })
     },
-    goBack() {
+    goBack () {
       this.$router.go(-1)
     }
   }

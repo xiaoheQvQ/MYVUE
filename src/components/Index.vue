@@ -2,7 +2,6 @@
   <div class="main-container">
     <!-- Search Bar Area -->
 
-
     <!-- 分类区域 - 使用新的Tag样式 -->
     <div class="categories-bar">
       <!-- "全部" 按钮 -->
@@ -155,9 +154,9 @@ export default {
   },
   methods: {
     queryVideos () {
-      const queryParams = { ...this.param };
-      if(queryParams.area) {
-          delete queryParams.seed;
+      const queryParams = { ...this.param }
+      if (queryParams.area) {
+        delete queryParams.seed
       }
 
       videoApi.queryVideos(queryParams).then(res => {
@@ -166,9 +165,9 @@ export default {
         this.param.pages = parseInt(data.pages)
         this.records = data.records
       }).catch(err => {
-        console.error("Error fetching videos:", err);
-        this.records = [];
-      });
+        console.error('Error fetching videos:', err)
+        this.records = []
+      })
     },
     changePage (current) {
       this.param.current = current
@@ -183,48 +182,47 @@ export default {
       })
     },
 
-  
     getAreas () {
       videoApi.getAreas().then(res => {
         this.areas = res.data
       }).catch(err => {
-          console.error("Error fetching areas:", err);
-          this.areas = {};
-      });
+        console.error('Error fetching areas:', err)
+        this.areas = {}
+      })
     },
     changeArea (areaKey) {
-      this.param.area = areaKey;
-      this.param.current = 1;
-      this.queryVideos();
+      this.param.area = areaKey
+      this.param.current = 1
+      this.queryVideos()
     },
     recommend () {
       if (Global.user) {
         videoApi.recommend().then(res => {
           this.recommendList = res.data
         }).catch(err => {
-          console.error("Error fetching recommendations:", err);
-          this.recommendList = [];
-        });
-      }else{
+          console.error('Error fetching recommendations:', err)
+          this.recommendList = []
+        })
+      } else {
         videoApi.basedItemRecommend().then(res => {
           this.recommendList = res.data
         }).catch(err => {
-          console.error("Error fetching recommendations:", err);
-          this.recommendList = [];
-        });
+          console.error('Error fetching recommendations:', err)
+          this.recommendList = []
+        })
       }
     },
-    refreshRecommendations() {
-      this.recommend();
+    refreshRecommendations () {
+      this.recommend()
     },
-    formatDuration(seconds) {
-      if (seconds === null || seconds === undefined) return '00:00';
-      seconds = Math.floor(seconds);
-      const minutes = Math.floor(seconds / 60);
-      const remainingSeconds = seconds % 60;
-      return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
+    formatDuration (seconds) {
+      if (seconds === null || seconds === undefined) return '00:00'
+      seconds = Math.floor(seconds)
+      const minutes = Math.floor(seconds / 60)
+      const remainingSeconds = seconds % 60
+      return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`
     },
-    formatDate(timestamp) {
+    formatDate (timestamp) {
       if (!timestamp) return ''
       const date = new Date(timestamp)
       return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
@@ -250,7 +248,6 @@ export default {
   right: 0;        /* 延伸到右侧 */
   z-index: 100;   /* 确保它在其他元素之上 */
 
-
   display: flex;
   align-items: center;
   max-width: 700px;
@@ -274,14 +271,12 @@ export default {
   width: 100%;
 }
 
-
 .index-search-container .search-input >>> .el-input__inner {
   color: #303133;
   border-radius: 20px;
   border: 1px solid #dcdfe6;
   background-color: transparent !important;
 }
-
 
 .index-search-container .el-button {
   border-radius: 20px;

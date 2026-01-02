@@ -140,6 +140,7 @@
 import userApi from '@/api/user/user'
 import videoApi from '@/api/video/video'
 import Global from '@/components/Global.vue'
+import { EventBus } from '@/api/event-bus'
 
 export default {
   name: 'Detail',
@@ -294,6 +295,8 @@ export default {
         this.$message.success('修改成功')
         this.isModify = false
         this.getUserInfo()
+
+        EventBus.$emit('user-info-updated')
       }).catch(error => {
         this.$message.error('修改失败: ' + (error.message || '未知错误'))
       })

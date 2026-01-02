@@ -29,6 +29,7 @@ import feedCard from '@/components/feed/postCard.vue'
 import feedList from '@/components/feed/postList.vue'
 import feedPage from '@/components/feed/feedPage.vue'
 import MusicPlayer from '@/components/music/MusicPlayer.vue'
+import IMMain from '@/components/im/IMMain.vue'
 Vue.use(Router)
 
 const router = new Router({
@@ -189,6 +190,12 @@ const router = new Router({
       path: '/chat',
       name: 'Chat',
       component: () => import('@/components/chat/ChatUser.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/im',
+      name: 'IM',
+      component: IMMain,
       meta: { requiresAuth: true }
     },
     // 管理员路由

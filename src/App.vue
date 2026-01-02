@@ -238,6 +238,7 @@
                 <el-dropdown-item icon="el-icon-notebook-2" @click.native="resume()">发布图文</el-dropdown-item>
                 <el-dropdown-item icon="el-icon-film" @click.native="feedPage()">图文社区</el-dropdown-item>
                 <el-dropdown-item icon="el-icon-data-analysis" @click.native="analyze()">视频管理</el-dropdown-item>
+                <el-dropdown-item icon="el-icon-chat-dot-round" @click.native="imChat()">IM聊天</el-dropdown-item>
                 <el-dropdown-item icon="el-icon-user" @click.native="music()">音乐中心</el-dropdown-item>
                 <el-dropdown-item divided>
                   <div class="logout-item" @click="logout()"><i class="el-icon-switch-button"></i> 退出登录</div>
@@ -418,9 +419,15 @@ export default {
     EventBus.$on('message-handled', (messageId) => {
       this.handledMessageIds.add(messageId)
     })
+
+    // 监听用户信息更新事件
+    EventBus.$on('user-info-updated', () => {
+      this.getInfo()
+    })
   },
   beforeDestroy() {
     EventBus.$off('message-handled')
+    EventBus.$off('user-info-updated')
     this.stopBackgroundAnimation()
   },
   methods: {
@@ -790,6 +797,7 @@ export default {
     },
     analyze() { this.$router.push('/analyze') },
     music() { this.$router.push('/music') },
+    imChat() { this.$router.push('/im') },
     getRandomInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min },
     searchUsers(keyword) {
       if (!keyword || keyword.trim() === '') return

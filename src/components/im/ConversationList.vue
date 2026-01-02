@@ -46,11 +46,13 @@ export default {
     EventBus.$on('im-single-message', this.onNewMessage)
     EventBus.$on('im-group-message', this.onNewMessage)
     EventBus.$on('im-read-receipt', this.onReadReceipt)
+    EventBus.$on('im-group-notify', this.onGroupNotify)
   },
   beforeDestroy() {
     EventBus.$off('im-single-message', this.onNewMessage)
     EventBus.$off('im-group-message', this.onNewMessage)
     EventBus.$off('im-read-receipt', this.onReadReceipt)
+    EventBus.$off('im-group-notify', this.onGroupNotify)
   },
   methods: {
     async loadConversations() {
@@ -137,6 +139,11 @@ export default {
       if (index > 0) {
         this.conversations.splice(index, 1)
         this.conversations.unshift(conversation)
+      }
+    },
+    onGroupNotify(message) {
+      if (message.content === 'JOIN' || message.content === 'INVITED' || message.content === 'CREATE') {
+        this.loadConversations()
       }
     },
     formatTime(time) {

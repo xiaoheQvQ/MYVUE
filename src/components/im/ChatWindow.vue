@@ -77,6 +77,13 @@
         </el-button>
       </div>
     </div>
+
+    <!-- 群组信息抽屉 -->
+    <group-info-drawer 
+      v-if="chatInfo.type === 'group'"
+      :show.sync="drawerVisible" 
+      :group-info="chatInfo" 
+    />
   </div>
 </template>
 
@@ -85,9 +92,13 @@ import Global from '@/components/Global.vue'
 import IMWebSocket from '@/api/im/websocket'
 import messageApi from '@/api/im/message'
 import { EventBus } from '@/api/event-bus'
+import GroupInfoDrawer from './GroupInfoDrawer.vue'
 
 export default {
   name: 'ChatWindow',
+  components: {
+    GroupInfoDrawer
+  },
   props: {
     chatInfo: {
       type: Object,
@@ -104,7 +115,8 @@ export default {
       hasMore: false,
       oldestSeq: null,
       isTyping: false,
-      typingTimer: null
+      typingTimer: null,
+      drawerVisible: false
     }
   },
   computed: {
@@ -305,7 +317,11 @@ export default {
       }
     },
     showChatInfo() {
-      this.$message.info('聊天详情功能开发中...')
+      if (this.chatInfo.type === 'group') {
+        this.drawerVisible = true
+      } else {
+        this.$message.info('成员资料功能开发中...')
+      }
     }
   }
 }

@@ -1,24 +1,33 @@
 <template>
-  <el-drawer
-    title="群组信息"
-    :visible.sync="visible"
-    direction="rtl"
-    size="350px"
-    @close="handleClose"
-  >
+  <el-drawer title="群组信息" :visible.sync="visible" direction="rtl" size="350px" @close="handleClose">
     <div class="group-info-container" v-loading="loading">
+      <!-- 群组头像和名称 -->
+      <div class="section group-header">
+        <div class="avatar-wrapper">
+          <el-avatar :size="80" :src="groupInfo.avatar">{{ groupInfo.name }}</el-avatar>
+          <div class="avatar-upload" v-if="isOwnerOrAdmin" @click="handleUploadAvatar">
+            <i class="el-icon-camera"></i>
+          </div>
+        </div>
+        <h3 class="group-name">{{ groupInfo.name }}</h3>
+      </div>
+
+      <el-divider></el-divider>
+
       <!-- 群组基本信息 -->
       <div class="section member-section">
         <div class="section-header">
           <span>群成员 ({{ members.length }})</span>
         </div>
         <div class="member-grid">
-          <div 
-            v-for="member in members" 
-            :key="member.userId" 
-            class="member-item"
-          >
-            <el-avatar :size="40" :src="member.avatar"></el-avatar>
+          <div v-for="member in members" :key="member.userId" class="member-item">
+            <div class="member-avatar-wrapper">
+              <el-avatar :size="40" :src="member.avatar">{{ member.nick }}</el-avatar>
+              <!-- 群主标识 -->
+              <el-tag v-if="member.memberRole === 1" size="mini" type="danger" class="owner-badge">群主</el-tag>
+              <!-- 管理员标识 -->
+              <el-tag v-else-if="member.memberRole === 2" size="mini" type="warning" class="admin-badge">管理</el-tag>
+            </div>
             <span class="member-name">{{ member.nick || member.nickName }}</span>
           </div>
           <!-- 添加按钮 -->
@@ -53,13 +62,11 @@
       </div>
     </div>
 
+    <!-- 上传群头像 -->
+    <input ref="avatarInput" type="file" accept="image/*" style="display: none" @change="handleAvatarChange" />
+
     <!-- 邀请好友弹窗 -->
-    <el-dialog
-      title="邀请好友入群"
-      :visible.sync="showInviteDialog"
-      width="400px"
-      append-to-body
-    >
+    <el-dialog title="邀请好友入群" :visible.sync="showInviteDialog" width="400px" append-to-body>
       <div class="friend-selector">
         <el-checkbox-group v-model="selectedFriends">
           <div v-for="friend in availableFriends" :key="friend.friendId" class="friend-option">
@@ -84,6 +91,7 @@
 </template>
 
 <script>
+import Global from '@/components/Global.vue'
 import groupApi from '@/api/im/group'
 import friendApi from '@/api/im/friend'
 
@@ -112,6 +120,13 @@ export default {
       // 过滤掉已经是群成员的好友
       const memberIds = this.members.map(m => String(m.userId))
       return this.friends.filter(f => !memberIds.includes(String(f.friendId)))
+    },
+    // 检查当前用户是否是群主或管理员
+    isOwnerOrAdmin() {
+      const currentUserId = (this.$store.state.user && this.$store.state.user.id) || (Global.user && Global.user.id)
+      if (!currentUserId) return false
+      const currentMember = this.members.find(m => String(m.userId) === String(currentUserId))
+      return currentMember && (currentMember.memberRole === 1 || currentMember.memberRole === 2)
     }
   },
   watch: {
@@ -154,7 +169,7 @@ export default {
       try {
         // 后端接口暂时一次只能加一个，循环调用或后端改接口
         // 这里假设循环调用
-        await Promise.all(this.selectedFriends.map(friendId => 
+        await Promise.all(this.selectedFriends.map(friendId =>
           groupApi.addMember(this.groupInfo.targetId, friendId)
         ))
         this.$message.success('已发送邀请')
@@ -178,6 +193,58 @@ export default {
           this.$message.error('退出失败')
         }
       })
+    },
+    // 触发文件选择
+    handleUploadAvatar() {
+      this.$refs.avatarInput.click()
+    },
+    // 处理头像文件选择
+    async handleAvatarChange(event) {
+      const file = event.target.files[0]
+      if (!file) return
+
+      // 验证文件类型
+      if (!file.type.startsWith('image/')) {
+        this.$message.error('请选择图片文件')
+        return
+      }
+
+      // 验证文件大小 (5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        this.$message.error('图片大小不能超过5MB')
+        return
+      }
+
+      try {
+        const formData = new FormData()
+        formData.append('file', file)
+
+        const loading = this.$loading({
+          lock: true,
+          text: '上传中...',
+          spinner: 'el-icon-loading',
+          background: 'rgba(0, 0, 0, 0.7)'
+        })
+
+        const res = await groupApi.uploadAvatar(this.groupInfo.targetId, formData)
+        loading.close()
+
+        if (res.code === 0) {
+          this.$message.success('群头像上传成功')
+          // 更新本地显示
+          this.groupInfo.avatar = res.data
+          // 刷新群信息
+          this.$emit('refresh')
+        } else {
+          this.$message.error(res.message || '上传失败')
+        }
+      } catch (error) {
+        console.error('上传群头像失败:', error)
+        this.$message.error('上传失败')
+      } finally {
+        // 清空input，允许重复选择同一文件
+        event.target.value = ''
+      }
     }
   }
 }
@@ -188,6 +255,46 @@ export default {
   padding: 0 20px 20px;
   height: 100%;
   overflow-y: auto;
+}
+
+.group-header {
+  text-align: center;
+  padding: 20px 0;
+}
+
+.avatar-wrapper {
+  position: relative;
+  display: inline-block;
+  margin-bottom: 15px;
+}
+
+.avatar-upload {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 28px;
+  height: 28px;
+  background: #409eff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  cursor: pointer;
+  border: 2px solid white;
+  transition: all 0.3s;
+}
+
+.avatar-upload:hover {
+  background: #66b1ff;
+  transform: scale(1.1);
+}
+
+.group-name {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 500;
+  color: #303133;
 }
 
 .section {
@@ -213,10 +320,28 @@ export default {
   cursor: pointer;
 }
 
+.member-avatar-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.owner-badge,
+.admin-badge {
+  position: absolute;
+  bottom: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
+  padding: 0 4px;
+  height: 16px;
+  line-height: 16px;
+  border-radius: 2px;
+}
+
 .member-name {
   font-size: 12px;
   color: #666;
-  margin-top: 5px;
+  margin-top: 8px;
   width: 100%;
   text-align: center;
   overflow: hidden;

@@ -55,5 +55,41 @@ export default {
      */
     getGroupList() {
         return axios.get('/im/group/list')
+    },
+
+    /**
+     * 上传群组头像
+     */
+    uploadAvatar(groupId, formData) {
+        return axios.post('/im/group/uploadAvatar', formData, {
+            params: { groupId },
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        })
+    },
+
+    /**
+     * 更新群组信息
+     */
+    updateGroupInfo(groupId, groupName, groupAvatar, introduction, notification) {
+        return axios.post('/im/group/updateInfo', null, {
+            params: {
+                groupId,
+                groupName,
+                groupAvatar,
+                introduction,
+                notification
+            }
+        })
+    },
+
+    /**
+     * 搜索群成员(用于@提及)
+     */
+    searchGroupMembers(groupId, keyword = '') {
+        return axios.get(`/im/group/${groupId}/members/search`, {
+            params: { keyword }
+        })
     }
 }

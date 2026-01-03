@@ -85,6 +85,15 @@ export default {
     },
 
     /**
+     * 退出群组
+     */
+    exitGroup(groupId) {
+        return axios.post('/im/group/exit', null, {
+            params: { groupId }
+        })
+    },
+
+    /**
      * 搜索群成员(用于@提及)
      */
     searchGroupMembers(groupId, keyword = '') {

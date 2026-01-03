@@ -3,13 +3,15 @@
     <div class="group-info-container" v-loading="loading">
       <!-- 群组头像和名称 -->
       <div class="section group-header">
-        <div class="avatar-wrapper">
-          <el-avatar :size="80" :src="groupInfo.avatar">{{ groupInfo.name }}</el-avatar>
-          <div class="avatar-upload" v-if="isOwnerOrAdmin" @click="handleUploadAvatar">
+        <div class="avatar-wrapper" :class="{ 'can-upload': isOwnerOrAdmin }"
+          @click="isOwnerOrAdmin && handleUploadAvatar()">
+          <el-avatar :size="80" :src="groupInfo.avatar || groupInfo.groupAvatar">{{ groupInfo.name ||
+            groupInfo.groupName }}</el-avatar>
+          <div class="avatar-upload" v-if="isOwnerOrAdmin">
             <i class="el-icon-camera"></i>
           </div>
         </div>
-        <h3 class="group-name">{{ groupInfo.name }}</h3>
+        <h3 class="group-name">{{ groupInfo.name || groupInfo.groupName }}</h3>
       </div>
 
       <el-divider></el-divider>
@@ -49,8 +51,18 @@
           <span class="value">{{ groupInfo.name }}</span>
         </div>
         <div class="info-item">
-          <span class="label">群公告</span>
-          <p class="announcement">{{ groupInfo.notification || '暂无公告' }}</p>
+          <div class="label-with-action">
+            <span class="label">群公告</span>
+            <el-button v-if="isOwnerOrAdmin && !editingAnnouncement" type="text" size="mini"
+              @click="startEditAnnouncement">编辑</el-button>
+            <template v-if="editingAnnouncement">
+              <el-button type="text" size="mini" @click="saveAnnouncement" :loading="savingAnnouncement">保存</el-button>
+              <el-button type="text" size="mini" @click="cancelEditAnnouncement">取消</el-button>
+            </template>
+          </div>
+          <el-input v-if="editingAnnouncement" v-model="announcementText" type="textarea" :rows="3"
+            placeholder="输入群公告..."></el-input>
+          <p v-else class="announcement">{{ groupInfo.notification || '暂无公告' }}</p>
         </div>
       </div>
 
@@ -58,11 +70,12 @@
 
       <!-- 操作按钮 -->
       <div class="actions">
-        <el-button type="danger" plain block @click="handleExitGroup">退出群聊</el-button>
+        <el-button type="danger" plain block @click="handleExitGroup">{{ isOwner ? '解散群聊' : '退出群聊' }}</el-button>
       </div>
+
     </div>
 
-    <!-- 上传群头像 -->
+    <!-- 上传群头像 (放在容器外避免被loading遮罩影响) -->
     <input ref="avatarInput" type="file" accept="image/*" style="display: none" @change="handleAvatarChange" />
 
     <!-- 邀请好友弹窗 -->
@@ -91,9 +104,9 @@
 </template>
 
 <script>
-import Global from '@/components/Global.vue'
 import groupApi from '@/api/im/group'
 import friendApi from '@/api/im/friend'
+import { EventBus } from '@/api/event-bus'
 
 export default {
   name: 'GroupInfoDrawer',
@@ -112,7 +125,10 @@ export default {
       showInviteDialog: false,
       friends: [],
       selectedFriends: [],
-      inviting: false
+      inviting: false,
+      editingAnnouncement: false,
+      announcementText: '',
+      savingAnnouncement: false
     }
   },
   computed: {
@@ -123,20 +139,30 @@ export default {
     },
     // 检查当前用户是否是群主或管理员
     isOwnerOrAdmin() {
-      const currentUserId = (this.$store.state.user && this.$store.state.user.id) || (Global.user && Global.user.id)
-      if (!currentUserId) return false
+      if (!this.Global || !this.Global.user) return false
+      const currentUserId = this.Global.user.id
       const currentMember = this.members.find(m => String(m.userId) === String(currentUserId))
       return currentMember && (currentMember.memberRole === 1 || currentMember.memberRole === 2)
+    },
+    // 检查当前用户是否是群主
+    isOwner() {
+      if (!this.Global || !this.Global.user) return false
+      const currentUserId = this.Global.user.id
+      const currentMember = this.members.find(m => String(m.userId) === String(currentUserId))
+      return currentMember && currentMember.memberRole === 1
     }
   },
   watch: {
     show(val) {
+      console.log('GroupInfoDrawer: show changed to', val)
       this.visible = val
+      console.log('GroupInfoDrawer: visible set to', this.visible)
       if (val) {
         this.loadData()
       }
     },
     visible(val) {
+      console.log('GroupInfoDrawer: visible changed to', val)
       this.$emit('update:show', val)
     }
   },
@@ -183,24 +209,95 @@ export default {
       }
     },
     handleExitGroup() {
-      this.$confirm('确定要退出该群聊吗？', '提示', {
-        type: 'warning'
+      const action = this.isOwner ? '解散' : '退出'
+      const confirmText = this.isOwner
+        ? '解散群组后，所有成员将被移除，且无法恢复。确定要解散该群聊吗？'
+        : '确定要退出该群聊吗？'
+
+      this.$confirm(confirmText, '提示', {
+        type: 'warning',
+        confirmButtonText: '确定',
+        cancelButtonText: '取消'
       }).then(async () => {
         try {
-          // TODO: 后端增加退出群组接口
-          this.$message.info('功能开发中...')
+          if (this.isOwner) {
+            // 群主解散群组
+            await groupApi.dissolveGroup(this.groupInfo.targetId)
+            this.$message.success('群组已解散')
+          } else {
+            // 普通成员退出群组
+            await groupApi.exitGroup(this.groupInfo.targetId)
+            this.$message.success('已退出群组')
+          }
+
+          // 关闭抽屉
+          this.visible = false
+
+          // 通知父组件刷新会话列表
+          EventBus.$emit('refresh-conversation-list')
+          EventBus.$emit('group-exited', this.groupInfo.targetId)
         } catch (error) {
-          this.$message.error('退出失败')
+          console.error(`${action}群组失败:`, error)
+          const errorMsg = (error.response && error.response.data && error.response.data.msg) || error.message || `${action}失败`
+          this.$message.error(errorMsg)
         }
+      }).catch(() => {
+        // 用户取消
       })
+    },
+    // 开始编辑公告
+    startEditAnnouncement() {
+      this.announcementText = this.groupInfo.notification || ''
+      this.editingAnnouncement = true
+    },
+    // 取消编辑公告
+    cancelEditAnnouncement() {
+      this.editingAnnouncement = false
+      this.announcementText = ''
+    },
+    // 保存公告
+    async saveAnnouncement() {
+      this.savingAnnouncement = true
+      try {
+        await groupApi.updateGroupInfo(
+          this.groupInfo.targetId,
+          null, // groupName
+          null, // groupAvatar
+          null, // introduction
+          this.announcementText // notification
+        )
+        this.$message.success('群公告已更新')
+        this.groupInfo.notification = this.announcementText
+        this.editingAnnouncement = false
+
+        // 通知会话列表刷新
+        EventBus.$emit('refresh-conversation-list')
+      } catch (error) {
+        console.error('更新群公告失败:', error)
+        this.$message.error('更新失败')
+      } finally {
+        this.savingAnnouncement = false
+      }
     },
     // 触发文件选择
     handleUploadAvatar() {
+      console.log('handleUploadAvatar called')
+      console.log('groupInfo:', this.groupInfo)
+      console.log('isOwnerOrAdmin:', this.isOwnerOrAdmin)
+      console.log('avatarInput ref:', this.$refs.avatarInput)
+
+      if (!this.$refs.avatarInput) {
+        console.error('avatarInput ref not found')
+        this.$message.error('上传组件未就绪，请稍后再试')
+        return
+      }
+
       this.$refs.avatarInput.click()
     },
     // 处理头像文件选择
     async handleAvatarChange(event) {
       const file = event.target.files[0]
+      console.log('handleAvatarChange called, file:', file)
       if (!file) return
 
       // 验证文件类型
@@ -219,6 +316,15 @@ export default {
         const formData = new FormData()
         formData.append('file', file)
 
+        // 获取群组ID - 尝试多个可能的字段名
+        const groupId = this.groupInfo.targetId || this.groupInfo.groupId || this.groupInfo.id
+        console.log('Uploading avatar for groupId:', groupId)
+
+        if (!groupId) {
+          this.$message.error('无法获取群组ID')
+          return
+        }
+
         const loading = this.$loading({
           lock: true,
           text: '上传中...',
@@ -226,17 +332,19 @@ export default {
           background: 'rgba(0, 0, 0, 0.7)'
         })
 
-        const res = await groupApi.uploadAvatar(this.groupInfo.targetId, formData)
+        const res = await groupApi.uploadAvatar(groupId, formData)
         loading.close()
 
-        if (res.code === 0) {
+        if (res.code === 200000) {
           this.$message.success('群头像上传成功')
           // 更新本地显示
           this.groupInfo.avatar = res.data
           // 刷新群信息
           this.$emit('refresh')
+          // 通知会话列表刷新
+          EventBus.$emit('refresh-conversation-list')
         } else {
-          this.$message.error(res.message || '上传失败')
+          this.$message.error(res.msg || res.message || '上传失败')
         }
       } catch (error) {
         console.error('上传群头像失败:', error)
@@ -286,6 +394,15 @@ export default {
 }
 
 .avatar-upload:hover {
+  background: #66b1ff;
+  transform: scale(1.1);
+}
+
+.avatar-wrapper.can-upload {
+  cursor: pointer;
+}
+
+.avatar-wrapper.can-upload:hover .avatar-upload {
   background: #66b1ff;
   transform: scale(1.1);
 }
@@ -389,6 +506,14 @@ export default {
   padding: 10px;
   border-radius: 4px;
   line-height: 1.5;
+  margin: 0;
+}
+
+.label-with-action {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
 }
 
 .actions {

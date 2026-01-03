@@ -1,12 +1,7 @@
 <template>
   <div class="conversation-list">
-    <div
-      v-for="conversation in conversations"
-      :key="conversation.id"
-      class="conversation-item"
-      :class="{ active: selectedId === conversation.id }"
-      @click="selectConversation(conversation)"
-    >
+    <div v-for="conversation in conversations" :key="conversation.id" class="conversation-item"
+      :class="{ active: selectedId === conversation.id }" @click="selectConversation(conversation)">
       <el-badge :value="conversation.unreadCount" :hidden="conversation.unreadCount === 0">
         <el-avatar :size="45" :src="conversation.avatar"></el-avatar>
       </el-badge>
@@ -37,43 +32,54 @@ import Global from '@/components/Global.vue'
 
 export default {
   name: 'ConversationList',
-  data () {
+  data() {
     return {
       conversations: [],
       selectedId: null
     }
   },
-  created () {
+  created() {
     this.loadConversations()
     EventBus.$on('im-single-message', this.onNewMessage)
     EventBus.$on('im-group-message', this.onNewMessage)
     EventBus.$on('im-read-receipt', this.onReadReceipt)
     EventBus.$on('im-group-notify', this.onGroupNotify)
+    EventBus.$on('refresh-conversation-list', this.loadConversations)
   },
-  beforeDestroy () {
+  beforeDestroy() {
     EventBus.$off('im-single-message', this.onNewMessage)
     EventBus.$off('im-group-message', this.onNewMessage)
     EventBus.$off('im-read-receipt', this.onReadReceipt)
     EventBus.$off('im-group-notify', this.onGroupNotify)
+    EventBus.$off('refresh-conversation-list', this.loadConversations)
   },
   methods: {
-    async loadConversations () {
+    async loadConversations() {
       try {
         const res = await conversationApi.getConversationList()
         this.conversations = (res.data || []).map(conv => {
-          // 这里可能需要根据 targetId 获取更详细的用户/群组信息
-          // 暂时使用 backend 返回的基本信息
+          // 处理头像字段：优先使用targetAvatar，如果是群组则尝试groupAvatar
+          let avatar = conv.targetAvatar
+          if (!avatar && conv.conversationType === 2) {
+            // 群组类型，尝试使用groupAvatar字段
+            avatar = conv.groupAvatar
+          }
+          if (!avatar) {
+            // 如果还是没有，使用默认头像
+            avatar = 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png'
+          }
+
           return {
             ...conv,
-            name: conv.targetName || (conv.conversationType === 1 ? '好友' : '群组'),
-            avatar: conv.targetAvatar || 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png'
+            name: conv.targetName || conv.groupName || (conv.conversationType === 1 ? '好友' : '群组'),
+            avatar: avatar
           }
         })
       } catch (error) {
         console.error('加载会话列表失败:', error)
       }
     },
-    async selectConversation (conversation) {
+    async selectConversation(conversation) {
       this.selectedId = conversation.id
       this.$emit('select', conversation)
 
@@ -87,7 +93,7 @@ export default {
         }
       }
     },
-    onNewMessage (message) {
+    onNewMessage(message) {
       // 更新会话列表
       // msgType 3 is single chat, 4 is group chat
       const conversationType = (message.msgType === 3 || message.msgType === 1) ? 1 : 2
@@ -123,14 +129,14 @@ export default {
         })
       }
     },
-    emitTotalUnread () {
+    emitTotalUnread() {
       const total = this.conversations.reduce((sum, c) => sum + (c.unreadCount || 0), 0)
       EventBus.$emit('update-total-unread', total)
     },
-    onReadReceipt (message) {
+    onReadReceipt(message) {
       // 处理已读回执
     },
-    getMessagePreview (message) {
+    getMessagePreview(message) {
       if (message.contentType === 1) {
         return message.content
       } else if (message.contentType === 2) {
@@ -144,14 +150,14 @@ export default {
       }
       return ''
     },
-    moveToTop (conversation) {
+    moveToTop(conversation) {
       const index = this.conversations.indexOf(conversation)
       if (index > 0) {
         this.conversations.splice(index, 1)
         this.conversations.unshift(conversation)
       }
     },
-    onGroupNotify (message) {
+    onGroupNotify(message) {
       if (message.content === 'JOIN' || message.content === 'INVITED' || message.content === 'CREATE') {
         this.loadConversations()
 
@@ -166,7 +172,7 @@ export default {
         }
       }
     },
-    formatTime (time) {
+    formatTime(time) {
       if (!time) return ''
       const now = new Date()
       const msgTime = new Date(time)

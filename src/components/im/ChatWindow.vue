@@ -88,10 +88,22 @@
           </div>
         </div>
       </div>
+      <!-- 待发送文件预览 -->
+      <div v-if="pendingFile" class="pending-file-preview">
+        <div class="file-preview-container">
+          <i class="el-icon-document"></i>
+          <span class="file-name">{{ pendingFile.fileName }}</span>
+          <span class="file-size">{{ formatFileSize(pendingFile.size) }}</span>
+          <div class="remove-btn" @click="clearPendingFile">
+            <i class="el-icon-close"></i>
+          </div>
+        </div>
+      </div>
       <div class="input-toolbar">
         <el-button type="text" icon="el-icon-picture" @click="triggerImageUpload">图片</el-button>
-        <el-button type="text" icon="el-icon-folder" @click="sendFile">文件</el-button>
+        <el-button type="text" icon="el-icon-folder" @click="triggerFileUpload">文件</el-button>
         <input ref="imageInput" type="file" accept="image/*" style="display: none" @change="handleImageSelect" />
+        <input ref="fileInput" type="file" style="display: none" @change="handleFileSelect" />
       </div>
       <div class="input-box">
         <el-popover v-model="showAtPopover" placement="top-start" width="150" trigger="manual">
@@ -165,7 +177,8 @@ export default {
       atAll: false,
       atNames: [],
       // 待发送富媒体
-      pendingImage: null
+      pendingImage: null,
+      pendingFile: null
     }
   },
   computed: {
@@ -317,20 +330,34 @@ export default {
       }
     },
     sendMessage() {
-      if (!this.inputMessage.trim() && !this.pendingImage) {
+      if (!this.inputMessage.trim() && !this.pendingImage && !this.pendingFile) {
         return
       }
 
       this.sending = true
       const content = this.inputMessage.trim()
-      const mediaUrl = this.pendingImage ? this.pendingImage.url : null
-      const contentType = mediaUrl ? 2 : 1 // 如果有图，类型设为图片(富媒体)
+      let mediaUrl = null
+      let contentType = 1 // 默认文本
+      let extraData = null
 
-      const extraData = mediaUrl ? {
-        mediaUrl: mediaUrl,
-        fileSize: this.pendingImage.size,
-        fileName: this.pendingImage.fileName
-      } : null
+      // 判断消息类型
+      if (this.pendingImage) {
+        mediaUrl = this.pendingImage.url
+        contentType = 2 // 图片
+        extraData = {
+          mediaUrl: mediaUrl,
+          fileSize: this.pendingImage.size,
+          fileName: this.pendingImage.fileName
+        }
+      } else if (this.pendingFile) {
+        mediaUrl = this.pendingFile.url
+        contentType = 5 // 文件
+        extraData = {
+          mediaUrl: mediaUrl,
+          fileSize: this.pendingFile.size,
+          fileName: this.pendingFile.fileName
+        }
+      }
 
       if (this.chatInfo.type === 'single') {
         IMWebSocket.sendSingleMessage(this.chatInfo.targetId, content, contentType, extraData)
@@ -347,6 +374,7 @@ export default {
 
       this.clearInput()
       this.pendingImage = null
+      this.pendingFile = null
       this.sending = false
     },
     clearInput() {
@@ -441,8 +469,57 @@ export default {
         event.target.value = ''
       }
     },
-    sendFile() {
-      this.$message.info('文件发送功能开发中...')
+    // 触发文件选择
+    triggerFileUpload() {
+      this.$refs.fileInput.click()
+    },
+    // 处理文件选择
+    async handleFileSelect(event) {
+      const file = event.target.files[0]
+      if (!file) return
+
+      // 验证文件大小 (20MB)
+      if (file.size > 20 * 1024 * 1024) {
+        this.$message.error('文件大小不能超过20MB')
+        return
+      }
+
+      const loading = this.$loading({
+        text: '上传中...',
+        background: 'rgba(0, 0, 0, 0.7)'
+      })
+
+      try {
+        const res = await messageApi.uploadFile(file)
+
+        // 设为待发送状态
+        const fileData = res.data
+        this.pendingFile = {
+          url: fileData.url || fileData,
+          size: fileData.size || file.size,
+          fileName: fileData.fileName || file.name
+        }
+
+        this.$message.success('文件已就绪，可输入文字后一同发送')
+      } catch (error) {
+        console.error('文件上传失败:', error)
+        this.$message.error('文件上传失败')
+      } finally {
+        loading.close()
+        event.target.value = ''
+      }
+    },
+    // 清除待发送文件
+    clearPendingFile() {
+      this.pendingFile = null
+    },
+    // 格式化文件大小
+    formatFileSize(bytes) {
+      if (bytes === 0) return '0 B'
+      const k = 1024
+      const sizes = ['B', 'KB', 'MB', 'GB']
+      const i = Math.floor(Math.log(bytes) / Math.log(k))
+      return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i]
     },
     selectAtAll() {
       this.atAll = true
@@ -564,8 +641,13 @@ export default {
       return message.fromUserName || this.chatInfo.name
     },
     showChatInfo() {
+      console.log('showChatInfo called, chatInfo:', this.chatInfo)
+      console.log('chatInfo.type:', this.chatInfo.type)
+      console.log('drawerVisible before:', this.drawerVisible)
+
       if (this.chatInfo.type === 'group') {
         this.drawerVisible = true
+        console.log('drawerVisible after:', this.drawerVisible)
       } else {
         this.$message.info('成员资料功能开发中...')
       }
@@ -769,6 +851,65 @@ export default {
 }
 
 .preview-container .remove-btn:hover {
+  background: rgba(245, 108, 108, 0.8);
+}
+
+/* 待发送文件预览 */
+.pending-file-preview {
+  padding: 10px 20px;
+  background: #fff;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.file-preview-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  background: #f8f9fa;
+}
+
+.file-preview-container i {
+  font-size: 24px;
+  color: #409eff;
+  margin-right: 10px;
+}
+
+.file-preview-container .file-name {
+  flex: 1;
+  font-size: 14px;
+  color: #303133;
+  margin-right: 10px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.file-preview-container .file-size {
+  font-size: 12px;
+  color: #909399;
+  margin-right: 30px;
+}
+
+.file-preview-container .remove-btn {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 50%;
+  z-index: 10;
+}
+
+.file-preview-container .remove-btn:hover {
   background: rgba(245, 108, 108, 0.8);
 }
 
